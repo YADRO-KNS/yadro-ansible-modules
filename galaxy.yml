@@ -1,5 +1,5 @@
 namespace: yadro
-name: rackscale
+name: obmc
 version: 1.0.0
 readme: README.md
 authors:

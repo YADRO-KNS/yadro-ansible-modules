@@ -14,7 +14,7 @@ __metaclass__ = type
 
 DOCUMENTATION = r'''
 ---
-module: server_powerstate
+module: powerstate
 short_description: Module short description.
 version_added: "1.0.0"
 description: Module full description.
@@ -56,7 +56,7 @@ job_status:
 EXAMPLES = r'''
 ---
 - name: Power state operation
-  yadro.rackscale.server_powerstate:
+  yadro.obmc.powerstate:
     hostname: "192.168.0.1"
     username: "username"
     password: "password"
@@ -77,8 +77,7 @@ def main():
         },
         supports_check_mode=False
     )
-    module.exit_json(msg="Power State operation job submitted successfully.",
-                     job_status={}, changed=True)
+    module.exit_json(msg="Power State operation job submitted successfully.")
 
 
 if __name__ == '__main__':
