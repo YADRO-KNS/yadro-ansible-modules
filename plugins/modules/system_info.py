@@ -18,7 +18,7 @@ short_description: Returns OpenBmc system information.
 version_added: "1.0.0"
 description: Returns OpenBmc system information.
 extends_documentation_fragment:
-  - yadro.obmc.yadro_obmc_auth_options
+  - yadro.obmc.auth_options
 requirements:
     - "python >= 2.7.5"
 author: "Radmir Safin (@radmirsafin)"
