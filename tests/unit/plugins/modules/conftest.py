@@ -4,7 +4,7 @@ __metaclass__ = type
 import pytest
 
 from ansible.module_utils import basic
-from tests.unit.plugins.modules.utils import AnsibleExitJson, AnsibleFailJson
+from ansible_collections.yadro.obmc.tests.unit.plugins.modules.utils import AnsibleExitJson, AnsibleFailJson
 
 
 @pytest.fixture(autouse=True)

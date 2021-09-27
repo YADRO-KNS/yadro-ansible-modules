@@ -32,10 +32,12 @@ class ModuleTestCase:
 
     def run_module_expect_exit_json(self, module_args):
         set_module_args(module_args)
-        with pytest.raises(AnsibleExitJson):
+        with pytest.raises(AnsibleExitJson) as e:
             self.module.main()
+        return e.value.args[0]
 
     def run_module_expect_fail_json(self, module_args):
         set_module_args(module_args)
-        with pytest.raises(AnsibleFailJson):
+        with pytest.raises(AnsibleFailJson) as e:
             self.module.main()
+        return e.value.args[0]
