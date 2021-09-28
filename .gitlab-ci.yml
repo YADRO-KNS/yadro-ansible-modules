@@ -9,6 +9,7 @@ stages:
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  GIT_CLONE_PATH: "$CI_BUILDS_DIR/ansible_collections/yadro"
 
 cache:
   paths:
