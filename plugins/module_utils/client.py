@@ -122,10 +122,10 @@ class RestClient:
         return self._make_request(path, method="POST", body=body, headers=headers)
 
 
-class OpenBmcClient(RestClient):
+class OpenBmcRestClient(RestClient):
 
     def __init__(self, *args, **kwargs):
-        super(OpenBmcClient, self).__init__(*args, **kwargs)
+        super(OpenBmcRestClient, self).__init__(*args, **kwargs)
 
     def get_bmc_system_info(self):
         bios_info = self.get("/UpdateService/FirmwareInventory/bios_active").json_data

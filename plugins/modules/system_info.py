@@ -54,7 +54,7 @@ EXAMPLES = r"""
 """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.yadro.obmc.plugins.module_utils.client import OpenBmcClient, RestClientError
+from ansible_collections.yadro.obmc.plugins.module_utils.client import OpenBmcRestClient, RestClientError
 
 
 def main():
@@ -70,7 +70,7 @@ def main():
     )
 
     try:
-        client = OpenBmcClient(
+        client = OpenBmcRestClient(
             hostname=module.params["hostname"],
             username=module.params["username"],
             password=module.params["password"],
@@ -78,7 +78,7 @@ def main():
             port=module.params["port"]
         )
     except RestClientError as e:
-        module.fail_json(msg="Can't initialize OpenBmcClient.", error_info=e.msg)
+        module.fail_json(msg="Can't initialize OpenBmcRestClient.", error_info=e.msg)
 
     try:
         system_info = client.get_bmc_system_info()

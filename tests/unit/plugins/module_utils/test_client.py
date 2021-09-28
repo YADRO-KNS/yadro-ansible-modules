@@ -16,7 +16,7 @@ from ansible_collections.yadro.obmc.plugins.module_utils.client import (
     build_url,
     RestClient,
     RestClientError,
-    OpenBmcClient,
+    OpenBmcRestClient,
 )
 from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
 
@@ -326,7 +326,7 @@ class TestOpenBmcClient:
             "username": "username",
             "password": "password",
         }
-        client = OpenBmcClient(**client_kwargs)
+        client = OpenBmcRestClient(**client_kwargs)
         info = client.get_bmc_system_info()
 
         expected_info = {

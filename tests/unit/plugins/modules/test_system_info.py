@@ -33,6 +33,6 @@ class TestSystemInfo(ModuleTestCase):
             "changed": False,
             "system_info": system_info
         }
-        mocker.patch(MODULE_PATH + "system_info.OpenBmcClient.get_bmc_system_info", return_value=system_info)
+        mocker.patch(MODULE_PATH + "system_info.OpenBmcRestClient.get_bmc_system_info", return_value=system_info)
         result = self.run_module_expect_exit_json(module_default_args)
         assert result == expected_json
