@@ -1,6 +1,11 @@
 default:
   tags:
     - docker
+    - x86_64
+
+stages:
+  - sanity
+  - units
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
@@ -11,17 +16,18 @@ cache:
     - venv/
 
 before_script:
-  - pip install --user virtualenv
-  - python3 -m virtualenv venv
+  - virtualenv venv
   - source venv/bin/activate
   - pip install ansible
   - pip install coverage==4.5.4
 
 sanity:
+  stage: sanity
   script:
     - ansible-test sanity -v --docker
 
 units:
+  stage: units
   script:
     - ansible-test units -v --docker --coverage
 
