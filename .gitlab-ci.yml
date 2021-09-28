@@ -1,0 +1,12 @@
+job:
+  tags:
+    - docker
+    - x86_64
+
+environment:
+  stage: environment
+  script:
+    - pip install --user virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip show pip
