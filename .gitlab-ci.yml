@@ -8,8 +8,8 @@ stages:
   - units
 
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   GIT_CLONE_PATH: "$CI_BUILDS_DIR/ansible_collections/yadro/obmc"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
 cache:
   paths:
@@ -31,4 +31,3 @@ units:
   stage: units
   script:
     - ansible-test units -v --docker --coverage
-
