@@ -1,3 +1,3 @@
-# Ansible Collection - yadro.obmc
+# YADRO OpenBmc Ansible Collection
 
-Documentation for the collection.
+TODO

@@ -53,10 +53,10 @@ class RestClientResponse:
 class RestClient:
 
     def __init__(self, hostname, base_prefix="/redfish/v1/", username=None, password=None,
-                 validate_certs=True, timeout=10):
+                 verify_certs=True, port=443, timeout=10):
 
         self._protocol = "https"
-        self._port = 443
+        self._port = port
         if "://" in hostname:
             raise RestClientError("Hostname must not contain protocol definition.")
 
@@ -68,7 +68,7 @@ class RestClient:
 
         self._username = username
         self._password = password
-        self.validate_certs = validate_certs
+        self.verify_certs = verify_certs
         self.timeout = timeout
 
     def _get_reqeust_params(self, method, headers=None):
@@ -78,7 +78,7 @@ class RestClient:
 
         request_params = {
             "method": method,
-            "validate_certs": self.validate_certs,
+            "verify_certs": self.verify_certs,
             "use_proxy": True,
             "timeout": self.timeout,
             "follow_redirects": "all",
@@ -120,3 +120,19 @@ class RestClient:
 
     def post(self, path, body=None, headers=None):
         return self._make_request(path, method="POST", body=body, headers=headers)
+
+
+class OpenBmcClient(RestClient):
+
+    def __init__(self, *args, **kwargs):
+        super(OpenBmcClient, self).__init__(*args, **kwargs)
+
+    def get_bmc_system_info(self):
+        bios_info = self.get("/UpdateService/FirmwareInventory/bios_active").json_data
+        bmc_info = self.get("/UpdateService/FirmwareInventory/bmc_active").json_data
+        return {
+            "firmware": {
+                "bios_version": bios_info["Version"],
+                "bmc_version": bmc_info["Version"],
+            }
+        }

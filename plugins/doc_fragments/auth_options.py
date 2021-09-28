@@ -6,14 +6,13 @@
 
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 
 class ModuleDocFragment(object):
 
-    DOCUMENTATION = r'''
+    DOCUMENTATION = r"""
     options:
       hostname:
         required: True
@@ -35,4 +34,4 @@ class ModuleDocFragment(object):
         type: bool
         description: Responsible for SSL certificates verification. If set to False certificates won't verified.
         default: True
-'''
+"""

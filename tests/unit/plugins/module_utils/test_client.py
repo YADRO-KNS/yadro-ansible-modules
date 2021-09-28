@@ -12,10 +12,16 @@ __metaclass__ = type
 import pytest
 import json
 
-from ansible_collections.yadro.obmc.plugins.module_utils.client import RestClient, RestClientError, build_url
+from ansible_collections.yadro.obmc.plugins.module_utils.client import (
+    build_url,
+    RestClient,
+    RestClientError,
+    OpenBmcClient,
+)
 from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
 
 MODULE_UTIL_PATH = "ansible_collections.yadro.obmc.plugins.module_utils."
+
 
 class TestRestClinet:
 
@@ -29,7 +35,7 @@ class TestRestClinet:
 
     def test_build_url(self):
         assert "https://localhost/path?key=value" == build_url("https://localhost", "path", {"key": "value"})
-        
+
     def test_hostname_with_protocol(self):
         client_kwargs = {
             "hostname": "https://localhost",
@@ -47,7 +53,8 @@ class TestRestClinet:
             "username": "username",
             "password": "password",
             "base_prefix": "/redfish/v1/",
-            "validate_certs": True,
+            "verify_certs": True,
+            "port": 443,
             "timeout": 30,
         }
         client = RestClient(**client_kwargs)
@@ -57,7 +64,7 @@ class TestRestClinet:
             "url": "https://localhost:443/redfish/v1/path",
             "data": None,
             "method": "GET",
-            "validate_certs": True,
+            "verify_certs": True,
             "use_proxy": True,
             "timeout": 30,
             "follow_redirects": "all",
@@ -76,7 +83,8 @@ class TestRestClinet:
             "username": "username",
             "password": "password",
             "base_prefix": "/redfish/v1/",
-            "validate_certs": True,
+            "verify_certs": True,
+            "port": 443,
             "timeout": 30,
         }
         client = RestClient(**client_kwargs)
@@ -86,7 +94,7 @@ class TestRestClinet:
             "url": "https://localhost:443/redfish/v1/path",
             "data": None,
             "method": "GET",
-            "validate_certs": True,
+            "verify_certs": True,
             "use_proxy": True,
             "timeout": 30,
             "follow_redirects": "all",
@@ -103,7 +111,8 @@ class TestRestClinet:
             "username": "username",
             "password": "password",
             "base_prefix": "/redfish/v1/",
-            "validate_certs": True,
+            "verify_certs": True,
+            "port": 443,
             "timeout": 30,
         }
         client = RestClient(**client_kwargs)
@@ -113,7 +122,7 @@ class TestRestClinet:
             "url": "https://localhost:443/redfish/v1/path",
             "data": None,
             "method": "GET",
-            "validate_certs": True,
+            "verify_certs": True,
             "use_proxy": True,
             "timeout": 30,
             "follow_redirects": "all",
@@ -132,7 +141,8 @@ class TestRestClinet:
             "username": "username",
             "password": "password",
             "base_prefix": "/redfish/v1/",
-            "validate_certs": True,
+            "verify_certs": True,
+            "port": 443,
             "timeout": 30,
         }
         client = RestClient(**client_kwargs)
@@ -145,7 +155,7 @@ class TestRestClinet:
             "url": "https://localhost:443/redfish/v1/path",
             "data": None,
             "method": "GET",
-            "validate_certs": True,
+            "verify_certs": True,
             "use_proxy": True,
             "timeout": 30,
             "follow_redirects": "all",
@@ -181,7 +191,8 @@ class TestRestClinet:
             "username": "username",
             "password": "password",
             "base_prefix": "/redfish/v1/",
-            "validate_certs": True,
+            "verify_certs": True,
+            "port": 443,
             "timeout": 30,
         }
         client = RestClient(**client_kwargs)
@@ -191,7 +202,7 @@ class TestRestClinet:
             "url": "https://localhost:443/redfish/v1/path?key=value",
             "data": None,
             "method": "GET",
-            "validate_certs": True,
+            "verify_certs": True,
             "use_proxy": True,
             "timeout": 30,
             "follow_redirects": "all",
@@ -225,7 +236,8 @@ class TestRestClinet:
             "username": "username",
             "password": "password",
             "base_prefix": "/redfish/v1/",
-            "validate_certs": True,
+            "verify_certs": True,
+            "port": 443,
             "timeout": 30,
         }
         client = RestClient(**client_kwargs)
@@ -235,7 +247,7 @@ class TestRestClinet:
             "url": "https://localhost:443/redfish/v1/path",
             "data": json.dumps({"json": "data"}),
             "method": "POST",
-            "validate_certs": True,
+            "verify_certs": True,
             "use_proxy": True,
             "timeout": 30,
             "follow_redirects": "all",
@@ -256,17 +268,18 @@ class TestRestClinet:
             "username": "username",
             "password": "password",
             "base_prefix": "/redfish/v1/",
-            "validate_certs": True,
+            "verify_certs": True,
+            "port": 443,
             "timeout": 30,
         }
         client = RestClient(**client_kwargs)
-        response = client.post("/path", body=b'bytes data')
+        response = client.post("/path", body=b"bytes data")
 
         expected_request_kwargs = {
             "url": "https://localhost:443/redfish/v1/path",
-            "data": b'bytes data',
+            "data": b"bytes data",
             "method": "POST",
-            "validate_certs": True,
+            "verify_certs": True,
             "use_proxy": True,
             "timeout": 30,
             "follow_redirects": "all",
@@ -288,3 +301,42 @@ class TestRestClinet:
         client = RestClient(**client_kwargs)
         with pytest.raises(RestClientError):
             client.post("/path", body=("unsupported", "body"))
+
+    def test_request_exceptions(self):
+        # TODO check exceptions:
+        # URLError, SSLValidationError, ConnectionError
+        # HTTPError
+        pass
+
+
+class TestOpenBmcClient:
+
+    @pytest.fixture
+    def mock_response(self):
+        mock_response = MagicMock()
+        mock_response.getcode.return_value = 200
+        mock_response.read.return_value = json.dumps({"Version": "version"})
+        return mock_response
+
+    def test_system_info(self, mocker, mock_response):
+        mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=mock_response)
+
+        client_kwargs = {
+            "hostname": "localhost",
+            "username": "username",
+            "password": "password",
+        }
+        client = OpenBmcClient(**client_kwargs)
+        info = client.get_bmc_system_info()
+
+        expected_info = {
+            "firmware": {
+                "bios_version": "version",
+                "bmc_version": "version",
+            }
+        }
+        assert info == expected_info
+
+    def test_rest_client_exceptions_passthrough(self):
+        # TODO check exceptions received from RestClient
+        pass
