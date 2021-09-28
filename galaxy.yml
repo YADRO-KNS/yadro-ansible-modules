@@ -3,8 +3,8 @@ name: obmc
 version: 1.0.0
 readme: README.md
 authors:
-  - your name <example@domain.com>
-description: your collection description
+  - Radmir Safin <r.safin@yadro.com>
+description: Yadro OpenBmc Ansible Collection
 license:
   - GPL-2.0-or-later
 license_file: ''

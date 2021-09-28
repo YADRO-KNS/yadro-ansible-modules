@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# YADRO OpenBmc Ansible Modules
+# YADRO OpenBmc Ansible Collection
 # Version 1.0.0
 # Copyright (c) 2021 YADRO (KNS Group LLC)
 
