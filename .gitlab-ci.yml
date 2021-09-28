@@ -16,7 +16,7 @@ cache:
     - venv/
 
 before_script:
-  - virtualenv venv
+  - virtualenv --python=/usr/local/bin/python3.8 venv
   - source venv/bin/activate
   - pip install ansible
   - pip install coverage==4.5.4
