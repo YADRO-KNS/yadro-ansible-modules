@@ -1,6 +1,6 @@
 default:
   tags:
-    - docker
+    - ansible
     - x86_64
 
 stages:
