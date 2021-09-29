@@ -16,7 +16,6 @@ from ansible_collections.yadro.obmc.plugins.module_utils.client import (
     build_url,
     RestClient,
     RestClientError,
-    OpenBmcRestClient,
 )
 from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
 
@@ -26,317 +25,137 @@ MODULE_UTIL_PATH = "ansible_collections.yadro.obmc.plugins.module_utils."
 class TestRestClinet:
 
     @pytest.fixture
-    def mock_response(self):
-        mock_response = MagicMock()
-        mock_response.getcode.return_value = 200
-        mock_response.headers = mock_response.getheaders.return_value = {"X-Auth-Token": "token"}
-        mock_response.read.return_value = json.dumps({"key": "value"})
-        return mock_response
+    def response_mock(self):
+        response_mock = MagicMock()
+        response_mock.getcode.return_value = 200
+        response_mock.headers = response_mock.getheaders.return_value = {"X-Auth-Token": "token"}
+        response_mock.read.return_value = json.dumps({"json": "data"})
+        return response_mock
+
+    @pytest.fixture
+    def request_args(self):
+        default_args = {
+            "url": "https://localhost:443/redfish/v1/path",
+            "data": None,
+            "method": None,
+            "verify_certs": True,
+            "use_proxy": True,
+            "timeout": 30,
+            "follow_redirects": "all",
+            "headers": {},
+            "force_basic_auth": True,
+            "url_username": "username",
+            "url_password": "password",
+        }
+        return default_args
 
     def test_build_url(self):
-        assert "https://localhost/path?key=value" == build_url("https://localhost", "path", {"key": "value"})
+        expected = "https://localhost/path?key=value"
+        result = build_url("https://localhost", "path", {"key": "value"})
+        assert result == expected
 
-    def test_hostname_with_protocol(self):
-        client_kwargs = {
-            "hostname": "https://localhost",
-            "username": "username",
-            "password": "password",
-        }
-        with pytest.raises(RestClientError):
-            client = RestClient(**client_kwargs)
+    def test_hostname_with_protocol(self, rest_client_args):
+        rest_client_args["hostname"] = "https://localhost"
+        client = RestClient(**rest_client_args)
+        assert client.base_url == "https://localhost:443/redfish/v1/"
 
-    def test_request_params(self, mocker):
+    def test_hostname_without_protocol(self, rest_client):
+        assert rest_client.base_url == "https://localhost:443/redfish/v1/"
+
+    def test_request_params(self, mocker, rest_client, request_args):
         mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        response = rest_client.get("/path")
+        request_args["method"] = "GET"
+        mock.assert_called_with(**request_args)
 
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-            "base_prefix": "/redfish/v1/",
-            "verify_certs": True,
-            "port": 443,
-            "timeout": 30,
-        }
-        client = RestClient(**client_kwargs)
-        response = client.get("/path")
-
-        expected_request_kwargs = {
-            "url": "https://localhost:443/redfish/v1/path",
-            "data": None,
-            "method": "GET",
-            "verify_certs": True,
-            "use_proxy": True,
-            "timeout": 30,
-            "follow_redirects": "all",
-            "headers": {},
-            "force_basic_auth": True,
-            "url_username": "username",
-            "url_password": "password",
-        }
-        mock.assert_called_with(**expected_request_kwargs)
-
-    def test_request_params_with_token(self, mocker):
+    def test_request_params_with_token(self, mocker, rest_client, request_args):
         mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
-
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-            "base_prefix": "/redfish/v1/",
-            "verify_certs": True,
-            "port": 443,
-            "timeout": 30,
-        }
-        client = RestClient(**client_kwargs)
-        response = client.get("/path", headers={"X-Auth-Token": "token"})
-
-        expected_request_kwargs = {
-            "url": "https://localhost:443/redfish/v1/path",
-            "data": None,
+        headers = {"X-Auth-Token": "token"}
+        response = rest_client.get("/path", headers=headers)
+        request_args.pop("url_username")
+        request_args.pop("url_password")
+        request_args.update({
             "method": "GET",
-            "verify_certs": True,
-            "use_proxy": True,
-            "timeout": 30,
-            "follow_redirects": "all",
-            "headers": {"X-Auth-Token": "token"},
+            "headers": headers,
             "force_basic_auth": False,
-        }
-        mock.assert_called_with(**expected_request_kwargs)
-
-    def test_request_params_with_extra_headers(self, mocker):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
-
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-            "base_prefix": "/redfish/v1/",
-            "verify_certs": True,
-            "port": 443,
-            "timeout": 30,
-        }
-        client = RestClient(**client_kwargs)
-        response = client.get("/path", headers={"Header name": "Header value"})
-
-        expected_request_kwargs = {
-            "url": "https://localhost:443/redfish/v1/path",
-            "data": None,
-            "method": "GET",
-            "verify_certs": True,
-            "use_proxy": True,
-            "timeout": 30,
-            "follow_redirects": "all",
-            "headers": {"Header name": "Header value"},
-            "force_basic_auth": True,
-            "url_username": "username",
-            "url_password": "password",
-        }
-        mock.assert_called_with(**expected_request_kwargs)
-
-    def test_request_params_with_token_and_extra_headers(self, mocker):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
-
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-            "base_prefix": "/redfish/v1/",
-            "verify_certs": True,
-            "port": 443,
-            "timeout": 30,
-        }
-        client = RestClient(**client_kwargs)
-        response = client.get("/path", headers={
-            "X-Auth-Token": "token",
-            "Extra header": "Extra value"
         })
+        mock.assert_called_with(**request_args)
 
-        expected_request_kwargs = {
-            "url": "https://localhost:443/redfish/v1/path",
-            "data": None,
+    def test_request_params_with_extra_headers(self, mocker, rest_client, request_args):
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        headers = {"Extra": "Header"}
+        response = rest_client.get("/path", headers=headers)
+        request_args.update({
             "method": "GET",
-            "verify_certs": True,
-            "use_proxy": True,
-            "timeout": 30,
-            "follow_redirects": "all",
-            "headers": {
-                "X-Auth-Token": "token",
-                "Extra header": "Extra value"
-            },
+            "headers": headers,
+        })
+        mock.assert_called_with(**request_args)
+
+    def test_request_params_with_token_and_extra_headers(self, mocker, rest_client, request_args):
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        headers = {"X-Auth-Token": "token", "Extra": "Header"}
+        response = rest_client.get("/path", headers=headers)
+        request_args.pop("url_username")
+        request_args.pop("url_password")
+        request_args.update({
+            "method": "GET",
+            "headers": headers,
             "force_basic_auth": False,
-        }
+        })
+        mock.assert_called_with(**request_args)
 
-        mock.assert_called_with(**expected_request_kwargs)
-
-    def test_get_request(self, mocker, mock_response):
-        mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=mock_response)
-
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-        }
-        client = RestClient(**client_kwargs)
-        response = client.get("/path")
-
+    def test_success_get_request(self, mocker, rest_client, response_mock):
+        mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=response_mock)
+        response = rest_client.get("/path")
         assert response.is_success
         assert response.status_code == 200
-        assert response.json_data == {"key": "value"}
+        assert response.json_data == {"json": "data"}
 
-    def test_get_request_with_query(self, mocker):
+    def test_get_request_with_query(self, mocker, rest_client, request_args):
         mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        response = rest_client.get("/path", query_params={"query": "param"})
+        request_args.update({"url": "https://localhost:443/redfish/v1/path?query=param", "method": "GET"})
+        mock.assert_called_with(**request_args)
 
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-            "base_prefix": "/redfish/v1/",
-            "verify_certs": True,
-            "port": 443,
-            "timeout": 30,
-        }
-        client = RestClient(**client_kwargs)
-        response = client.get("/path", query_params={"key": "value"})
-
-        expected_request_kwargs = {
-            "url": "https://localhost:443/redfish/v1/path?key=value",
-            "data": None,
-            "method": "GET",
-            "verify_certs": True,
-            "use_proxy": True,
-            "timeout": 30,
-            "follow_redirects": "all",
-            "headers": {},
-            "force_basic_auth": True,
-            "url_username": "username",
-            "url_password": "password",
-        }
-        mock.assert_called_with(**expected_request_kwargs)
-
-    def test_post_request(self, mocker, mock_response):
-        mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=mock_response)
-
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-        }
-        client = RestClient(**client_kwargs)
-        response = client.post("/path", body={"post": "data"})
-
+    def test_success_post_request(self, mocker, rest_client, response_mock):
+        mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=response_mock)
+        response = rest_client.post("/path", body={"post": "data"})
         assert response.is_success
         assert response.status_code == 200
-        assert response.json_data == {"key": "value"}
+        assert response.json_data == {"json": "data"}
 
-    def test_post_request_json_data(self, mocker):
+    def test_post_request_json_data(self, mocker, rest_client, request_args):
         mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
-
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-            "base_prefix": "/redfish/v1/",
-            "verify_certs": True,
-            "port": 443,
-            "timeout": 30,
-        }
-        client = RestClient(**client_kwargs)
-        response = client.post("/path", body={"json": "data"})
-
-        expected_request_kwargs = {
-            "url": "https://localhost:443/redfish/v1/path",
-            "data": json.dumps({"json": "data"}),
+        body = {"json": "data"}
+        response = rest_client.post("/path", body=body)
+        request_args.update({
             "method": "POST",
-            "verify_certs": True,
-            "use_proxy": True,
-            "timeout": 30,
-            "follow_redirects": "all",
+            "data":  json.dumps(body),
             "headers": {
                 "Content-Type": "application/json",
-            },
-            "force_basic_auth": True,
-            "url_username": "username",
-            "url_password": "password",
-        }
-        mock.assert_called_with(**expected_request_kwargs)
+            }
+        })
+        mock.assert_called_with(**request_args)
 
-    def test_post_request_bytes_data(self, mocker):
+    def test_post_request_bytes_data(self, mocker, rest_client, request_args):
         mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
-
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-            "base_prefix": "/redfish/v1/",
-            "verify_certs": True,
-            "port": 443,
-            "timeout": 30,
-        }
-        client = RestClient(**client_kwargs)
-        response = client.post("/path", body=b"bytes data")
-
-        expected_request_kwargs = {
-            "url": "https://localhost:443/redfish/v1/path",
-            "data": b"bytes data",
+        body = b"bytest data"
+        response = rest_client.post("/path", body=body)
+        request_args.update({
             "method": "POST",
-            "verify_certs": True,
-            "use_proxy": True,
-            "timeout": 30,
-            "follow_redirects": "all",
+            "data":  body,
             "headers": {
                 "Content-Type": "application/octet-stream",
-            },
-            "force_basic_auth": True,
-            "url_username": "username",
-            "url_password": "password",
-        }
-        mock.assert_called_with(**expected_request_kwargs)
+            }
+        })
+        mock.assert_called_with(**request_args)
 
-    def test_post_request_unsupported_data(self):
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-        }
-        client = RestClient(**client_kwargs)
+    def test_post_request_unsupported_data(self, rest_client):
         with pytest.raises(RestClientError):
-            client.post("/path", body=("unsupported", "body"))
+            rest_client.post("/path", body=("unsupported", "body"))
 
     def test_request_exceptions(self):
         # TODO check exceptions:
         # URLError, SSLValidationError, ConnectionError
         # HTTPError
-        pass
-
-
-class TestOpenBmcClient:
-
-    @pytest.fixture
-    def mock_response(self):
-        mock_response = MagicMock()
-        mock_response.getcode.return_value = 200
-        mock_response.read.return_value = json.dumps({"Version": "version"})
-        return mock_response
-
-    def test_system_info(self, mocker, mock_response):
-        mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=mock_response)
-
-        client_kwargs = {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
-        }
-        client = OpenBmcRestClient(**client_kwargs)
-        info = client.get_bmc_system_info()
-
-        expected_info = {
-            "firmware": {
-                "bios_version": "version",
-                "bmc_version": "version",
-            }
-        }
-        assert info == expected_info
-
-    def test_rest_client_exceptions_passthrough(self):
-        # TODO check exceptions received from RestClient
         pass
