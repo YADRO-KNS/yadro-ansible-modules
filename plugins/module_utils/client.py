@@ -11,7 +11,7 @@ __metaclass__ = type
 
 import json
 
-from ansible.module_utils.urls import open_url, ConnectionError, SSLValidationError
+from ansible.module_utils.urls import open_url
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 from ansible.module_utils.six.moves.urllib.parse import urlencode
 
@@ -31,7 +31,8 @@ class RestClientResponse:
 
     def __init__(self, response):
         self.http_response = response
-        if self.http_response:
+        self.body = None
+        if response:
             self.body = self.http_response.read()
 
     @property
@@ -55,14 +56,16 @@ class RestClient:
     def __init__(self, hostname, base_prefix="/redfish/v1/", username=None, password=None,
                  verify_certs=True, port=443, timeout=10):
 
-        self._protocol = "https"
-        self._port = port
         if "://" in hostname:
-            raise RestClientError("Hostname must not contain protocol definition.")
+            self._protocol, self._hostname = hostname.split("://")
+        else:
+            self._protocol = "https"
+            self._hostname = hostname
 
+        self._port = port
         self._base_prefix = base_prefix
         self._base_url = build_url(
-            "{0}://{1}:{2}".format(self._protocol, hostname, self._port),
+            "{0}://{1}:{2}".format(self._protocol, self._hostname, self._port),
             self._base_prefix
         )
 
@@ -70,6 +73,10 @@ class RestClient:
         self._password = password
         self.verify_certs = verify_certs
         self.timeout = timeout
+
+    @property
+    def base_url(self):
+        return self._base_url
 
     def _get_reqeust_params(self, method, headers=None):
         request_headers = {}

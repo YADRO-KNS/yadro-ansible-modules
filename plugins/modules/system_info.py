@@ -69,21 +69,18 @@ def main():
         supports_check_mode=True
     )
 
-    try:
-        client = OpenBmcRestClient(
-            hostname=module.params["hostname"],
-            username=module.params["username"],
-            password=module.params["password"],
-            verify_certs=module.params["verify_certs"],
-            port=module.params["port"]
-        )
-    except RestClientError as e:
-        module.fail_json(msg="Can't initialize OpenBmcRestClient.", error_info=e.msg)
+    client = OpenBmcRestClient(
+        hostname=module.params["hostname"],
+        username=module.params["username"],
+        password=module.params["password"],
+        verify_certs=module.params["verify_certs"],
+        port=module.params["port"]
+    )
 
     try:
         system_info = client.get_bmc_system_info()
     except Exception as e:
-        module.fail_json(msg="Can't read bmc system information.", error_info=e.msg)
+        module.fail_json(msg="Can't read system information.", error_info=e.msg)
     else:
         module.exit_json(msg="System information successfully read.", system_info=system_info)
 
