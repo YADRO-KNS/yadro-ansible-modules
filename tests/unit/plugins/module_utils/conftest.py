@@ -27,9 +27,11 @@ def rest_client_args():
     }
     return default_args
 
+
 @pytest.fixture
 def rest_client(rest_client_args):
     return RestClient(**rest_client_args)
+
 
 @pytest.fixture
 def obmc_client(rest_client_args):

@@ -130,7 +130,7 @@ class TestRestClinet:
         response = rest_client.post("/path", body=body)
         request_args.update({
             "method": "POST",
-            "data":  json.dumps(body),
+            "data": json.dumps(body),
             "headers": {
                 "Content-Type": "application/json",
             }
@@ -143,7 +143,7 @@ class TestRestClinet:
         response = rest_client.post("/path", body=body)
         request_args.update({
             "method": "POST",
-            "data":  body,
+            "data": body,
             "headers": {
                 "Content-Type": "application/octet-stream",
             }
