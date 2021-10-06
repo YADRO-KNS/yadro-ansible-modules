@@ -134,12 +134,5 @@ class OpenBmcRestClient(RestClient):
     def __init__(self, *args, **kwargs):
         super(OpenBmcRestClient, self).__init__(*args, **kwargs)
 
-    def get_bmc_system_info(self):
-        bios_info = self.get("/UpdateService/FirmwareInventory/bios_active").json_data
-        bmc_info = self.get("/UpdateService/FirmwareInventory/bmc_active").json_data
-        return {
-            "firmware": {
-                "bios_version": bios_info["Version"],
-                "bmc_version": bmc_info["Version"],
-            }
-        }
+    def get_bmc_firmware_info(self):
+        return self.get("/UpdateService/FirmwareInventory/bmc_active").json_data

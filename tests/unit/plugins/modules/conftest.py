@@ -32,5 +32,11 @@ def mock_module(mocker):
 
 @pytest.fixture
 def module_default_args():
-    default_args = {"hostname": "localhost", "username": "username", "password": "password"}
+    default_args = {
+        "connection": {
+            "hostname": "localhost",
+            "username": "testuser",
+            "password": "testpassword"
+        }
+    }
     return default_args
