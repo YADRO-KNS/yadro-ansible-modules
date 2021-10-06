@@ -33,11 +33,11 @@ msg:
   sample: Firmware information successfully fetched.
 error_info:
   type: dict
-  returned: on HTTP error
+  returned: on error
   description: Error details.
 firmware_info:
   type: dict
-  returned: success
+  returned: on success
   description: OpenBmc firmware information.
   sample: {
     "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory/bmc_active",
@@ -65,9 +65,10 @@ EXAMPLES = r"""
 ---
 - name: Get server information
   yadro.obmc.bmc_firmware_info:
-    hostname: "192.168.0.1"
-    username: "username"
-    password: "password"
+    connection:
+      hostname: "192.168.0.1"
+      username: "username"
+      password: "password"
   register: firmware_info
 """
 
