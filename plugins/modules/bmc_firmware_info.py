@@ -40,17 +40,7 @@ firmware_info:
   returned: on success
   description: OpenBmc firmware information.
   sample: {
-    "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory/bmc_active",
-    "@odata.type": "#SoftwareInventory.v1_1_0.SoftwareInventory",
     "Description": "BMC image",
-    "Id": "bmc_active",
-    "Members@odata.count": 1,
-    "Name": "Software Inventory",
-    "RelatedItem": [
-      {
-        "@odata.id": "/redfish/v1/Managers/bmc"
-      }
-    ],
     "Status": {
       "Health": "OK",
       "HealthRollup": "OK",
@@ -72,8 +62,11 @@ EXAMPLES = r"""
   register: firmware_info
 """
 
+import json
+
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.yadro.obmc.plugins.module_utils.client import OpenBmcRestClient, RestClientError
+from ansible_collections.yadro.obmc.plugins.module_utils.client import OpenBmcRestClient
+from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 
 
 def main():
@@ -104,8 +97,12 @@ def main():
 
     try:
         firmware_info = client.get_bmc_firmware_info()
+    except HTTPError as e:
+        module.fail_json(msg="Request finished with error.", error_info=str(e))
+    except URLError as e:
+        module.fail_json(msg="Can't connect to server.", error_info=str(e), unreachable=True)
     except Exception as e:
-        module.fail_json(msg="Can't read firmware information.", error_info=e.msg)
+        module.fail_json(msg="Can't read firmware information.", error_info=str(e))
     else:
         module.exit_json(msg="Firmware information successfully read.", firmware_info=firmware_info)
 

@@ -11,7 +11,7 @@ __metaclass__ = type
 
 import json
 
-from ansible.module_utils.urls import open_url
+from ansible.module_utils.urls import open_url, SSLValidationError, ConnectionError
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 from ansible.module_utils.six.moves.urllib.parse import urlencode
 
@@ -114,7 +114,7 @@ class RestClient:
                 headers["Content-Type"] = "application/octet-stream"
                 request_body = body
             else:
-                raise RestClientError("{0} type currently unsupported".format(type(body)))
+                raise RestClientError("Unsupported body type: {0}".format(type(body)))
         else:
             request_body = None
 
@@ -135,4 +135,10 @@ class OpenBmcRestClient(RestClient):
         super(OpenBmcRestClient, self).__init__(*args, **kwargs)
 
     def get_bmc_firmware_info(self):
-        return self.get("/UpdateService/FirmwareInventory/bmc_active").json_data
+        data = self.get("/UpdateService/FirmwareInventory/bmc_active").json_data
+        return {
+            "Description": data["Description"],
+            "Status": data["Status"],
+            "Updateable": data["Updateable"],
+            "Version": data["Version"]
+        }

@@ -12,12 +12,10 @@ __metaclass__ = type
 import pytest
 import json
 
-from ansible_collections.yadro.obmc.plugins.module_utils.client import (
-    build_url,
-    RestClient,
-    RestClientError,
-)
+from ansible_collections.yadro.obmc.plugins.module_utils.client import build_url, RestClient, RestClientError
 from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
+from ansible.module_utils.urls import open_url, SSLValidationError, ConnectionError
+from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 
 MODULE_UTIL_PATH = "ansible_collections.yadro.obmc.plugins.module_utils."
 
@@ -154,8 +152,15 @@ class TestRestClinet:
         with pytest.raises(RestClientError):
             rest_client.post("/path", body=("unsupported", "body"))
 
-    def test_request_exceptions(self):
-        # TODO check exceptions:
-        # URLError, SSLValidationError, ConnectionError
-        # HTTPError
-        pass
+    @pytest.mark.parametrize("exception", [URLError, SSLValidationError, ConnectionError])
+    def test_client_exceptions_passthrough(self, mocker, response_mock, rest_client, exception):
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=response_mock)
+        mock.side_effect = exception("Test")
+        with pytest.raises(exception):
+            rest_client.get("/path")
+
+    def test_client_http_exceptions_passthrough(self, mocker, response_mock, rest_client):
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=response_mock)
+        mock.side_effect = HTTPError("localhost", 400, "Bad Request Error", {}, None)
+        with pytest.raises(HTTPError):
+            rest_client.get("/path")
