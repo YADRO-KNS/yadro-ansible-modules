@@ -1,0 +1,6 @@
+.idea
+build/html
+build/rst
+build/venv
+build/yadro-obmc-*.tar.gz
+

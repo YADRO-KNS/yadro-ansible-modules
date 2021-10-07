@@ -91,7 +91,7 @@ def main():
                 }
             }
         },
-        supports_check_mode=True
+        supports_check_mode=False
     )
 
     client = OpenBmcRestClient(

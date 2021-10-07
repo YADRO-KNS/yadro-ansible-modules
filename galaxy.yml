@@ -14,4 +14,7 @@ repository: http://example.com/repository
 documentation: http://docs.example.com
 homepage: http://example.com
 issues: http://example.com/issue/tracker
-build_ignore: []
+build_ignore:
+  - '.*'
+  - build
+  - build-tool.sh
