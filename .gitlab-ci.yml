@@ -6,28 +6,33 @@ default:
 stages:
   - sanity
   - units
+  - webdocs
 
 variables:
   GIT_CLONE_PATH: "$CI_BUILDS_DIR/ansible_collections/yadro/obmc"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PYTHON_INTERPRETER: "/usr/local/bin/python3.8"
 
 cache:
   paths:
     - .cache/pip
-    - venv/
-
-before_script:
-  - virtualenv --python=/usr/local/bin/python3.8 venv
-  - source venv/bin/activate
-  - pip install ansible
-  - pip install coverage==4.5.4
+    - build/venv
 
 sanity:
   stage: sanity
   script:
-    - ansible-test sanity -v --docker
+    - ./build-tool.sh sanity
 
 units:
   stage: units
   script:
-    - ansible-test units -v --docker --coverage
+    - ./build-tool.sh units
+
+webdocs:
+  stage: webdocs
+  script:
+    - ./build-tool.sh webdocs
+    - mv ./build/html webdocs
+  artifacts:
+    paths:
+      - webdocs
