@@ -16,7 +16,7 @@ from ansible_collections.yadro.obmc.tests.unit.plugins.modules.utils import Ansi
 
 
 @pytest.fixture(autouse=True)
-def mock_module(mocker):
+def module_mock(mocker):
 
     def exit_json(*args, **kwargs):
         if "changed" not in kwargs:

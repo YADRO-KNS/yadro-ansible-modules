@@ -47,7 +47,7 @@ firmware_info:
       "State": "Enabled"
     },
     "Updateable": true,
-    "Version": "v1.3rb93fad"
+    "Version": "v1.0"
   }
 """
 
@@ -65,8 +65,9 @@ EXAMPLES = r"""
 import json
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.yadro.obmc.plugins.module_utils.client import OpenBmcRestClient
+from ansible.module_utils.urls import ConnectionError, SSLValidationError
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
+from ansible_collections.yadro.obmc.plugins.module_utils.bmc_client import create_client
 
 
 def main():
@@ -80,28 +81,28 @@ def main():
                     "username": {"required": True, "type": "str"},
                     "password": {"required": True, "type": "str", "no_log": True},
                     "port": {"required": False, "default": 443, "type": "int"},
-                    "verify_certs": {"required": False, "default": True, "type": "bool"},
+                    "validate_certs": {"required": False, "default": True, "type": "bool"},
                 }
             }
         },
         supports_check_mode=False
     )
 
-    client = OpenBmcRestClient(
-        hostname=module.params["connection"]["hostname"],
-        username=module.params["connection"]["username"],
-        password=module.params["connection"]["password"],
-        verify_certs=module.params["connection"]["verify_certs"],
-        port=module.params["connection"]["port"]
-    )
-
     try:
-        firmware_info = client.get_bmc_firmware_info()
+        client = create_client(**module.params["connection"])
+        managers = client.get_manager_collection()
+        if len(managers) != 1:
+            module.fail_json(
+                msg="Can't identify BMC manager.",
+                error_info="Operations with only one BMC manager supported. Found: {0}".format(len(managers))
+            )
+        active_firmware = client.get_manager(managers[0])["Links"]["ActiveSoftwareImage"]
+        firmware_info = client.get_software_inventory(active_firmware)
     except HTTPError as e:
         module.fail_json(msg="Request finished with error.", error_info=str(e))
     except URLError as e:
-        module.fail_json(msg="Can't connect to server.", error_info=str(e), unreachable=True)
-    except Exception as e:
+        module.fail_json(msg="Can't connect to server.", error_info=str(e))
+    except (SSLValidationError, ConnectionError) as e:
         module.fail_json(msg="Can't read firmware information.", error_info=str(e))
     else:
         module.exit_json(msg="Firmware information successfully read.", firmware_info=firmware_info)

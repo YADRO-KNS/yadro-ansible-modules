@@ -36,7 +36,7 @@ class TestRestClinet:
             "url": "https://localhost:443/redfish/v1/path",
             "data": None,
             "method": None,
-            "verify_certs": True,
+            "validate_certs": True,
             "use_proxy": True,
             "timeout": 30,
             "follow_redirects": "all",
@@ -137,7 +137,7 @@ class TestRestClinet:
 
     def test_post_request_bytes_data(self, mocker, rest_client, request_args):
         mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
-        body = b"bytest data"
+        body = b"bytes data"
         response = rest_client.post("/path", body=body)
         request_args.update({
             "method": "POST",

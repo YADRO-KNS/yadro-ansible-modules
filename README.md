@@ -11,9 +11,7 @@ yadro:
       - yadro.obmc.bmc_reset
       - yadro.obmc.bmc_reset_to_defaults
       network:
-        - yadro.obmc.bmc_network_interfaces
         interface:
-          - yadro.obmc.bmc_network_interface_info
           - yadro.obmc.bmc_network_interface
       firmware:
         - yadro.obmc.bmc_firmware_info
@@ -26,7 +24,6 @@ yadro:
     system:
       - yadro.obmc.system_info
       power:
-        - yadro.obmc.system_power_info
         - yadro.obmc.system_power_state
       thermal:
         - yadro.obmc.system_thermal_info

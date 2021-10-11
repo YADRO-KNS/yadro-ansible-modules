@@ -11,7 +11,7 @@ __metaclass__ = type
 
 import pytest
 
-from ansible_collections.yadro.obmc.plugins.module_utils.client import RestClient, OpenBmcRestClient
+from ansible_collections.yadro.obmc.plugins.module_utils.client import RestClient
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def rest_client_args():
         "username": "username",
         "password": "password",
         "base_prefix": "/redfish/v1/",
-        "verify_certs": True,
+        "validate_certs": True,
         "port": 443,
         "timeout": 30,
     }
@@ -31,8 +31,3 @@ def rest_client_args():
 @pytest.fixture
 def rest_client(rest_client_args):
     return RestClient(**rest_client_args)
-
-
-@pytest.fixture
-def obmc_client(rest_client_args):
-    return OpenBmcRestClient(**rest_client_args)
