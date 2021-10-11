@@ -35,8 +35,8 @@ class ModuleDocFragment(object):
             type: int
             description: OpenBmc REST API port.
             default: 443
-          verify_certs:
+          validate_certs:
             type: bool
-            description: Responsible for SSL certificates verification. If set to False certificates won't verified.
+            description: Responsible for SSL certificates validation. If set to False certificates won't validated.
             default: True
 """

@@ -1,0 +1,13 @@
+---
+- name: Read information about BMC firmware
+  yadro.obmc.bmc_firmware_info:
+    connection:
+      hostname: "http://172.17.133.188"
+      port: 8080
+      username: "admin"
+      password: "ChangeMe"
+      validate_certs: false
+  register: results
+
+- debug:
+    msg: "{{ results }}"

@@ -6,6 +6,7 @@ default:
 stages:
   - sanity
   - units
+  - integration
   - webdocs
 
 variables:
@@ -27,6 +28,11 @@ units:
   stage: units
   script:
     - ./build-tool.sh units
+
+integration:
+  stage: integration
+  script:
+    - ./build-tool.sh integration
 
 webdocs:
   stage: webdocs

@@ -53,8 +53,7 @@ class RestClientResponse:
 
 class RestClient:
 
-    def __init__(self, hostname, base_prefix="/redfish/v1/", username=None, password=None,
-                 verify_certs=True, port=443, timeout=10):
+    def __init__(self, hostname, base_prefix, username, password, validate_certs, port, timeout):
 
         if "://" in hostname:
             self._protocol, self._hostname = hostname.split("://")
@@ -71,7 +70,7 @@ class RestClient:
 
         self._username = username
         self._password = password
-        self.verify_certs = verify_certs
+        self.validate_certs = validate_certs
         self.timeout = timeout
 
     @property
@@ -85,7 +84,7 @@ class RestClient:
 
         request_params = {
             "method": method,
-            "verify_certs": self.verify_certs,
+            "validate_certs": self.validate_certs,
             "use_proxy": True,
             "timeout": self.timeout,
             "follow_redirects": "all",
@@ -127,18 +126,3 @@ class RestClient:
 
     def post(self, path, body=None, headers=None):
         return self._make_request(path, method="POST", body=body, headers=headers)
-
-
-class OpenBmcRestClient(RestClient):
-
-    def __init__(self, *args, **kwargs):
-        super(OpenBmcRestClient, self).__init__(*args, **kwargs)
-
-    def get_bmc_firmware_info(self):
-        data = self.get("/UpdateService/FirmwareInventory/bmc_active").json_data
-        return {
-            "Description": data["Description"],
-            "Status": data["Status"],
-            "Updateable": data["Updateable"],
-            "Version": data["Version"]
-        }

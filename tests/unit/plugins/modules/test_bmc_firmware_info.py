@@ -11,6 +11,7 @@ __metaclass__ = type
 
 import pytest
 
+from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
 from ansible_collections.yadro.obmc.plugins.modules import bmc_firmware_info
 from ansible_collections.yadro.obmc.tests.unit.plugins.modules.utils import ModuleTestCase
 from ansible.module_utils.urls import ConnectionError, SSLValidationError
@@ -24,27 +25,50 @@ class TestBmcFirmwareInfo(ModuleTestCase):
     module = bmc_firmware_info
 
     @pytest.fixture
-    def default_firmware_info(self):
-        firmware_info = {
-            "Description": "BMC image",
-            "Status": {
-                "Health": "OK",
-                "HealthRollup": "OK",
-                "State": "Enabled"
-            },
-            "Updateable": True,
-            "Version": "v1.0"
+    def client_mock(self):
+        client_mock = MagicMock()
+        client_mock.get_manager_collection.return_value = ["BMC"]
+        client_mock.get_manager.return_value = {
+            "Name": "BMC test manager",
+            "Description": "",
+            "Links": {
+                "ActiveSoftwareImage": "Image name",
+            }
         }
-        return firmware_info
+        client_mock.get_software_inventory.return_value = {
+            "Name": "Image name",
+            "Description": "Image description",
+        }
+        return client_mock
 
-    @pytest.fixture
-    def bmc_firmware_info_mock(self, mocker):
-        return mocker.patch(MODULE_PATH + "bmc_firmware_info.OpenBmcRestClient.get_bmc_firmware_info")
+    def test_simple_success_case(self, mocker, client_mock, module_default_args):
+        mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
+        expected_json = {
+            "msg": "Firmware information successfully read.",
+            "changed": False,
+            "firmware_info": {
+                "Name": "Image name",
+                "Description": "Image description",
+            },
+        }
+        result = self.run_module_expect_exit_json(module_default_args)
+        assert result == expected_json
 
-    def test_http_error(self, bmc_firmware_info_mock, default_firmware_info, module_default_args):
-        bmc_firmware_info_mock.return_value = default_firmware_info
+    def test_multiple_managers_error(self, mocker, client_mock, module_default_args):
+        client_mock.get_manager_collection.return_value = ["One", "Two"]
+        mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
+        expected_json = {
+            "msg": "Can't identify BMC manager.",
+            "failed": True,
+            "error_info": "Operations with only one BMC manager supported. Found: 2",
+        }
+        result = self.run_module_expect_fail_json(module_default_args)
+        assert result == expected_json
+
+    def test_http_error_passthrough(self, mocker, client_mock, module_default_args):
         exception = HTTPError("localhost", 400, "Bad Request Error", {}, None)
-        bmc_firmware_info_mock.side_effect = exception
+        client_mock.get_manager.side_effect = exception
+        mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
         expected_json = {
             "msg": "Request finished with error.",
             "error_info": str(exception),
@@ -53,38 +77,27 @@ class TestBmcFirmwareInfo(ModuleTestCase):
         result = self.run_module_expect_fail_json(module_default_args)
         assert result == expected_json
 
-    def test_url_error(self, bmc_firmware_info_mock, default_firmware_info, module_default_args):
-        bmc_firmware_info_mock.return_value = default_firmware_info
+    def test_url_error_passthrough(self, mocker, client_mock, module_default_args):
         exception = URLError("URL error")
-        bmc_firmware_info_mock.side_effect = exception
+        client_mock.get_manager.side_effect = exception
+        mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
         expected_json = {
             "msg": "Can't connect to server.",
             "error_info": str(exception),
             "failed": True,
-            "unreachable": True,
         }
         result = self.run_module_expect_fail_json(module_default_args)
         assert result == expected_json
 
     @pytest.mark.parametrize("exception", [ConnectionError, SSLValidationError])
-    def test_connection_errors(self, bmc_firmware_info_mock, default_firmware_info, module_default_args, exception):
-        bmc_firmware_info_mock.return_value = default_firmware_info
-        exception = exception("URL error")
-        bmc_firmware_info_mock.side_effect = exception
+    def test_connection_errors_passthrough(self, mocker, client_mock, module_default_args, exception):
+        expected_exc = exception("Test exception")
+        client_mock.get_manager.side_effect = expected_exc
+        mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
         expected_json = {
             "msg": "Can't read firmware information.",
-            "error_info": str(exception),
+            "error_info": str(expected_exc),
             "failed": True,
         }
         result = self.run_module_expect_fail_json(module_default_args)
-        assert result == expected_json
-
-    def test_success_case(self, bmc_firmware_info_mock, default_firmware_info, module_default_args):
-        bmc_firmware_info_mock.return_value = default_firmware_info
-        expected_json = {
-            "msg": "Firmware information successfully read.",
-            "changed": False,
-            "firmware_info": default_firmware_info,
-        }
-        result = self.run_module_expect_exit_json(module_default_args)
         assert result == expected_json

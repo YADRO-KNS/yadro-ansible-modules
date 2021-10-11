@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 WORKDIR=$(pwd)
 BUILD_DIR=${WORKDIR}/build
@@ -13,6 +13,7 @@ print_usage() {
 	echo "    prepare               prepare environment"
 	echo "    sanity                execute collection sanity tests (docker required)"
 	echo "    units                 execute collection unit tests (docker required)"
+	echo "    integration           execute collection integration tests"
 	echo "    build                 pack collection to galaxy tarball"
 	echo "    webdocs               build html documentation for collection"
 	echo "    clean                 clean all build files"
@@ -57,6 +58,10 @@ units() {
   ansible-test units -v --docker --coverage
 }
 
+integration() {
+  ansible-test integration
+}
+
 build() {
   ansible-galaxy collection build --output-path "${BUILD_DIR}"
 }
@@ -66,7 +71,6 @@ webdocs() {
     echo "Build tarball not found. Execute 'build' command first."
     exit 1
   fi
-
   mkdir -p "${BUILD_DIR}/rst"
   chmod go-w "${BUILD_DIR}/rst"
   echo "Installing collection to virtual environment"
@@ -99,6 +103,11 @@ case $1 in
   units)
     prepare
     units
+    exit 0
+    ;;
+  integration)
+    prepare
+    integration
     exit 0
     ;;
   build)
