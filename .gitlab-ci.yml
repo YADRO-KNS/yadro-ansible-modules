@@ -4,10 +4,10 @@ default:
     - x86_64
 
 stages:
-  - sanity
+#  - sanity
   - units
-  - integration
-  - webdocs
+#  - integration
+#  - webdocs
 
 variables:
   GIT_CLONE_PATH: "$CI_BUILDS_DIR/ansible_collections/yadro/obmc"
@@ -19,26 +19,32 @@ cache:
     - .cache/pip
     - build/venv
 
-sanity:
-  stage: sanity
-  script:
-    - ./build-tool.sh sanity
+#sanity:
+#  stage: sanity
+#  script:
+#    - ./build-tool.sh sanity
 
 units:
   stage: units
   script:
     - ./build-tool.sh units
-
-integration:
-  stage: integration
-  script:
-    - ./build-tool.sh integration
-
-webdocs:
-  stage: webdocs
-  script:
-    - ./build-tool.sh webdocs
-    - mv ./build/html webdocs
+  coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
-    paths:
-      - webdocs
+    reports:
+      junit: ./tests/output/junit/*.xml
+      cobertura: ./tests/output/reports/coverage.xml
+
+
+#integration:
+#  stage: integration
+#  script:
+#    - ./build-tool.sh integration
+
+#webdocs:
+#  stage: webdocs
+#  script:
+#    - ./build-tool.sh webdocs
+#    - mv ./build/html webdocs
+#  artifacts:
+#    paths:
+#      - webdocs

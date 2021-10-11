@@ -4,6 +4,7 @@ set -e
 
 WORKDIR=$(pwd)
 BUILD_DIR=${WORKDIR}/build
+TEST_DIR=${WORKDIR}/tests
 
 print_usage() {
 	echo "Parameters (provided via environment):"
@@ -15,16 +16,13 @@ print_usage() {
 	echo "    units                 execute collection unit tests (docker required)"
 	echo "    integration           execute collection integration tests"
 	echo "    build                 pack collection to galaxy tarball"
+	echo "    report                disaply test report"
 	echo "    webdocs               build html documentation for collection"
 	echo "    clean                 clean all build files"
 }
 
 prepare() {
   echo "=> PREPARE ENVIRONMENT"
-
-  if [[ "${PYTHON_INTERPRETER}" = "" ]] ; then
-    PYTHON_INTERPRETER=$(which python3)
-  fi
 
   if docker ps 1>/dev/null; then
     echo "Docker is OK"
@@ -33,14 +31,21 @@ prepare() {
     exit 1
   fi
 
-  echo "Create virtual environment"
-  ${PYTHON_INTERPRETER} -m venv "${BUILD_DIR}/venv"
-  source "${BUILD_DIR}/venv/bin/activate"
+  if [[ -d "${BUILD_DIR}/venv" ]] ; then
+    echo "Looks like environment exists. Activating..."
+    source "${BUILD_DIR}/venv/bin/activate"
+  else
+    echo "Environment directory not found. Creating..."
+    if [[ "${PYTHON_INTERPRETER}" = "" ]] ; then
+      PYTHON_INTERPRETER=$(which python3)
+    fi
+    ${PYTHON_INTERPRETER} -m venv "${BUILD_DIR}/venv"
+    source "${BUILD_DIR}/venv/bin/activate"
+    echo "Installing requirements"
+    pip install --upgrade pip
+    pip install -r "${BUILD_DIR}/build-requirements.txt"
+  fi
   echo "Python: $(which python)"
-
-  echo "Installing requirements"
-  pip install --upgrade pip
-  pip install -r "${BUILD_DIR}/build-requirements.txt"
 }
 
 clean() {
@@ -48,25 +53,36 @@ clean() {
   rm -rfv "${BUILD_DIR}"/yadro-obmc-*.tar.gz
   rm -rfv "${BUILD_DIR}/rst"
   rm -rfv "${BUILD_DIR}/html"
+  if [[ -d "${TEST_DIR}/output" ]]; then
+    rm -rfv "${TEST_DIR}/output"
+  fi
 }
 
 sanity() {
+  echo "=> SANITY TESTS"
   ansible-test sanity -v --docker
 }
 
 units() {
+  echo "=> UNIT TESTS"
   ansible-test units -v --docker --coverage
+  sed -i 's/file="/file="tests\/unit\/plugins\//g' "${TEST_DIR}"/output/junit/*
+  ansible-test coverage xml
+  ansible-test coverage report
 }
 
 integration() {
+  echo "=> INTEGRATION TESTS"
   ansible-test integration
 }
 
 build() {
+  echo "=> BUILD TAR"
   ansible-galaxy collection build --output-path "${BUILD_DIR}"
 }
 
 webdocs() {
+  echo "=> BUILD WEBDOCS"
   if ! find "${BUILD_DIR}"/yadro-obmc-*.tar.gz; then
     echo "Build tarball not found. Execute 'build' command first."
     exit 1
@@ -96,16 +112,19 @@ case $1 in
     exit 0
     ;;
   sanity)
+    clean
     prepare
     sanity
     exit 0
     ;;
   units)
+    clean
     prepare
     units
     exit 0
     ;;
   integration)
+    clean
     prepare
     integration
     exit 0
