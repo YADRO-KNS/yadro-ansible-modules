@@ -1,3 +1,11 @@
+workflow:
+  rules:
+    - if: "$CI_COMMIT_REF_NAME == 'main'"
+      when: always
+    - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
+      when: always
+    - when: never
+
 default:
   tags:
     - ansible
@@ -47,3 +55,5 @@ webdocs:
   artifacts:
     paths:
       - webdocs
+  only:
+    - main
