@@ -1,5 +1,8 @@
 # YADRO OpenBmc Ansible Collection
 
+[![pipeline status](***REMOVED***)](***REMOVED***)
+[![coverage report](***REMOVED***)](***REMOVED***)
+
 ## Modules tree
 
 ```yml
