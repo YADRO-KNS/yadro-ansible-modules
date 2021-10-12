@@ -12,7 +12,7 @@ __metaclass__ = type
 import pytest
 import json
 
-from ansible_collections.yadro.obmc.plugins.module_utils.client import build_url, RestClient, RestClientError
+from ansible_collections.yadro.obmc.plugins.module_utils.client.rest import build_url, RestClient, RestClientError
 from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
 from ansible.module_utils.urls import open_url, SSLValidationError, ConnectionError
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
@@ -61,13 +61,13 @@ class TestRestClinet:
         assert rest_client.base_url == "https://localhost:443/redfish/v1/"
 
     def test_request_params(self, mocker, rest_client, request_args):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
         response = rest_client.get("/path")
         request_args["method"] = "GET"
         mock.assert_called_with(**request_args)
 
     def test_request_params_with_token(self, mocker, rest_client, request_args):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
         headers = {"X-Auth-Token": "token"}
         response = rest_client.get("/path", headers=headers)
         request_args.pop("url_username")
@@ -80,7 +80,7 @@ class TestRestClinet:
         mock.assert_called_with(**request_args)
 
     def test_request_params_with_extra_headers(self, mocker, rest_client, request_args):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
         headers = {"Extra": "Header"}
         response = rest_client.get("/path", headers=headers)
         request_args.update({
@@ -90,7 +90,7 @@ class TestRestClinet:
         mock.assert_called_with(**request_args)
 
     def test_request_params_with_token_and_extra_headers(self, mocker, rest_client, request_args):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
         headers = {"X-Auth-Token": "token", "Extra": "Header"}
         response = rest_client.get("/path", headers=headers)
         request_args.pop("url_username")
@@ -103,27 +103,27 @@ class TestRestClinet:
         mock.assert_called_with(**request_args)
 
     def test_success_get_request(self, mocker, rest_client, response_mock):
-        mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=response_mock)
+        mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url", return_value=response_mock)
         response = rest_client.get("/path")
         assert response.is_success
         assert response.status_code == 200
         assert response.json_data == {"json": "data"}
 
     def test_get_request_with_query(self, mocker, rest_client, request_args):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
         response = rest_client.get("/path", query_params={"query": "param"})
         request_args.update({"url": "https://localhost:443/redfish/v1/path?query=param", "method": "GET"})
         mock.assert_called_with(**request_args)
 
     def test_success_post_request(self, mocker, rest_client, response_mock):
-        mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=response_mock)
+        mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url", return_value=response_mock)
         response = rest_client.post("/path", body={"post": "data"})
         assert response.is_success
         assert response.status_code == 200
         assert response.json_data == {"json": "data"}
 
     def test_post_request_json_data(self, mocker, rest_client, request_args):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
         body = {"json": "data"}
         response = rest_client.post("/path", body=body)
         request_args.update({
@@ -136,7 +136,7 @@ class TestRestClinet:
         mock.assert_called_with(**request_args)
 
     def test_post_request_bytes_data(self, mocker, rest_client, request_args):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url")
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
         body = b"bytes data"
         response = rest_client.post("/path", body=body)
         request_args.update({
@@ -154,13 +154,13 @@ class TestRestClinet:
 
     @pytest.mark.parametrize("exception", [URLError, SSLValidationError, ConnectionError])
     def test_client_exceptions_passthrough(self, mocker, response_mock, rest_client, exception):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=response_mock)
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url", return_value=response_mock)
         mock.side_effect = exception("Test")
         with pytest.raises(exception):
             rest_client.get("/path")
 
     def test_client_http_exceptions_passthrough(self, mocker, response_mock, rest_client):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.open_url", return_value=response_mock)
+        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url", return_value=response_mock)
         mock.side_effect = HTTPError("localhost", 400, "Bad Request Error", {}, None)
         with pytest.raises(HTTPError):
             rest_client.get("/path")

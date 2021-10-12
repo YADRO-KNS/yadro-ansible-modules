@@ -1,0 +1,90 @@
+---
+- name: Ensure user absent before test
+  yadro.obmc.bmc_account:
+    connection:
+      hostname: "http://172.17.133.188"
+      port: 8080
+      username: "admin"
+      password: "ChangeMe"
+      validate_certs: false
+    username: "IntegrationTestUser"
+    state: "absent"
+  delegate_to: localhost
+
+- name: Create TestUser
+  yadro.obmc.bmc_account:
+    connection:
+      hostname: "http://172.17.133.188"
+      port: 8080
+      username: "admin"
+      password: "ChangeMe"
+      validate_certs: false
+    username: "IntegrationTestUser"
+    password: "IntegrationTestPassword"
+    role: "Operator"
+    enabled: true
+    state: "present"
+  register: result
+  delegate_to: localhost
+
+- name: Check user created and state changed
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Account created.'"
+
+- name: Ensure TestUser present
+  yadro.obmc.bmc_account:
+    connection:
+      hostname: "http://172.17.133.188"
+      port: 8080
+      username: "admin"
+      password: "ChangeMe"
+      validate_certs: false
+    username: "IntegrationTestUser"
+  register: result
+  delegate_to: localhost
+
+- name: Check user exists and state doesn't changed
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required. Account exists.'"
+
+- name: Disable TestUser
+  yadro.obmc.bmc_account:
+    connection:
+      hostname: "http://172.17.133.188"
+      port: 8080
+      username: "admin"
+      password: "ChangeMe"
+      validate_certs: false
+    username: "IntegrationTestUser"
+    enabled: false
+  register: result
+  delegate_to: localhost
+
+- name: Check user modified
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Account updated.'"
+
+- name: Delete TestUser
+  yadro.obmc.bmc_account:
+    connection:
+      hostname: "http://172.17.133.188"
+      port: 8080
+      username: "admin"
+      password: "ChangeMe"
+      validate_certs: false
+    username: "IntegrationTestUser"
+    state: "absent"
+  register: result
+  delegate_to: localhost
+
+- name: Check user deleted
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Account deleted.'"
