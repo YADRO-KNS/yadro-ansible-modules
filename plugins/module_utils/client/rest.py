@@ -126,3 +126,9 @@ class RestClient:
 
     def post(self, path, body=None, headers=None):
         return self._make_request(path, method="POST", body=body, headers=headers)
+
+    def delete(self, path, headers=None):
+        return self._make_request(path, method="DELETE", headers=headers)
+
+    def patch(self, path, body=None, headers=None):
+        return self._make_request(path, method="PATCH", body=body, headers=headers)

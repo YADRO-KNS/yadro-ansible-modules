@@ -33,10 +33,12 @@ class ModuleDocFragment(object):
             description: OpenBmc user password.
           port:
             type: int
-            description: OpenBmc REST API port.
             default: 443
+            description: OpenBmc REST API port.
           validate_certs:
             type: bool
-            description: Responsible for SSL certificates validation. If set to False certificates won't validated.
             default: True
+            description:
+              - Responsible for SSL certificates validation.
+              - If set to False certificates won't validated.
 """
