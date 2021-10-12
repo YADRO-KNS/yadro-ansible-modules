@@ -9,13 +9,16 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+import json
 import pytest
 
+from io import StringIO
 from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
 from ansible_collections.yadro.obmc.plugins.modules import bmc_firmware_info
 from ansible_collections.yadro.obmc.tests.unit.plugins.modules.utils import ModuleTestCase
 from ansible.module_utils.urls import ConnectionError, SSLValidationError
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
+from ansible.module_utils.common.text.converters import to_text
 
 MODULE_PATH = "ansible_collections.yadro.obmc.plugins.modules."
 
@@ -27,7 +30,10 @@ class TestBmcFirmwareInfo(ModuleTestCase):
     @pytest.fixture
     def client_mock(self):
         client_mock = MagicMock()
-        client_mock.get_manager_collection.return_value = ["BMC"]
+        client_mock.get_manager_collection.return_value = {
+            "Name": "Managers Collection",
+            "Members": ["BMC"],
+        }
         client_mock.get_manager.return_value = {
             "Name": "BMC test manager",
             "Description": "",
@@ -55,7 +61,10 @@ class TestBmcFirmwareInfo(ModuleTestCase):
         assert result == expected_json
 
     def test_multiple_managers_error(self, mocker, client_mock, module_default_args):
-        client_mock.get_manager_collection.return_value = ["One", "Two"]
+        client_mock.get_manager_collection.return_value = {
+            "Name": "Managers Collection",
+            "Members": ["First", "Second"],
+        }
         mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
         expected_json = {
             "msg": "Can't identify BMC manager.",
@@ -66,12 +75,14 @@ class TestBmcFirmwareInfo(ModuleTestCase):
         assert result == expected_json
 
     def test_http_error_passthrough(self, mocker, client_mock, module_default_args):
-        exception = HTTPError("localhost", 400, "Bad Request Error", {}, None)
+        error_message = {"Error": "message"}
+        http_error = to_text(json.dumps(error_message))
+        exception = HTTPError("localhost", 400, "Bad Request Error", {}, StringIO(http_error))
         client_mock.get_manager.side_effect = exception
         mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
         expected_json = {
             "msg": "Request finished with error.",
-            "error_info": str(exception),
+            "error_info": error_message,
             "failed": True,
         }
         result = self.run_module_expect_fail_json(module_default_args)
@@ -95,7 +106,7 @@ class TestBmcFirmwareInfo(ModuleTestCase):
         client_mock.get_manager.side_effect = expected_exc
         mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
         expected_json = {
-            "msg": "Can't read firmware information.",
+            "msg": "Can't connect to server.",
             "error_info": str(expected_exc),
             "failed": True,
         }

@@ -11,7 +11,7 @@ __metaclass__ = type
 
 import pytest
 
-from ansible_collections.yadro.obmc.plugins.module_utils.client import RestClient
+from ansible_collections.yadro.obmc.plugins.module_utils.client.rest import RestClient
 
 
 @pytest.fixture
