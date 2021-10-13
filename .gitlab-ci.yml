@@ -15,7 +15,7 @@ stages:
   - sanity
   - units
   - integration
-  - webdocs
+  - pages
 
 variables:
   GIT_CLONE_PATH: "$CI_BUILDS_DIR/ansible_collections/yadro/obmc"
@@ -47,13 +47,13 @@ integration:
   script:
     - ./build-tool.sh integration
 
-webdocs:
-  stage: webdocs
+pages:
+  stage: pages
   script:
     - ./build-tool.sh webdocs
-    - mv ./build/html webdocs
+    - mv ./build/html public
   artifacts:
     paths:
-      - webdocs
+      - public
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
