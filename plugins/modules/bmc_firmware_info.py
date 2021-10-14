@@ -71,7 +71,7 @@ from ansible_collections.yadro.obmc.plugins.module_utils.client.client import cr
 def run_module(module):
     params = module.params
     client = create_client(**params["connection"])
-    managers = client.get_manager_collection()["Members"]
+    managers = client.get_manager_collection()
     if len(managers) != 1:
         module.fail_json(
             msg="Can't identify BMC manager.",
