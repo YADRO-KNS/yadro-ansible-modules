@@ -3,6 +3,10 @@
 [![pipeline status](https://gitlab.spb.yadro.com/galaxy/obmc/badges/master/pipeline.svg)](https://gitlab.spb.yadro.com/galaxy/obmc/-/commits/master)
 [![coverage report](https://gitlab.spb.yadro.com/galaxy/obmc/badges/master/coverage.svg)](https://gitlab.spb.yadro.com/galaxy/obmc/-/commits/master)
 
+## Documentation
+
+https://galaxy.pages.spb.yadro.com/obmc/
+
 ## Modules tree
 
 ```yml
@@ -10,7 +14,7 @@ yadro:
   obmc:
     bmc:
       - yadro.obmc.bmc_account
-      - yadro.obmc.bmc_time
+      - yadro.obmc.bmc_ntp
       - yadro.obmc.bmc_reset
       - yadro.obmc.bmc_reset_to_defaults
       network:
