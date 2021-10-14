@@ -113,7 +113,7 @@ from ansible_collections.yadro.obmc.plugins.module_utils.client.client import cr
 def run_module(module):
     params = module.params
     client = create_client(**params["connection"])
-    accounts = client.get_account_collection()["Members"]
+    accounts = client.get_account_collection()
     if params["state"] == "present":
         if params["username"] in accounts:
             user_account = client.get_account(params["username"])

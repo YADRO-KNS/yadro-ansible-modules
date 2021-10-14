@@ -25,7 +25,7 @@ def create_client(hostname, username, password, base_prefix="/redfish/v1/",
                                base_prefix=base_prefix, validate_certs=validate_certs,
                                port=port, timeout=timeout)
 
-    systems = client.get_system_collection()["Members"]
+    systems = client.get_system_collection()
     if len(systems) != 1:
         raise UnsupporedSystemError("Operations with only one BMC system supported. Found: {0}"
                                     .format(len(systems)))

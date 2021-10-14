@@ -23,23 +23,23 @@ class OpenBmcRestClient(RestClient):
 
     def get_chassis_collection(self):
         data = self.get("/Chassis").json_data
-        return {"Name": data["Name"], "Members": _parse_members(data)}
+        return _parse_members(data)
 
     def get_system_collection(self):
         data = self.get("/Systems").json_data
-        return {"Name": data["Name"], "Members": _parse_members(data)}
+        return _parse_members(data)
 
     def get_manager_collection(self):
         data = self.get("/Managers").json_data
-        return {"Name": data["Name"], "Members": _parse_members(data)}
+        return _parse_members(data)
 
     def get_account_collection(self):
         data = self.get("/AccountService/Accounts").json_data
-        return {"Name": data["Name"], "Members": _parse_members(data)}
+        return _parse_members(data)
 
     def get_software_inventory_collection(self):
         data = self.get("/UpdateService/FirmwareInventory").json_data
-        return {"Name": data["Name"], "Members": _parse_members(data)}
+        return _parse_members(data)
 
     def get_system(self, system_id):
         data = self.get("/Systems/{0}".format(system_id)).json_data
