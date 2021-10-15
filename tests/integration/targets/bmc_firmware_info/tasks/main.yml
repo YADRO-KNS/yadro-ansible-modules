@@ -1,12 +1,16 @@
 ---
+- name: Setup connection information
+  set_fact: &connection_info
+    connection:
+      hostname:       "{{ connection_hostname }}"
+      port:           "{{ connection_port }}"
+      username:       "{{ connection_username }}"
+      password:       "{{ connection_password }}"
+      validate_certs: "{{ connection_validate_certs }}"
+
 - name: Read information about BMC firmware (check mode)
   yadro.obmc.bmc_firmware_info:
-    connection:
-      hostname: "http://172.17.133.188"
-      port: 8080
-      username: "admin"
-      password: "ChangeMe"
-      validate_certs: false
+    <<: *connection_info
   register: result
   check_mode: True
   delegate_to: localhost
@@ -20,12 +24,7 @@
 
 - name: Read information about BMC firmware
   yadro.obmc.bmc_firmware_info:
-    connection:
-      hostname: "http://172.17.133.188"
-      port: 8080
-      username: "admin"
-      password: "ChangeMe"
-      validate_certs: false
+    <<: *connection_info
   register: result
   delegate_to: localhost
 

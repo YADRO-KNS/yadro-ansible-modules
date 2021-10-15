@@ -1,24 +1,23 @@
 ---
+- name: Setup connection parameters
+  set_fact: &connection_info
+    connection:
+      hostname:       "{{ connection_hostname }}"
+      port:           "{{ connection_port }}"
+      username:       "{{ connection_username }}"
+      password:       "{{ connection_password }}"
+      validate_certs: "{{ connection_validate_certs }}"
+
 - name: Ensure user absent before test
   yadro.obmc.bmc_account:
-    connection:
-      hostname: "http://172.17.133.188"
-      port: 8080
-      username: "admin"
-      password: "ChangeMe"
-      validate_certs: false
+    <<: *connection_info
     username: "IntegrationTestUser"
     state: "absent"
   delegate_to: localhost
 
 - name: Create TestUser
   yadro.obmc.bmc_account:
-    connection:
-      hostname: "http://172.17.133.188"
-      port: 8080
-      username: "admin"
-      password: "ChangeMe"
-      validate_certs: false
+    <<: *connection_info
     username: "IntegrationTestUser"
     password: "IntegrationTestPassword"
     role: "Operator"
@@ -35,12 +34,7 @@
 
 - name: Ensure TestUser present
   yadro.obmc.bmc_account:
-    connection:
-      hostname: "http://172.17.133.188"
-      port: 8080
-      username: "admin"
-      password: "ChangeMe"
-      validate_certs: false
+    <<: *connection_info
     username: "IntegrationTestUser"
   register: result
   delegate_to: localhost
@@ -53,12 +47,7 @@
 
 - name: Disable TestUser
   yadro.obmc.bmc_account:
-    connection:
-      hostname: "http://172.17.133.188"
-      port: 8080
-      username: "admin"
-      password: "ChangeMe"
-      validate_certs: false
+    <<: *connection_info
     username: "IntegrationTestUser"
     enabled: false
   register: result
@@ -72,12 +61,7 @@
 
 - name: Delete TestUser
   yadro.obmc.bmc_account:
-    connection:
-      hostname: "http://172.17.133.188"
-      port: 8080
-      username: "admin"
-      password: "ChangeMe"
-      validate_certs: false
+    <<: *connection_info
     username: "IntegrationTestUser"
     state: "absent"
   register: result

@@ -6,6 +6,9 @@ WORKDIR=$(pwd)
 BUILD_DIR=${WORKDIR}/build
 TEST_DIR=${WORKDIR}/tests
 
+DOCKER_MOCKUP_SERVER_IMAGE="***REMOVED***"
+DOCKER_MOCKUP_SERVER_PORT=8000
+
 print_usage() {
 	echo "Parameters (provided via environment):"
 	echo "    PYTHON_INTERPRETER    path to python interpreter (optional)"
@@ -14,7 +17,7 @@ print_usage() {
 	echo "    prepare               prepare environment"
 	echo "    sanity                execute collection sanity tests (docker required)"
 	echo "    units                 execute collection unit tests (docker required)"
-	echo "    integration           execute collection integration tests"
+	echo "    integration           execute collection integration tests (docker required, mockup server will be used)"
 	echo "    build                 pack collection to galaxy tarball"
 	echo "    report                disaply test report"
 	echo "    webdocs               build html documentation for collection"
@@ -73,7 +76,38 @@ units() {
 
 integration() {
   echo "=> INTEGRATION TESTS"
+
+  echo "Creating mockup server"
+  docker pull "${DOCKER_MOCKUP_SERVER_IMAGE}"
+  CONTAINER_ID=$(docker run --rm -d "${DOCKER_MOCKUP_SERVER_IMAGE}")
+  CONTAINER_IP_ADDRESS=$(docker inspect -f "{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}" "${CONTAINER_ID}")
+  echo "Mockup server IP address: http://${CONTAINER_IP_ADDRESS}:${DOCKER_MOCKUP_SERVER_PORT}"
+
+  echo "Creating integration_config.yml"
+  (
+    echo "---"
+    echo "connection_hostname: http://${CONTAINER_IP_ADDRESS}"
+    echo "connection_port: ${DOCKER_MOCKUP_SERVER_PORT}"
+    echo "connection_username: admin"
+    echo "connection_password: admin"
+    echo "connection_validate_certs: false"
+  ) > tests/integration/integration_config.yml
+
+  echo "Executing ansible-test"
+  set +e
   ansible-test integration
+  ANSIBLE_TEST_RC=$?
+  set -e
+
+  echo "Destroying mockup server"
+  docker kill ${CONTAINER_ID} 1>/dev/null
+
+  if [[ "${ANSIBLE_TEST_RC}" -eq 0 ]]; then
+    echo "Tests finished successfuly"
+  else
+    echo "Tests failed"
+    exit ${ANSIBLE_TEST_RC}
+  fi
 }
 
 build() {

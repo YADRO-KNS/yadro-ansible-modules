@@ -14,7 +14,7 @@ yadro:
   obmc:
     bmc:
       - yadro.obmc.bmc_account
-      - yadro.obmc.bmc_ntp
+      - yadro.obmc.bmc_time
       - yadro.obmc.bmc_reset
       - yadro.obmc.bmc_reset_to_defaults
       network:
