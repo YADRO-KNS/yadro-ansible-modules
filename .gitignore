@@ -4,3 +4,5 @@ build/rst
 build/venv
 build/yadro-obmc-*.tar.gz
 
+tests/integration/integration_config.yml
+

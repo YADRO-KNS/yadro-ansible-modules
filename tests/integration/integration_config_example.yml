@@ -1,6 +1,8 @@
 ---
 # Mockup connection options generated in runtime
-# If you have dedicated server for testing, you can edit values manually
+# If you have dedicated server for testing, you can rename this file
+# to integration_config.yml and edit values manually
+
 connection_hostname: ...
 connection_port: ...
 connection_username: ...
