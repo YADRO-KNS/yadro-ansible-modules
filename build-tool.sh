@@ -9,6 +9,8 @@ TEST_DIR=${WORKDIR}/tests
 DOCKER_MOCKUP_SERVER_IMAGE="***REMOVED***"
 DOCKER_MOCKUP_SERVER_PORT=8000
 
+SUBCOMMAND_ARGS="${*:2}"
+
 print_usage() {
 	echo "Parameters (provided via environment):"
 	echo "    PYTHON_INTERPRETER    path to python interpreter (optional)"
@@ -95,7 +97,7 @@ integration() {
 
   echo "Executing ansible-test"
   set +e
-  ansible-test integration
+  ansible-test integration ${SUBCOMMAND_ARGS}
   ANSIBLE_TEST_RC=$?
   set -e
 
