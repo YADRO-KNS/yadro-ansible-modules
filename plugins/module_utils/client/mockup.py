@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-from ansible_collections.yadro.obmc.plugins.module_utils.client.bmc import OpenBmcRestClient
+from ansible_collections.yadro.obmc.plugins.module_utils.client.bmc import OpenBmcRestClient, validate_schema
 
 
 class DMTFMockupRestClient(OpenBmcRestClient):
@@ -17,40 +17,26 @@ class DMTFMockupRestClient(OpenBmcRestClient):
     def __init__(self, *args, **kwargs):
         super(DMTFMockupRestClient, self).__init__(*args, **kwargs)
 
-    def get_manager(self, manager_id):
-        data = self.get("/Managers/{0}".format(manager_id)).json_data
-        return {
-            "Id": data["Id"],
-            "Name": data["Name"],
-            "Description": data.get("Description", ""),
-            "Links": {
-                "ActiveSoftwareImage": "BMC"
-            }
+    def create_account(self, payload):
+        schema = {
+            "UserName": {"required": True, "type": str},
+            "Password": {"required": True, "type": str},
+            "RoleId": {"required": True, "type": str},
+            "Enabled": {"required": False, "type": bool},
         }
+        validate_schema(schema, payload)
 
-    def get_software_inventory(self, software_id):
-        data = self.get("/UpdateService/FirmwareInventory/{0}".format(software_id)).json_data
-        return {
-            "Id": data["Id"],
-            "Name": data["Name"],
-            "Description": data.get("Description", ""),
-            "Status": data["Status"].update({"HealthRollup": "OK"}),
-            "Updateable": data["Updateable"],
-            "Version": data["Version"],
-        }
-
-    def create_account(self, username, password, role, enabled):
         data = {
             "@odata.type": "#ManagerAccount..v1_8_0.ManagerAccount",
             "AccountTypes": [
                 "Redfish"
             ],
             "Description": "User Account",
-            "Enabled": enabled,
-            "Id": username,
+            "Enabled": payload["Enabled"],
+            "Id": payload["UserName"],
             "Links": {
                 "Role": {
-                    "@odata.id": "/redfish/v1/AccountService/Roles/{0}".format(role)
+                    "@odata.id": "/redfish/v1/AccountService/Roles/{0}".format(payload["RoleId"])
                 }
             },
             "Locked": False,
@@ -60,7 +46,7 @@ class DMTFMockupRestClient(OpenBmcRestClient):
             "Name": "User Account",
             "Password": None,
             "PasswordChangeRequired": False,
-            "RoleId": role,
-            "UserName": username
+            "RoleId": payload["RoleId"],
+            "UserName": payload["UserName"],
         }
         self.post("/AccountService/Accounts", body=data)

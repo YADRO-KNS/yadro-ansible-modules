@@ -12,6 +12,29 @@ __metaclass__ = type
 from ansible_collections.yadro.obmc.plugins.module_utils.client.rest import RestClient
 
 
+class SchemaValidationException(Exception):
+    pass
+
+
+def validate_schema(schema, payload):
+    keys_diff = set(payload.keys()).difference(schema.keys())
+    if keys_diff:
+        raise SchemaValidationException("Payload extra keys found: {0}".format(keys_diff))
+
+    for schema_key, schema_args in schema.items():
+        if schema_key in payload.keys():
+            if not isinstance(payload[schema_key], schema_args["type"]):
+                raise SchemaValidationException(
+                    "Payload key type invalid: {0} is not {1}".format(payload[schema_key], schema_args["type"])
+                )
+            if "suboptions" in schema_args.keys():
+                validate_schema(schema_args["suboptions"], payload[schema_key])
+        else:
+            if schema_args["required"]:
+                raise SchemaValidationException("Required key not found: {0}".format(schema_key))
+    return True
+
+
 def _parse_members(data):
     return [member["@odata.id"].split("/")[-1] for member in data["Members"]]
 
@@ -25,78 +48,78 @@ class OpenBmcRestClient(RestClient):
         data = self.get("/Chassis").json_data
         return _parse_members(data)
 
-    def get_system_collection(self):
-        data = self.get("/Systems").json_data
-        return _parse_members(data)
-
     def get_manager_collection(self):
         data = self.get("/Managers").json_data
         return _parse_members(data)
-
-    def get_account_collection(self):
-        data = self.get("/AccountService/Accounts").json_data
-        return _parse_members(data)
-
-    def get_software_inventory_collection(self):
-        data = self.get("/UpdateService/FirmwareInventory").json_data
-        return _parse_members(data)
-
-    def get_system(self, system_id):
-        data = self.get("/Systems/{0}".format(system_id)).json_data
-        return {"Id": data["Id"], "Model": data["Model"]}
 
     def get_manager(self, manager_id):
         data = self.get("/Managers/{0}".format(manager_id)).json_data
         return {
             "Id": data["Id"],
             "Name": data["Name"],
-            "Description": data.get("Description", ""),
             "Links": {
                 "ActiveSoftwareImage": data["Links"]["ActiveSoftwareImage"]["@odata.id"].split("/")[-1]
             }
         }
 
-    def get_account(self, account_id):
-        data = self.get("/AccountService/Accounts/{0}".format(account_id)).json_data
+    def get_system_collection(self):
+        data = self.get("/Systems").json_data
+        return _parse_members(data)
+
+    def get_system(self, system_id):
+        data = self.get("/Systems/{0}".format(system_id)).json_data
         return {
             "Id": data["Id"],
-            "Name": data["Name"],
-            "UserName": data["UserName"],
-            "Description": data.get("Description", ""),
-            "Enabled": data["Enabled"],
-            "RoleId": data["RoleId"]
+            "Model": data["Model"],
         }
+
+    def get_software_inventory_collection(self):
+        data = self.get("/UpdateService/FirmwareInventory").json_data
+        return _parse_members(data)
 
     def get_software_inventory(self, software_id):
         data = self.get("/UpdateService/FirmwareInventory/{0}".format(software_id)).json_data
         return {
             "Id": data["Id"],
             "Name": data["Name"],
-            "Description": data.get("Description", ""),
             "Status": data["Status"],
             "Updateable": data["Updateable"],
             "Version": data["Version"],
         }
 
-    def create_account(self, account_id, password, role, enabled):
-        data = {
-            "UserName": account_id,
-            "Password": password,
-            "RoleId": role,
-            "Enabled": enabled
+    def get_account_collection(self):
+        data = self.get("/AccountService/Accounts").json_data
+        return _parse_members(data)
+
+    def get_account(self, username):
+        data = self.get("/AccountService/Accounts/{0}".format(username)).json_data
+        return {
+            "Id": data["Id"],
+            "Name": data["Name"],
+            "UserName": data["UserName"],
+            "Enabled": data["Enabled"],
+            "RoleId": data["RoleId"]
         }
-        self.post("/AccountService/Accounts", body=data)
 
-    def update_account(self, account_id, password=None, role=None, enabled=None):
-        data = {}
-        if password:
-            data["Password"] = password
-        if role:
-            data["RoleId"] = role
-        if enabled is not None:
-            data["Enabled"] = enabled
-        if data:
-            self.patch("/AccountService/Accounts/{0}".format(account_id), body=data)
+    def create_account(self, payload):
+        schema = {
+            "UserName": {"required": True, "type": str},
+            "Password": {"required": True, "type": str},
+            "RoleId": {"required": True, "type": str},
+            "Enabled": {"required": False, "type": bool},
+        }
+        validate_schema(schema, payload)
+        self.post("/AccountService/Accounts", body=payload)
 
-    def delete_account(self, account_id):
-        self.delete("/AccountService/Accounts/{0}".format(account_id))
+    def update_account(self, payload):
+        schema = {
+            "UserName": {"required": True, "type": str},
+            "Password": {"required": False, "type": str},
+            "RoleId": {"required": False, "type": str},
+            "Enabled": {"required": False, "type": bool},
+        }
+        validate_schema(schema, payload)
+        self.patch("/AccountService/Accounts/{0}".format(payload["UserName"]), body=payload)
+
+    def delete_account(self, username):
+        self.delete("/AccountService/Accounts/{0}".format(username))

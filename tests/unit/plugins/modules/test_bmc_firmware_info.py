@@ -30,10 +30,7 @@ class TestBmcFirmwareInfo(ModuleTestCase):
     @pytest.fixture
     def client_mock(self):
         client_mock = MagicMock()
-        client_mock.get_manager_collection.return_value = {
-            "Name": "Managers Collection",
-            "Members": ["BMC"],
-        }
+        client_mock.get_manager_collection.return_value = ["BMC"]
         client_mock.get_manager.return_value = {
             "Name": "BMC test manager",
             "Description": "",
@@ -61,10 +58,7 @@ class TestBmcFirmwareInfo(ModuleTestCase):
         assert result == expected_json
 
     def test_multiple_managers_error(self, mocker, client_mock, module_default_args):
-        client_mock.get_manager_collection.return_value = {
-            "Name": "Managers Collection",
-            "Members": ["First", "Second"],
-        }
+        client_mock.get_manager_collection.return_value = ["First", "Second"]
         mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
         expected_json = {
             "msg": "Can't identify BMC manager.",
