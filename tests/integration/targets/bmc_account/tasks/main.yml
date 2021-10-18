@@ -11,15 +11,15 @@
 - name: Ensure user absent before test
   yadro.obmc.bmc_account:
     <<: *connection_info
-    username: "IntegrationTestUser"
+    username: "TestUser"
     state: "absent"
   delegate_to: localhost
 
 - name: Create TestUser
   yadro.obmc.bmc_account:
     <<: *connection_info
-    username: "IntegrationTestUser"
-    password: "IntegrationTestPassword"
+    username: "TestUser"
+    password: "TestPass123"
     role: "Operator"
     enabled: true
     state: "present"
@@ -35,7 +35,7 @@
 - name: Ensure TestUser present
   yadro.obmc.bmc_account:
     <<: *connection_info
-    username: "IntegrationTestUser"
+    username: "TestUser"
   register: result
   delegate_to: localhost
 
@@ -48,7 +48,7 @@
 - name: Disable TestUser
   yadro.obmc.bmc_account:
     <<: *connection_info
-    username: "IntegrationTestUser"
+    username: "TestUser"
     enabled: false
   register: result
   delegate_to: localhost
@@ -62,7 +62,7 @@
 - name: Delete TestUser
   yadro.obmc.bmc_account:
     <<: *connection_info
-    username: "IntegrationTestUser"
+    username: "TestUser"
     state: "absent"
   register: result
   delegate_to: localhost
