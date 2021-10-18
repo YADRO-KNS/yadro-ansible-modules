@@ -1,0 +1,95 @@
+---
+- name: Setup connection parameters
+  set_fact: &connection_info
+    connection:
+      hostname:       "{{ connection_hostname }}"
+      port:           "{{ connection_port }}"
+      username:       "{{ connection_username }}"
+      password:       "{{ connection_password }}"
+      validate_certs: "{{ connection_validate_certs }}"
+
+- name: Ensure NTP disabled before tests
+  yadro.obmc.bmc_time:
+    <<: *connection_info
+    ntp_enabled: false
+    ntp_servers: []
+  delegate_to: localhost
+
+
+- name: Configure NTP servers
+  yadro.obmc.bmc_time:
+    <<: *connection_info
+    ntp_enabled: true
+    ntp_servers:
+      - 192.168.1.100
+      - 192.168.2.100
+  register: result
+  delegate_to: localhost
+
+- name: Check time configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Time configuration updated.'"
+
+
+- name: Configure NTP servers again
+  yadro.obmc.bmc_time:
+    <<: *connection_info
+    ntp_enabled: true
+    ntp_servers:
+      - 192.168.1.100
+      - 192.168.2.100
+  register: result
+  delegate_to: localhost
+
+- name: Check configuration exists and state doesn't changed
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required. Time configuration is actual.'"
+
+
+- name: Change NTP servers
+  yadro.obmc.bmc_time:
+    <<: *connection_info
+    ntp_enabled: true
+    ntp_servers:
+      - 192.168.3.100
+  register: result
+  delegate_to: localhost
+
+- name: Check time configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Time configuration updated.'"
+
+
+- name: Remove NTP servers
+  yadro.obmc.bmc_time:
+    <<: *connection_info
+    ntp_enabled: true
+    ntp_servers: []
+  register: result
+  delegate_to: localhost
+
+- name: Check time configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Time configuration updated.'"
+
+
+- name: Disable NTP support
+  yadro.obmc.bmc_time:
+    <<: *connection_info
+    ntp_enabled: false
+  register: result
+  delegate_to: localhost
+
+- name: Check time configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Time configuration updated.'"

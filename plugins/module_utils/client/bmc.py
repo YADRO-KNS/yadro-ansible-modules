@@ -98,7 +98,7 @@ class OpenBmcRestClient(RestClient):
             "Name": data["Name"],
             "UserName": data["UserName"],
             "Enabled": data["Enabled"],
-            "RoleId": data["RoleId"]
+            "RoleId": data["RoleId"],
         }
 
     def create_account(self, payload):
@@ -123,3 +123,25 @@ class OpenBmcRestClient(RestClient):
 
     def delete_account(self, username):
         self.delete("/AccountService/Accounts/{0}".format(username))
+
+    def get_network_protocol(self, manager_id):
+        data = self.get("/Managers/{0}/NetworkProtocol".format(manager_id)).json_data
+        return {
+            "Id": data["Id"],
+            "Name": data["Name"],
+            "NTP": data["NTP"],
+        }
+
+    def update_network_protocol(self, manager_id, payload):
+        schema = {
+            "NTP": {
+                "required": False,
+                "type": dict,
+                "suboptions": {
+                    "NTPServers": {"required": False, "type": list},
+                    "ProtocolEnabled": {"required": False, "type": bool},
+                }
+            },
+        }
+        validate_schema(schema, payload)
+        self.patch("/Managers/{0}/NetworkProtocol".format(manager_id), body=payload)
