@@ -100,7 +100,7 @@ integration() {
   set -e
 
   echo "Destroying mockup server"
-  docker kill ${CONTAINER_ID} 1>/dev/null
+  docker kill "${CONTAINER_ID}" 1>/dev/null
 
   if [[ "${ANSIBLE_TEST_RC}" -eq 0 ]]; then
     echo "Tests finished successfuly"

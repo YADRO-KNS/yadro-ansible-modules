@@ -118,16 +118,17 @@ def run_module(module):
         if params["username"] in accounts:
             user_account = client.get_account(params["username"])
 
-            diff = {}
+            payload = {}
             if params["password"]:
-                diff["password"] = params["password"]
+                payload["Password"] = params["password"]
             if params["role"] and params["role"] != user_account["RoleId"]:
-                diff["role"] = params["role"]
+                payload["RoleId"] = params["role"]
             if params["enabled"] is not None and params["enabled"] != user_account["Enabled"]:
-                diff["enabled"] = params["enabled"]
+                payload["Enabled"] = params["enabled"]
 
-            if diff:
-                client.update_account(params["username"], **diff)
+            if payload:
+                payload["UserName"] = params["username"]
+                client.update_account(payload)
                 module.exit_json(msg="Account updated.", changed=True)
             else:
                 module.exit_json(msg="No changes required. Account exists.", changed=False)
@@ -139,8 +140,12 @@ def run_module(module):
                         error_info="Field required: {0}.".format(k),
                         changed=False
                     )
-            client.create_account(params["username"], params["password"],
-                                  params["role"], params["enabled"])
+            client.create_account({
+                "UserName": params["username"],
+                "Password": params["password"],
+                "RoleId": params["role"],
+                "Enabled": params["enabled"],
+            })
             module.exit_json(msg="Account created.", changed=True)
     else:
         if params["username"] in accounts:
