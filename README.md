@@ -5,6 +5,10 @@
 
 ## Documentation
 
+### Requirements and terms of reference
+***REMOVED***
+
+### Description of modules and parameters
 ***REMOVED***
 
 ## Modules tree

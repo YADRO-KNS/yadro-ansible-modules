@@ -16,7 +16,9 @@ DOCUMENTATION = r"""
 module: bmc_firmware_info
 short_description: Returns OpenBmc firmware information.
 version_added: "1.0.0"
-description: Returns OpenBmc firmware information.
+description:
+  - Returns OpenBmc firmware information.
+  - This module supports check mode.
 extends_documentation_fragment:
   - yadro.obmc.connection_options
 author: "Radmir Safin (@radmirsafin)"

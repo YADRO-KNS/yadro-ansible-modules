@@ -16,7 +16,9 @@ DOCUMENTATION = r"""
 module: bmc_account
 short_description: Module for managing OpenBmc accounts.
 version_added: "1.0.0"
-description: Creates, deletes and updates user accounts.
+description:
+  - Creates, deletes and updates user accounts.
+  - This module supports check mode.
 extends_documentation_fragment:
   - yadro.obmc.connection_options
 author: "Radmir Safin (@radmirsafin)"
