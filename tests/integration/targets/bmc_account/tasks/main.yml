@@ -1,4 +1,6 @@
 ---
+# Prepare
+
 - name: Prepare | Setup connection parameters
   set_fact: &connection_info
     connection:
@@ -15,8 +17,9 @@
     state: "absent"
   delegate_to: localhost
 
+# Test user creation
 
-- name: User creation | Create TestUser
+- name: Test user creation | Create TestUser
   yadro.obmc.bmc_account:
     <<: *connection_info
     username: "TestUser"
@@ -27,23 +30,33 @@
   register: result
   delegate_to: localhost
 
-- name: User creation | Check user created and state changed
+- name: Test user creation | Check user created and state changed
   assert:
     that:
       - "result.changed == true"
       - "result.msg == 'Account created.'"
 
+# Test check mode
 
-- name: Check mode | Delete user in check mode
+- name: Test check mode | Create TestUser
+  yadro.obmc.bmc_account:
+    <<: *connection_info
+    username: "TestUser"
+    password: "TestPass123"
+    role: "Operator"
+    enabled: true
+    state: "present"
+  delegate_to: localhost
+
+- name: Test check mode | Delete user in check mode
   yadro.obmc.bmc_account:
     <<: *connection_info
     username: "TestUser"
     state: "absent"
-  register: result
   check_mode: true
   delegate_to: localhost
 
-- name: Check mode | Ensure user exists
+- name: Test check mode | Ensure user exists
   yadro.obmc.bmc_account:
     <<: *connection_info
     username: "TestUser"
@@ -51,14 +64,15 @@
   register: result
   delegate_to: localhost
 
-- name: Check mode | Check user already exists
+- name: Test check mode | Check state didn't changed
   assert:
     that:
       - "result.changed == false"
       - "result.msg == 'No changes required.'"
 
+# Test user configuration
 
-- name: User configuration | Disable TestUser
+- name: Test user configuration | Disable TestUser
   yadro.obmc.bmc_account:
     <<: *connection_info
     username: "TestUser"
@@ -66,14 +80,15 @@
   register: result
   delegate_to: localhost
 
-- name: User configuration | Check user modified
+- name: Test user configuration | Check user modified
   assert:
     that:
       - "result.changed == true"
       - "result.msg == 'Account updated.'"
 
+# Test user deletion
 
-- name: User deletion | Delete TestUser
+- name: Test user deletion | Delete TestUser
   yadro.obmc.bmc_account:
     <<: *connection_info
     username: "TestUser"
@@ -81,7 +96,7 @@
   register: result
   delegate_to: localhost
 
-- name: User deletion | Check user deleted
+- name: Test user deletion | Check user deleted
   assert:
     that:
       - "result.changed == true"
