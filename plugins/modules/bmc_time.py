@@ -98,6 +98,13 @@ from ansible_collections.yadro.obmc.plugins.module_utils.client.client import cr
 
 def run_module(module):
     params = module.params
+    if params["ntp_servers"] and len(params["ntp_servers"]) > 3:
+        module.fail_json(
+            msg="Can't configure NTP servers.",
+            error_info="Supported no more than 3 NTP servers.".format(k),
+            changed=False
+        )
+
     client = create_client(**params["connection"])
     managers = client.get_manager_collection()
     if len(managers) != 1:
@@ -111,17 +118,18 @@ def run_module(module):
     changed = False
     payload = {"NTP": {}}
     if params["ntp_enabled"] is not None and params["ntp_enabled"] != network_protocols["NTP"]["ProtocolEnabled"]:
+        changed = True
         payload["NTP"]["ProtocolEnabled"] = params["ntp_enabled"]
-        changed = True
     if params["ntp_servers"] is not None and params["ntp_servers"] != network_protocols["NTP"]["NTPServers"]:
-        payload["NTP"]["NTPServers"] = params["ntp_servers"]
         changed = True
+        payload["NTP"]["NTPServers"] = params["ntp_servers"]
 
     if changed:
-        client.update_network_protocol(bmc_manager, payload)
-        module.exit_json(msg="Time configuration updated.", changed=changed)
+        if not module.check_mode:
+            client.update_network_protocol(bmc_manager, payload)
+        module.exit_json(msg="Configuration updated.", changed=changed)
     else:
-        module.exit_json(msg="No changes required. Time configuration is actual.", changed=changed)
+        module.exit_json(msg="No changes required.", changed=changed)
 
 
 def main():
