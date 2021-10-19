@@ -57,17 +57,6 @@ class TestBmcFirmwareInfo(ModuleTestCase):
         result = self.run_module_expect_exit_json(module_default_args)
         assert result == expected_json
 
-    def test_multiple_managers_error(self, mocker, client_mock, module_default_args):
-        client_mock.get_manager_collection.return_value = ["First", "Second"]
-        mocker.patch(MODULE_PATH + "bmc_firmware_info.create_client", return_value=client_mock)
-        expected_json = {
-            "msg": "Can't identify BMC manager.",
-            "failed": True,
-            "error_info": "Operations with only one BMC manager supported. Found: 2",
-        }
-        result = self.run_module_expect_fail_json(module_default_args)
-        assert result == expected_json
-
     def test_http_error_passthrough(self, mocker, client_mock, module_default_args):
         error_message = {"Error": "message"}
         http_error = to_text(json.dumps(error_message))

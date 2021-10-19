@@ -73,15 +73,8 @@ from ansible_collections.yadro.obmc.plugins.module_utils.client.client import cr
 def run_module(module):
     params = module.params
     client = create_client(**params["connection"])
-    managers = client.get_manager_collection()
-    if len(managers) != 1:
-        module.fail_json(
-            msg="Can't identify BMC manager.",
-            error_info="Operations with only one BMC manager supported. Found: {0}".format(len(managers))
-        )
-    manager = client.get_manager(managers[0])
-    current_firmware = manager["Links"]["ActiveSoftwareImage"]
-    firmware_info = client.get_software_inventory(current_firmware)
+    manager_info = client.get_manager()
+    firmware_info = client.get_software_inventory(manager_info["Links"]["ActiveSoftwareImage"])
     module.exit_json(msg="Firmware information successfully read.", firmware_info=firmware_info)
 
 
