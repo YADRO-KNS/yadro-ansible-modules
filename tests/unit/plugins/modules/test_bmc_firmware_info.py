@@ -23,7 +23,6 @@ class TestBmcFirmwareInfo(ModuleTestCase):
 
     def test_firmware_info_reading(self, mocker, module_args):
         client_mock = MagicMock()
-        client_mock.get_manager_collection.return_value = ["BMC"]
         client_mock.get_manager.return_value = {
             "Name": "BMC",
             "Links": {
