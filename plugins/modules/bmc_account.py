@@ -112,27 +112,25 @@ from ansible_collections.yadro.obmc.plugins.module_utils.client.client import cr
 
 def run_module(module):
     params = module.params
+    action = None
+    payload = {}
+
     client = create_client(**params["connection"])
     accounts = client.get_account_collection()
     if params["state"] == "present":
         if params["username"] in accounts:
+            action = "update"
             user_account = client.get_account(params["username"])
-
-            payload = {}
             if params["password"]:
                 payload["Password"] = params["password"]
             if params["role"] and params["role"] != user_account["RoleId"]:
                 payload["RoleId"] = params["role"]
             if params["enabled"] is not None and params["enabled"] != user_account["Enabled"]:
                 payload["Enabled"] = params["enabled"]
-
             if payload:
                 payload["UserName"] = params["username"]
-                client.update_account(payload)
-                module.exit_json(msg="Account updated.", changed=True)
-            else:
-                module.exit_json(msg="No changes required. Account exists.", changed=False)
         else:
+            action = "create"
             for k in ["password", "role", "enabled"]:
                 if params[k] is None:
                     module.fail_json(
@@ -140,19 +138,30 @@ def run_module(module):
                         error_info="Field required: {0}.".format(k),
                         changed=False
                     )
-            client.create_account({
+            payload = {
                 "UserName": params["username"],
                 "Password": params["password"],
                 "RoleId": params["role"],
                 "Enabled": params["enabled"],
-            })
-            module.exit_json(msg="Account created.", changed=True)
+            }
     else:
         if params["username"] in accounts:
+            action = "delete"
+
+    if action == "create" and payload:
+        if not module.check_mode:
+            client.create_account(payload)
+        module.exit_json(msg="Account created.", changed=True)
+    elif action == "update" and payload:
+        if not module.check_mode:
+            client.update_account(payload)
+        module.exit_json(msg="Account updated.", changed=True)
+    elif action == "delete":
+        if not module.check_mode:
             client.delete_account(params["username"])
-            module.exit_json(msg="Account deleted.", changed=True)
-        else:
-            module.exit_json(msg="No changes required. Account doesn't exists.", changed=False)
+        module.exit_json(msg="Account deleted.", changed=True)
+    else:
+        module.exit_json(msg="No changes required.", changed=False)
 
 
 def main():
@@ -184,7 +193,7 @@ def main():
                 "choices": ["present", "absent"]
             },
         },
-        supports_check_mode=False
+        supports_check_mode=True
     )
 
     try:
