@@ -73,7 +73,7 @@ units() {
   ansible-test units -v --docker --coverage
   sed -i 's/file="/file="tests\/unit\/plugins\//g' "${TEST_DIR}"/output/junit/*
   ansible-test coverage xml
-  ansible-test coverage report
+  ansible-test coverage report --omit="tests/unit/compat/*"
 }
 
 integration() {
