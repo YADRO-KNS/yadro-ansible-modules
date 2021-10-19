@@ -178,6 +178,7 @@ def main():
                     "password": {"required": True, "type": "str", "no_log": True},
                     "port": {"required": False, "type": "int", "default": 443},
                     "validate_certs": {"required": False, "type": "bool", "default": True},
+                    "timeout": {"required": False, "type": "int", "default": 10},
                 }
             },
             "username": {"type": "str", "required": True},
