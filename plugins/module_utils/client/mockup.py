@@ -22,12 +22,12 @@ class DMTFMockupRestClient(OpenBmcRestClient):
             "UserName": {"required": True, "type": str},
             "Password": {"required": True, "type": str},
             "RoleId": {"required": True, "type": str},
-            "Enabled": {"required": False, "type": bool},
+            "Enabled": {"required": True, "type": bool},
         }
         validate_schema(schema, payload)
 
         data = {
-            "@odata.type": "#ManagerAccount..v1_8_0.ManagerAccount",
+            "@odata.type": "#ManagerAccount.v1_8_0.ManagerAccount",
             "AccountTypes": [
                 "Redfish"
             ],

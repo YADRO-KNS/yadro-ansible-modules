@@ -108,14 +108,7 @@ def run_module(module):
         )
 
     client = create_client(**params["connection"])
-    managers = client.get_manager_collection()
-    if len(managers) != 1:
-        module.fail_json(
-            msg="Can't identify BMC manager.",
-            error_info="Operations with only one BMC manager supported. Found: {0}".format(len(managers))
-        )
-    bmc_manager = managers[0]
-    network_protocols = client.get_network_protocol(bmc_manager)
+    network_protocols = client.get_network_protocol()
 
     changed = False
     payload = {"NTP": {}}
@@ -128,7 +121,7 @@ def run_module(module):
 
     if changed:
         if not module.check_mode:
-            client.update_network_protocol(bmc_manager, payload)
+            client.update_network_protocol(payload)
         module.exit_json(msg="Configuration updated.", changed=changed)
     else:
         module.exit_json(msg="No changes required.", changed=changed)

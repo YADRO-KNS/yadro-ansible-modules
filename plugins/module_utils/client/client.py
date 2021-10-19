@@ -35,10 +35,18 @@ def create_client(hostname, username, password, base_prefix="/redfish/v1/",
         "Mockup Server": DMTFMockupRestClient,
     }
 
-    system_info = client.get_system(systems[0])
+    system_info = client.get_system_by_id(systems[0])
     try:
         client.__class__ = supported_systems[system_info["Model"]]
     except KeyError:
         raise UnsupporedSystemError("System unsupported: {0}. Known systems: {1}".format(
             system_info["Model"], supported_systems.keys()))
+
+    managers = client.get_managers_collection()
+    if len(managers) != 1:
+        raise UnsupporedSystemError("Operations with only one BMC manager supported. Found: {0}"
+                                    .format(len(managers)))
+
+    client.system_name = systems[0]
+    client.manager_name = managers[0]
     return client

@@ -35,53 +35,49 @@ def validate_schema(schema, payload):
     return True
 
 
-def _parse_members(data):
+def parse_members(data):
     return [member["@odata.id"].split("/")[-1] for member in data["Members"]]
 
 
 class OpenBmcRestClient(RestClient):
 
+    manager_name = None
+    system_name = None
+
     def __init__(self, *args, **kwargs):
         super(OpenBmcRestClient, self).__init__(*args, **kwargs)
 
-    def get_chassis_collection(self):
-        data = self.get("/Chassis").json_data
-        return _parse_members(data)
-
-    def get_manager_collection(self):
-        data = self.get("/Managers").json_data
-        return _parse_members(data)
-
-    def get_manager(self, manager_id):
-        data = self.get("/Managers/{0}".format(manager_id)).json_data
-        return {
-            "Id": data["Id"],
-            "Name": data["Name"],
-            "Links": {
-                "ActiveSoftwareImage": data["Links"]["ActiveSoftwareImage"]["@odata.id"].split("/")[-1]
-            }
-        }
-
     def get_system_collection(self):
         data = self.get("/Systems").json_data
-        return _parse_members(data)
+        return parse_members(data)
 
-    def get_system(self, system_id):
+    def get_system_by_id(self, system_id):
         data = self.get("/Systems/{0}".format(system_id)).json_data
         return {
             "Id": data["Id"],
             "Model": data["Model"],
         }
 
-    def get_software_inventory_collection(self):
-        data = self.get("/UpdateService/FirmwareInventory").json_data
-        return _parse_members(data)
+    def get_system(self):
+        return self.get_system_by_id(self.system_name)
+
+    def get_managers_collection(self):
+        data = self.get("/Managers").json_data
+        return parse_members(data)
+
+    def get_manager(self):
+        data = self.get("/Managers/{0}".format(self.manager_name)).json_data
+        return {
+            "Id": data["Id"],
+            "Links": {
+                "ActiveSoftwareImage": data["Links"]["ActiveSoftwareImage"]["@odata.id"].split("/")[-1]
+            }
+        }
 
     def get_software_inventory(self, software_id):
         data = self.get("/UpdateService/FirmwareInventory/{0}".format(software_id)).json_data
         return {
             "Id": data["Id"],
-            "Name": data["Name"],
             "Status": data["Status"],
             "Updateable": data["Updateable"],
             "Version": data["Version"],
@@ -89,13 +85,12 @@ class OpenBmcRestClient(RestClient):
 
     def get_account_collection(self):
         data = self.get("/AccountService/Accounts").json_data
-        return _parse_members(data)
+        return parse_members(data)
 
     def get_account(self, username):
         data = self.get("/AccountService/Accounts/{0}".format(username)).json_data
         return {
             "Id": data["Id"],
-            "Name": data["Name"],
             "UserName": data["UserName"],
             "Enabled": data["Enabled"],
             "RoleId": data["RoleId"],
@@ -106,7 +101,7 @@ class OpenBmcRestClient(RestClient):
             "UserName": {"required": True, "type": str},
             "Password": {"required": True, "type": str},
             "RoleId": {"required": True, "type": str},
-            "Enabled": {"required": False, "type": bool},
+            "Enabled": {"required": True, "type": bool},
         }
         validate_schema(schema, payload)
         self.post("/AccountService/Accounts", body=payload)
@@ -124,15 +119,10 @@ class OpenBmcRestClient(RestClient):
     def delete_account(self, username):
         self.delete("/AccountService/Accounts/{0}".format(username))
 
-    def get_network_protocol(self, manager_id):
-        data = self.get("/Managers/{0}/NetworkProtocol".format(manager_id)).json_data
-        return {
-            "Id": data["Id"],
-            "Name": data["Name"],
-            "NTP": data["NTP"],
-        }
+    def get_network_protocol(self):
+        return self.get("/Managers/{0}/NetworkProtocol".format(self.manager_name)).json_data
 
-    def update_network_protocol(self, manager_id, payload):
+    def update_network_protocol(self, payload):
         schema = {
             "NTP": {
                 "required": False,
@@ -144,4 +134,4 @@ class OpenBmcRestClient(RestClient):
             },
         }
         validate_schema(schema, payload)
-        self.patch("/Managers/{0}/NetworkProtocol".format(manager_id), body=payload)
+        self.patch("/Managers/{0}/NetworkProtocol".format(self.manager_name), body=payload)
