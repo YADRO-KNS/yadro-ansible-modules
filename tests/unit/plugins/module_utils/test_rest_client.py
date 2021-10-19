@@ -17,8 +17,6 @@ from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
 from ansible.module_utils.urls import open_url, SSLValidationError, ConnectionError
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 
-MODULE_UTIL_PATH = "ansible_collections.yadro.obmc.plugins.module_utils."
-
 
 class TestRestClinet:
 
@@ -40,7 +38,7 @@ class TestRestClinet:
 
     @pytest.fixture
     def open_url_expected_kwargs(self):
-        default_args = {
+        return {
             "url": "https://localhost:443/redfish/v1/testpath",
             "data": None,
             "method": None,
@@ -53,7 +51,6 @@ class TestRestClinet:
             "url_username": "username",
             "url_password": "password",
         }
-        return default_args
 
     @pytest.fixture
     def open_url_response_mock(self):
@@ -79,20 +76,20 @@ class TestRestClinet:
         assert client.base_url == "https://localhost:443/redfish/v1/"
 
     def test_open_url_params_with_get_request(self, mocker, rest_client, open_url_expected_kwargs):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__))
         open_url_expected_kwargs["method"] = "GET"
         rest_client.get("/testpath")
         mock.assert_called_with(**open_url_expected_kwargs)
 
     def test_open_url_params_with_get_request_query(self, mocker, rest_client, open_url_expected_kwargs):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__))
         open_url_expected_kwargs["method"] = "GET"
         open_url_expected_kwargs["url"] = "https://localhost:443/redfish/v1/testpath?key=value"
         rest_client.get("/testpath", query_params={"key": "value"})
         mock.assert_called_with(**open_url_expected_kwargs)
 
     def test_open_url_params_with_token(self, mocker, rest_client, open_url_expected_kwargs):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__))
         headers = {"X-Auth-Token": "token"}
         open_url_expected_kwargs.pop("url_username")
         open_url_expected_kwargs.pop("url_password")
@@ -105,7 +102,7 @@ class TestRestClinet:
         mock.assert_called_with(**open_url_expected_kwargs)
 
     def test_open_url_params_with_extra_headers(self, mocker, rest_client, open_url_expected_kwargs):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__))
         headers = {"Extra": "Header"}
         open_url_expected_kwargs.update({
             "method": "GET",
@@ -115,7 +112,7 @@ class TestRestClinet:
         mock.assert_called_with(**open_url_expected_kwargs)
 
     def test_open_url_params_with_token_and_extra_headers(self, mocker, rest_client, open_url_expected_kwargs):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__))
         headers = {"X-Auth-Token": "token", "Extra": "Header"}
         open_url_expected_kwargs.pop("url_username")
         open_url_expected_kwargs.pop("url_password")
@@ -128,7 +125,7 @@ class TestRestClinet:
         mock.assert_called_with(**open_url_expected_kwargs)
 
     def test_open_url_params_with_post_json_data(self, mocker, rest_client, open_url_expected_kwargs):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__))
         body = {"json": "data"}
         open_url_expected_kwargs.update({
             "method": "POST",
@@ -141,7 +138,7 @@ class TestRestClinet:
         mock.assert_called_with(**open_url_expected_kwargs)
 
     def test_open_url_params_with_post_bytes_data(self, mocker, rest_client, open_url_expected_kwargs):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__))
         body = b"bytes data"
         open_url_expected_kwargs.update({
             "method": "POST",
@@ -154,13 +151,13 @@ class TestRestClinet:
         mock.assert_called_with(**open_url_expected_kwargs)
 
     def test_open_url_params_with_delete_request(self, mocker, rest_client, open_url_expected_kwargs):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__))
         open_url_expected_kwargs["method"] = "DELETE"
         rest_client.delete("/testpath")
         mock.assert_called_with(**open_url_expected_kwargs)
 
     def test_open_url_params_with_patch_json_data(self, mocker, rest_client, open_url_expected_kwargs):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url")
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__))
         body = {"json": "data"}
         open_url_expected_kwargs.update({
             "method": "PATCH",
@@ -177,7 +174,7 @@ class TestRestClinet:
             rest_client.post("/testpath", body=("unsupported", "body"))
 
     def test_response_with_get_request(self, mocker, rest_client, open_url_response_mock):
-        mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url", return_value=open_url_response_mock)
+        mocker.patch("{0}.open_url".format(rest_client.__module__), return_value=open_url_response_mock)
         response = rest_client.get("/testpath")
         assert response.status_code == 200
         assert response.json_data == {"json": "data"}
@@ -185,14 +182,14 @@ class TestRestClinet:
 
     def test_response_fail_with_get_request(self, mocker, rest_client, open_url_response_mock):
         open_url_response_mock.getcode.return_value = 500
-        mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url", return_value=open_url_response_mock)
+        mocker.patch("{0}.open_url".format(rest_client.__module__), return_value=open_url_response_mock)
         response = rest_client.get("/testpath")
         assert response.status_code == 500
         assert response.json_data == {"json": "data"}
         assert response.headers == {"Content-Type": "application/json"}
 
     def test_response_with_post_request(self, mocker, rest_client, open_url_response_mock):
-        mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url", return_value=open_url_response_mock)
+        mocker.patch("{0}.open_url".format(rest_client.__module__), return_value=open_url_response_mock)
         response = rest_client.post("/testpath", body={"key": "value"})
         assert response.status_code == 200
         assert response.json_data == {"json": "data"}
@@ -200,13 +197,13 @@ class TestRestClinet:
 
     @pytest.mark.parametrize("exception", [URLError, SSLValidationError, ConnectionError])
     def test_client_connection_exceptions_passthrough(self, mocker, rest_client, open_url_response_mock, exception):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url", return_value=open_url_response_mock)
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__), return_value=open_url_response_mock)
         mock.side_effect = exception("Test Exception")
         with pytest.raises(exception):
             rest_client.get("/testpath")
 
     def test_client_http_exceptions_passthrough(self, mocker, rest_client, open_url_response_mock):
-        mock = mocker.patch(MODULE_UTIL_PATH + "client.rest.open_url", return_value=open_url_response_mock)
+        mock = mocker.patch("{0}.open_url".format(rest_client.__module__), return_value=open_url_response_mock)
         mock.side_effect = HTTPError("localhost", 400, "Bad Request Error", {}, None)
         with pytest.raises(HTTPError):
             rest_client.get("/testpath")
