@@ -16,7 +16,9 @@ DOCUMENTATION = r"""
 module: bmc_time
 short_description: Module for configure OpenBmc time.
 version_added: "1.0.0"
-description: Configures NTP servers.
+description:
+  - Configures NTP servers. Timezone is always set to GMT.
+  - This module supports check mode.
 extends_documentation_fragment:
   - yadro.obmc.connection_options
 author: "Radmir Safin (@radmirsafin)"
@@ -101,7 +103,7 @@ def run_module(module):
     if params["ntp_servers"] and len(params["ntp_servers"]) > 3:
         module.fail_json(
             msg="Can't configure NTP servers.",
-            error_info="Supported no more than 3 NTP servers.".format(k),
+            error_info="Supported no more than 3 NTP servers.",
             changed=False
         )
 

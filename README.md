@@ -5,6 +5,10 @@
 
 ## Documentation
 
+### Requirements and terms of reference
+https://c.yadro.com/display/INFKB/OpenBmc+Ansible+Collection
+
+### Description of modules and parameters
 https://galaxy.pages.spb.yadro.com/obmc/
 
 ## Modules tree

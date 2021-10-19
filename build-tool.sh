@@ -97,6 +97,7 @@ integration() {
 
   echo "Executing ansible-test"
   set +e
+  # shellcheck disable=SC2086
   ansible-test integration ${SUBCOMMAND_ARGS}
   ANSIBLE_TEST_RC=$?
   set -e
