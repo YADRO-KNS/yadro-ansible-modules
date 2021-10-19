@@ -30,25 +30,25 @@ class RestClientError(Exception):
 class RestClientResponse:
 
     def __init__(self, response):
-        self.http_response = response
-        self.body = None
-        if response:
-            self.body = self.http_response.read()
+        self._response = response
+        self._body = None
+        if self._response:
+            self._body = self._response.read()
 
     @property
     def json_data(self):
         try:
-            return json.loads(self.body)
+            return json.loads(self._body)
         except ValueError:
             raise ValueError("Unable to parse json")
 
     @property
-    def status_code(self):
-        return self.http_response.getcode()
+    def headers(self):
+        return dict(self._response.headers)
 
     @property
-    def is_success(self):
-        return self.status_code in [200, 201, 202, 204]
+    def status_code(self):
+        return self._response.getcode()
 
 
 class RestClient:
