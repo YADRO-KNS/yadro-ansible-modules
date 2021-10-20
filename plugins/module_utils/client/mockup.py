@@ -9,6 +9,8 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+import copy
+
 from ansible_collections.yadro.obmc.plugins.module_utils.client.bmc import OpenBmcRestClient, validate_schema
 
 
@@ -19,20 +21,23 @@ class DMTFMockupRestClient(OpenBmcRestClient):
 
     def create_account(self, payload):
         schema = {
-            "UserName": {"required": True, "type": str},
-            "Password": {"required": True, "type": str},
-            "RoleId": {"required": True, "type": str},
-            "Enabled": {"required": True, "type": bool},
+            "type": dict,
+            "suboptions": {
+                "UserName": {"type": str, "required": True},
+                "Password": {"type": str, "required": True},
+                "RoleId": {"type": str, "required": True},
+                "Enabled": {"type": bool, "required": True},
+            }
         }
         validate_schema(schema, payload)
 
-        data = {
+        mockup_payload = copy.deepcopy(payload)
+        mockup_payload.update({
             "@odata.type": "#ManagerAccount.v1_8_0.ManagerAccount",
             "AccountTypes": [
                 "Redfish"
             ],
             "Description": "User Account",
-            "Enabled": payload["Enabled"],
             "Id": payload["UserName"],
             "Links": {
                 "Role": {
@@ -46,7 +51,55 @@ class DMTFMockupRestClient(OpenBmcRestClient):
             "Name": "User Account",
             "Password": None,
             "PasswordChangeRequired": False,
-            "RoleId": payload["RoleId"],
-            "UserName": payload["UserName"],
+        })
+        self.post("/AccountService/Accounts", body=mockup_payload)
+
+    def update_ethernet_interface(self, interface_id, payload):
+        schema = {
+            "type": dict,
+            "suboptions": {
+                "DHCPv4": {
+                    "type": dict,
+                    "required": False,
+                    "suboptions": {
+                        "DHCPEnabled": {"type": bool, "required": False},
+                        "UseDNSServers": {"type": bool, "required": False},
+                        "UseDomainName": {"type": bool, "required": False},
+                        "UseNTPServers": {"type": bool, "required": False},
+                    }
+                },
+                "IPv4StaticAddresses": {
+                    "type": list,
+                    "required": False,
+                    "elements": {
+                        "type": dict,
+                        "suboptions": {
+                            "Address": {"type": str, "required": True},
+                            "Gateway": {"type": str, "required": True},
+                            "SubnetMask": {"type": str, "required": True},
+                        }
+                    }
+                },
+                "StaticNameServers": {
+                    "type": list,
+                    "required": False,
+                    "elements": {"type": str}
+                }
+            }
         }
-        self.post("/AccountService/Accounts", body=data)
+        validate_schema(schema, payload)
+
+        mockup_payload = copy.deepcopy(payload)
+        if "IPv4StaticAddresses" in mockup_payload.keys():
+            if mockup_payload["IPv4StaticAddresses"]:
+                if "DHCPv4" not in mockup_payload.keys():
+                    mockup_payload["DHCPv4"] = {}
+                mockup_payload["DHCPv4"].update({"DHCPEnabled": False})
+                for conf in mockup_payload["IPv4StaticAddresses"]:
+                    conf.update({"AddressOrigin": "Static"})
+
+        if "DHCPv4" in mockup_payload.keys():
+            if "DHCPEnabled" in mockup_payload["DHCPv4"] and mockup_payload["DHCPv4"]["DHCPEnabled"]:
+                mockup_payload["IPv4StaticAddresses"] = []
+
+        self.patch("/Managers/{0}/EthernetInterfaces/{1}".format(self.manager_name, interface_id), body=mockup_payload)

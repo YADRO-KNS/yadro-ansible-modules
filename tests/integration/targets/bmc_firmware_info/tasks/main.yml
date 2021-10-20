@@ -19,7 +19,7 @@
   check_mode: True
   delegate_to: localhost
 
-- name: Test firmware info | Check result
+- name: Test check mode | Check result
   assert:
     that:
       - "result.changed == false"

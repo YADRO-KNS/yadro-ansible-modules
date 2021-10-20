@@ -26,7 +26,7 @@ options:
   ntp_enabled:
     required: false
     type: bool
-    description: Indicates if NTP protocol is enabled or disabled.
+    description: Indicates if NTP protocol is enabled or disabled. If disabled host time will be used.
   ntp_servers:
     required: false
     type: list
@@ -42,7 +42,6 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-  sample: Account created.
 error_info:
   type: str
   returned: on error
