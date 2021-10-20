@@ -47,6 +47,11 @@ integration:
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - ./build-tool.sh integration
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    reports:
+      junit: ./tests/output/junit/*.xml
+      cobertura: ./tests/output/reports/coverage.xml
 
 pages:
   stage: pages

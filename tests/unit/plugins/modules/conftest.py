@@ -31,12 +31,14 @@ def module_mock(mocker):
 
 
 @pytest.fixture
-def module_default_args():
-    default_args = {
+def module_args():
+    return {
         "connection": {
             "hostname": "localhost",
-            "username": "testuser",
-            "password": "testpassword"
+            "username": "username",
+            "password": "password",
+            "validate_certs": False,
+            "port": 443,
+            "timeout": 10,
         }
     }
-    return default_args
