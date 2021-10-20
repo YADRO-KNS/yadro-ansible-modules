@@ -41,4 +41,8 @@ class ModuleDocFragment(object):
             description:
               - Responsible for SSL certificates validation.
               - If set to False certificates won't validated.
+          timeout:
+            type: int
+            default: 10
+            description: API request timeout.
 """
