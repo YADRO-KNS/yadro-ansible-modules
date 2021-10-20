@@ -30,7 +30,6 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-  sample: Firmware information successfully fetched.
 error_info:
   type: str
   returned: on error

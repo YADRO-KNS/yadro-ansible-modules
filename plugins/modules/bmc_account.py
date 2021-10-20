@@ -129,8 +129,6 @@ def run_module(module):
                 payload["RoleId"] = params["role"]
             if params["enabled"] is not None and params["enabled"] != user_account["Enabled"]:
                 payload["Enabled"] = params["enabled"]
-            if payload:
-                payload["UserName"] = params["username"]
         else:
             action = "create"
             for k in ["password", "role", "enabled"]:
@@ -156,7 +154,7 @@ def run_module(module):
         module.exit_json(msg="Account created.", changed=True)
     elif action == "update" and payload:
         if not module.check_mode:
-            client.update_account(payload)
+            client.update_account(params["username"], payload)
         module.exit_json(msg="Account updated.", changed=True)
     elif action == "delete":
         if not module.check_mode:

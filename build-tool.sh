@@ -65,12 +65,14 @@ clean() {
 
 sanity() {
   echo "=> SANITY TESTS"
-  ansible-test sanity -v --docker
+  # shellcheck disable=SC2086
+  ansible-test sanity -v --docker ${SUBCOMMAND_ARGS}
 }
 
 units() {
   echo "=> UNIT TESTS"
-  ansible-test units -v --docker --coverage
+  # shellcheck disable=SC2086
+  ansible-test units -v --docker --coverage ${SUBCOMMAND_ARGS}
   sed -i 's/file="/file="tests\/unit\/plugins\//g' "${TEST_DIR}"/output/junit/*
   ansible-test coverage xml
   ansible-test coverage report --omit="tests/unit/compat/*"

@@ -17,21 +17,20 @@ class SchemaValidationException(Exception):
 
 
 def validate_schema(schema, payload):
-    keys_diff = set(payload.keys()).difference(schema.keys())
-    if keys_diff:
-        raise SchemaValidationException("Payload extra keys found: {0}".format(keys_diff))
-
-    for schema_key, schema_args in schema.items():
-        if schema_key in payload.keys():
-            if not isinstance(payload[schema_key], schema_args["type"]):
-                raise SchemaValidationException(
-                    "Payload key type invalid: {0} is not {1}".format(payload[schema_key], schema_args["type"])
-                )
-            if "suboptions" in schema_args.keys():
-                validate_schema(schema_args["suboptions"], payload[schema_key])
-        else:
-            if schema_args["required"]:
-                raise SchemaValidationException("Required key not found: {0}".format(schema_key))
+    if not isinstance(payload, schema["type"]):
+        raise SchemaValidationException("Payload type is wrong: {0} != {1}".format(type(payload), schema["type"]))
+    if "suboptions" in schema:
+        extra_keys = set(payload.keys()).difference(schema["suboptions"].keys())
+        if extra_keys:
+            raise SchemaValidationException("Payload has extra keys: {0}".format(extra_keys))
+        for option_name, option_schema in schema["suboptions"].items():
+            if option_name in payload:
+                validate_schema(option_schema, payload[option_name])
+            elif "required" in option_schema and option_schema["required"]:
+                raise SchemaValidationException("Payload required field missed: {0}".format(option_name))
+    elif "elements" in schema:
+        for element in payload:
+            validate_schema(schema["elements"], element)
     return True
 
 
@@ -98,23 +97,28 @@ class OpenBmcRestClient(RestClient):
 
     def create_account(self, payload):
         schema = {
-            "UserName": {"required": True, "type": str},
-            "Password": {"required": True, "type": str},
-            "RoleId": {"required": True, "type": str},
-            "Enabled": {"required": True, "type": bool},
+            "type": dict,
+            "suboptions": {
+                "UserName": {"type": str, "required": True},
+                "Password": {"type": str, "required": True},
+                "RoleId": {"type": str, "required": True},
+                "Enabled": {"type": bool, "required": True},
+            }
         }
         validate_schema(schema, payload)
         self.post("/AccountService/Accounts", body=payload)
 
-    def update_account(self, payload):
+    def update_account(self, username, payload):
         schema = {
-            "UserName": {"required": True, "type": str},
-            "Password": {"required": False, "type": str},
-            "RoleId": {"required": False, "type": str},
-            "Enabled": {"required": False, "type": bool},
+            "type": dict,
+            "suboptions": {
+                "Password": {"type": str, "required": False},
+                "RoleId": {"type": str, "required": False},
+                "Enabled": {"type": bool, "required": False},
+            }
         }
         validate_schema(schema, payload)
-        self.patch("/AccountService/Accounts/{0}".format(payload["UserName"]), body=payload)
+        self.patch("/AccountService/Accounts/{0}".format(username), body=payload)
 
     def delete_account(self, username):
         self.delete("/AccountService/Accounts/{0}".format(username))
@@ -124,14 +128,66 @@ class OpenBmcRestClient(RestClient):
 
     def update_network_protocol(self, payload):
         schema = {
-            "NTP": {
-                "required": False,
-                "type": dict,
-                "suboptions": {
-                    "NTPServers": {"required": False, "type": list},
-                    "ProtocolEnabled": {"required": False, "type": bool},
+            "type": dict,
+            "suboptions": {
+                "NTP": {
+                    "type": dict,
+                    "required": False,
+                    "suboptions": {
+                        "NTPServers": {"type": list, "required": False},
+                        "ProtocolEnabled": {"type": bool, "required": False},
+                    }
                 }
-            },
+            }
         }
         validate_schema(schema, payload)
         self.patch("/Managers/{0}/NetworkProtocol".format(self.manager_name), body=payload)
+
+    def get_ethernet_interface_collection(self):
+        data = self.get("/Managers/{0}/EthernetInterfaces".format(self.manager_name)).json_data
+        return parse_members(data)
+
+    def get_ethernet_interface(self, interface_id):
+        data = self.get("/Managers/{0}/EthernetInterfaces/{1}".format(self.manager_name, interface_id)).json_data
+        return {
+            "Id": data["Id"],
+            "DHCPv4": data["DHCPv4"],
+            "IPv4StaticAddresses": data["IPv4StaticAddresses"],
+            "StaticNameServers": data["StaticNameServers"],
+        }
+
+    def update_ethernet_interface(self, interface_id, payload):
+        schema = {
+            "type": dict,
+            "suboptions": {
+                "DHCPv4": {
+                    "type": dict,
+                    "required": False,
+                    "suboptions": {
+                        "DHCPEnabled": {"type": bool, "required": False},
+                        "UseDNSServers": {"type": bool, "required": False},
+                        "UseDomainName": {"type": bool, "required": False},
+                        "UseNTPServers": {"type": bool, "required": False},
+                    }
+                },
+                "IPv4StaticAddresses": {
+                    "type": list,
+                    "required": False,
+                    "elements": {
+                        "type": dict,
+                        "suboptions": {
+                            "Address": {"type": str, "required": True},
+                            "Gateway": {"type": str, "required": True},
+                            "SubnetMask": {"type": str, "required": True},
+                        }
+                    }
+                },
+                "StaticNameServers": {
+                    "type": list,
+                    "required": False,
+                    "elements": {"type": str}
+                }
+            }
+        }
+        validate_schema(schema, payload)
+        self.patch("/Managers/{0}/EthernetInterfaces/{1}".format(self.manager_name, interface_id), body=payload)
