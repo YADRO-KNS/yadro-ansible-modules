@@ -98,7 +98,7 @@ integration() {
   echo "Executing ansible-test"
   set +e
   # shellcheck disable=SC2086
-  ansible-test integration ${SUBCOMMAND_ARGS}
+  ansible-test integration -v --docker --coverage ${SUBCOMMAND_ARGS}
   ANSIBLE_TEST_RC=$?
   set -e
 
@@ -107,6 +107,8 @@ integration() {
 
   if [[ "${ANSIBLE_TEST_RC}" -eq 0 ]]; then
     echo "Tests finished successfuly"
+    ansible-test coverage xml
+    ansible-test coverage report
   else
     echo "Tests failed"
     exit ${ANSIBLE_TEST_RC}
