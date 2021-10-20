@@ -36,6 +36,6 @@ class TestBmcFirmwareInfo(ModuleTestCase):
         }
         result = self.run_module_expect_exit_json(module_args)
 
-        client_mock.get_manager.assert_called()
+        client_mock.get_manager.assert_called_with()
         client_mock.get_software_inventory.assert_called_with(firmware_id)
         assert result == expected_json
