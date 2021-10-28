@@ -31,7 +31,7 @@ def module_mock(mocker):
 
 
 @pytest.fixture
-def module_args():
+def module_default_args():
     return {
         "connection": {
             "hostname": "localhost",

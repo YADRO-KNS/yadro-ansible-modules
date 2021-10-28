@@ -21,6 +21,10 @@ class TestBmcFirmwareInfo(ModuleTestCase):
 
     module = bmc_firmware_info
 
+    @pytest.fixture
+    def module_args(self, module_default_args):
+        return module_default_args
+
     def test_firmware_info_reading(self, mocker, module_args):
         firmware_id = "Image Id"
         firmware_info = {"Id": firmware_id, "Description": "Description"}

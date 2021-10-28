@@ -39,6 +39,10 @@ class AnsibleFailJson(Exception):
 
 
 class ModuleTestCase:
+    """Each test case inherited from ModuleTestCase, must define next entities:
+        module - test case class variable difenes module for testing
+        module_args - pytest fixture defines defaults arguments for selected module
+    """
 
     module = None
 
