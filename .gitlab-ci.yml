@@ -30,12 +30,12 @@ cache:
 sanity:
   stage: sanity
   script:
-    - ./build-tool.sh sanity
+    - ./utils.sh sanity
 
 units:
   stage: units
   script:
-    - ./build-tool.sh units
+    - ./utils.sh units
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
     reports:
@@ -46,7 +46,7 @@ integration:
   stage: integration
   script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - ./build-tool.sh integration
+    - ./utils.sh integration
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
     reports:
@@ -56,7 +56,7 @@ integration:
 pages:
   stage: pages
   script:
-    - ./build-tool.sh webdocs
+    - ./utils.sh webdocs
     - mv ./build/html public
   artifacts:
     paths:
