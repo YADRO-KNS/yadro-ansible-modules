@@ -1,0 +1,30 @@
+---
+- name: Test static nameservers (check mode) | Reset configuration
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    static_nameservers: []
+
+
+- name: Test static nameservers (check mode) | Set static nameserver
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    static_nameservers: "{{ static_nameservers }}"
+  check_mode: true
+  register: result
+
+- name: Test static nameservers (check mode) | Check state changed
+  assert:
+    that: "result.changed == true"
+
+- name: Test static nameservers (check mode) | Check configuration has not changed
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    static_nameservers: []
+  register: result
+
+- name: Test static nameservers (check mode) | Check configuration has not changed
+  assert:
+    that: "result.changed == false"

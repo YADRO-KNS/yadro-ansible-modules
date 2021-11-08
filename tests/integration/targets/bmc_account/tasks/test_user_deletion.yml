@@ -1,0 +1,43 @@
+---
+- name: Test user deletion | Ensure TestUser absent
+  yadro.obmc.bmc_account:
+    connection: "{{ connection }}"
+    username: "TestUser"
+    state: "absent"
+
+- name: Test user deletion | Create TestUser
+  yadro.obmc.bmc_account:
+    connection: "{{ connection }}"
+    username: "TestUser"
+    password: "TestPass123"
+    role: "Operator"
+    enabled: true
+    state: "present"
+
+
+- name: Test user deletion | Delete TestUser absent
+  yadro.obmc.bmc_account:
+    connection: "{{ connection }}"
+    username: "TestUser"
+    state: "absent"
+  register: result
+
+- name: Test user deletion | Check state changed and user deleted
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Account deleted.'"
+
+
+- name: Test user deletion | Ensure TestUser absent
+  yadro.obmc.bmc_account:
+    connection: "{{ connection }}"
+    username: "TestUser"
+    state: "absent"
+  register: result
+
+- name: Test user deletion | Check state didn't changed
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required.'"

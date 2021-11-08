@@ -1,0 +1,16 @@
+---
+connection_hostname: https://172.30.200.210
+connection_port: 443
+connection_username: admin
+connection_password: ...
+connection_timeout: 60
+connection_validate_certs: false
+
+# bmc_time configuration
+ntp_servers: [172.30.201.56]
+
+# bmc_network_interface confoguration
+interface_name: eth1
+static_nameservers: [172.30.6.2]
+ipv4_addresses:
+  - { gateway: 0.0.0.0, address: 192.168.0.100, subnet_mask: 255.255.255.0 }

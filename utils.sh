@@ -88,14 +88,16 @@ integration() {
   echo "Mockup server IP address: http://${CONTAINER_IP_ADDRESS}:${DOCKER_MOCKUP_SERVER_PORT}"
 
   echo "Creating integration_config.yml"
+  cp tests/integration/integration_config_mockup.yml tests/integration/integration_config.yml
   (
-    echo "---"
+    echo ""
     echo "connection_hostname: http://${CONTAINER_IP_ADDRESS}"
     echo "connection_port: ${DOCKER_MOCKUP_SERVER_PORT}"
     echo "connection_username: admin"
     echo "connection_password: admin"
+    echo "connection_timeout: 60"
     echo "connection_validate_certs: false"
-  ) > tests/integration/integration_config.yml
+  ) >> tests/integration/integration_config.yml
 
   echo "Executing ansible-test"
   set +e

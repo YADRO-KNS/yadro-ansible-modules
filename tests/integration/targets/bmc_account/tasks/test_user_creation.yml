@@ -1,0 +1,39 @@
+---
+- name: Test user creation | Ensure TestUser absent
+  yadro.obmc.bmc_account:
+    connection: "{{ connection }}"
+    username: "TestUser"
+    state: "absent"
+
+
+- name: Test user creation | Create TestUser
+  yadro.obmc.bmc_account:
+    connection: "{{ connection }}"
+    username: "TestUser"
+    password: "TestPass123"
+    role: "Operator"
+    enabled: true
+    state: "present"
+  register: result
+
+- name: Test user creation | Check user created and state changed
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Account created.'"
+
+
+- name: Test user creation | Check configuration applied
+  yadro.obmc.bmc_account:
+    connection: "{{ connection }}"
+    username: "TestUser"
+    role: "Operator"
+    enabled: true
+    state: "present"
+  register: result
+
+- name: Test user creation | Check configuration applied
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required.'"

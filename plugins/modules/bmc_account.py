@@ -131,13 +131,17 @@ def run_module(module):
                 payload["Enabled"] = params["enabled"]
         else:
             action = "create"
+            missed_args = []
             for k in ["password", "role", "enabled"]:
                 if params[k] is None:
-                    module.fail_json(
-                        msg="Can't create new account.",
-                        error_info="Field required: {0}.".format(k),
-                        changed=False
-                    )
+                    missed_args.append(k)
+            if missed_args:
+                module.fail_json(
+                    msg="Cannot create new account.",
+                    error_info="Fields required: {0}.".format(", ".join(missed_args)),
+                    changed=False
+                )
+
             payload = {
                 "UserName": params["username"],
                 "Password": params["password"],
@@ -202,7 +206,7 @@ def main():
     except HTTPError as e:
         module.fail_json(msg="Request finished with error.", error_info=json.load(e))
     except (URLError, SSLValidationError, ConnectionError) as e:
-        module.fail_json(msg="Can't connect to server.", error_info=str(e))
+        module.fail_json(msg="Cannot connect to server.", error_info=str(e))
 
 
 if __name__ == "__main__":
