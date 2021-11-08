@@ -43,7 +43,8 @@ options:
       - Cannot be configured if I(dhcp_enabled) is C(true).
       - If static configuration is present, DHCP will be disabled.
       - Each IP address record it is dictionary which must contains
-        O(gateway), O(address) and O(subnet_mask) keys. For more details look to examples.
+        I(gateway), I(address) and I(subnet_mask) keys.
+      - For more details look to examples.
   static_nameservers:
     type: list
     elements: str
@@ -154,6 +155,7 @@ def run_module(module):
         )
 
     current_config = client.get_ethernet_interface(params["name"])
+
     if params["dhcp_enabled"] is not None:
         if current_config["DHCPv4"]["DHCPEnabled"] != params["dhcp_enabled"]:
             payload["DHCPv4"] = {"DHCPEnabled": params["dhcp_enabled"]}

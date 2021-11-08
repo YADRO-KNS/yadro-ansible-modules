@@ -1,0 +1,62 @@
+---
+- name: Test DHCP setup | Set DHCP enabled
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    dhcp_enabled: true
+
+
+- name: Test DHCP setup | Disable DHCP
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    dhcp_enabled: false
+  register: result
+
+- name: Test DHCP setup | Check state changed
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Interface configuration updated.'"
+
+
+- name: Test DHCP setup | Check configuration applied
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    dhcp_enabled: false
+  register: result
+
+- name: Test DHCP setup | Check configuration applied
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required.'"
+
+
+- name: Test DHCP setup | Enable DHCP
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    dhcp_enabled: true
+  register: result
+
+- name: Test DHCP setup | Check state changed
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Interface configuration updated.'"
+
+
+- name: Test DHCP setup | Check configuration applied
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    dhcp_enabled: true
+  register: result
+
+- name: Test DHCP setup | Check configuration applied
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required.'"

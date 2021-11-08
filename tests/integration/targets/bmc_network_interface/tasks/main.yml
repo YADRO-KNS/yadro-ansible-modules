@@ -1,116 +1,14 @@
 ---
-# Prepare
-
-- name: Prepare | Setup connection information
-  set_fact: &connection_info
+- name: Setup connection information
+  set_fact:
     connection:
       hostname:       "{{ connection_hostname }}"
       port:           "{{ connection_port }}"
       username:       "{{ connection_username }}"
       password:       "{{ connection_password }}"
+      timeout:        "{{ connection_timeout }}"
       validate_certs: "{{ connection_validate_certs }}"
 
-- name: Prepare | Set DHCP enabled
-  yadro.obmc.bmc_network_interface:
-    <<: *connection_info
-    name: "eth0"
-    dhcp_enabled: true
-  delegate_to: localhost
-
-# Test check mode
-
-- name: Test check mode | Disable DHCP in check mode
-  yadro.obmc.bmc_network_interface:
-    <<: *connection_info
-    name: "eth0"
-    dhcp_enabled: false
-  register: result
-  check_mode: true
-  delegate_to: localhost
-
-- name: Test check mode | Check result
-  assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Interface configuration updated.'"
-
-- name: Test check mode | Enable DHCP
-  yadro.obmc.bmc_network_interface:
-    <<: *connection_info
-    name: "eth0"
-    dhcp_enabled: true
-  register: result
-  delegate_to: localhost
-
-- name: Test check mode | Check state didn't changed
-  assert:
-    that:
-      - "result.changed == false"
-      - "result.msg == 'No changes required.'"
-
-# Test DHCP with static
-
-- name: Test DHCP with static | Try to set DHCP and static configuration
-  yadro.obmc.bmc_network_interface:
-    <<: *connection_info
-    name: "eth0"
-    dhcp_enabled: true
-    ipv4_addresses:
-      - { gateway: 192.168.0.1, address: 192.168.0.2, subnet_mask: 255.255.255.0 }
-  register: result
-  delegate_to: localhost
-  ignore_errors: true
-
-- name: Test DHCP with static | Check error raised
-  assert:
-    that:
-      - "result.failed == true"
-      - "result.changed == false"
-      - "result.error_info == 'Conflict between static configuration and DHCP.'"
-
-# Test static configuration
-
-- name: Test static configuration | Enable DHCP
-  yadro.obmc.bmc_network_interface:
-    <<: *connection_info
-    name: "eth0"
-    dhcp_enabled: true
-  delegate_to: localhost
-
-- name: Test static configuration | Set static IPs and nameservers
-  yadro.obmc.bmc_network_interface:
-    <<: *connection_info
-    name: "eth0"
-    ipv4_addresses:
-      - { gateway: 192.168.0.1, address: 192.168.0.2, subnet_mask: 255.255.255.0 }
-      - { gateway: 192.168.0.1, address: 192.168.0.3, subnet_mask: 255.255.255.0 }
-    static_nameservers:
-      - 192.168.0.100
-      - 192.168.0.200
-  register: result
-  delegate_to: localhost
-
-- name: Test static configuration | Check state changed
-  assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Interface configuration updated.'"
-
-- name: Test static configuration | Ensure configuration applied
-  yadro.obmc.bmc_network_interface:
-    <<: *connection_info
-    name: "eth0"
-    ipv4_addresses:
-      - { gateway: 192.168.0.1, address: 192.168.0.2, subnet_mask: 255.255.255.0 }
-      - { gateway: 192.168.0.1, address: 192.168.0.3, subnet_mask: 255.255.255.0 }
-    static_nameservers:
-      - 192.168.0.100
-      - 192.168.0.200
-  register: result
-  delegate_to: localhost
-
-- name: Test static configuration | Ensure configuration applied
-  assert:
-    that:
-      - "result.changed == false"
-      - "result.msg == 'No changes required.'"
+- name: Include nested test files
+  include_tasks: "{{ item }}"
+  loop: "{{ lookup('fileglob', 'test_*.yml', wantlist=True) }}"

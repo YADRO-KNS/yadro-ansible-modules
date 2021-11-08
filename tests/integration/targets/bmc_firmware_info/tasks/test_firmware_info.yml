@@ -1,0 +1,12 @@
+---
+- name: Test firmware info | Read firmware information
+  yadro.obmc.bmc_firmware_info:
+    connection: "{{ connection }}"
+  register: result
+
+- name: Test firmware info | Check state didn't changed and firmware_info returned
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.firmware_info != None"
+      - "result.msg == 'Firmware information successfully read.'"

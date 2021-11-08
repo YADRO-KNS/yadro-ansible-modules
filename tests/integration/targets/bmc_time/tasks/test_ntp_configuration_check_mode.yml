@@ -1,0 +1,35 @@
+---
+- name: Test NTP configuration (check mode) | Ensure NTP not configred
+  yadro.obmc.bmc_time:
+    connection: "{{ connection }}"
+    ntp_enabled: false
+    ntp_servers: []
+
+
+- name: Test NTP configuration (check mode) | Configure NTP servers
+  yadro.obmc.bmc_time:
+    connection: "{{ connection }}"
+    ntp_enabled: true
+    ntp_servers: "{{ ntp_servers }}"
+  check_mode: true
+  register: result
+
+- name: Test NTP configuration (check mode) | Check configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Configuration updated.'"
+
+
+- name: Test NTP configuration (check mode) | Check configuration not applied
+  yadro.obmc.bmc_time:
+    connection: "{{ connection }}"
+    ntp_enabled: false
+    ntp_servers: []
+  register: result
+
+- name: Test NTP configuration (check mode) | Check configuration not applied
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required.'"

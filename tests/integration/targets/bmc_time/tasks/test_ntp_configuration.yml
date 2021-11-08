@@ -1,0 +1,61 @@
+---
+- name: Test NTP configuration | Ensure NTP not configred
+  yadro.obmc.bmc_time:
+    connection: "{{ connection }}"
+    ntp_enabled: false
+    ntp_servers: []
+
+
+- name: Test NTP configuration | Configure NTP servers
+  yadro.obmc.bmc_time:
+    connection: "{{ connection }}"
+    ntp_enabled: true
+    ntp_servers: "{{ ntp_servers }}"
+  register: result
+
+- name: Test NTP configuration | Check configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Configuration updated.'"
+
+
+- name: Test NTP configuration | Check configuration applied
+  yadro.obmc.bmc_time:
+    connection: "{{ connection }}"
+    ntp_enabled: true
+    ntp_servers: "{{ ntp_servers }}"
+  register: result
+
+- name: Test NTP configuration | Check configuration applied
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required.'"
+
+
+- name: Test NTP configuration | Disable NTP support
+  yadro.obmc.bmc_time:
+    connection: "{{ connection }}"
+    ntp_enabled: false
+  register: result
+
+- name: Test NTP configuration | Check configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Configuration updated.'"
+
+
+- name: Test NTP configuration | Check configuration applied
+  yadro.obmc.bmc_time:
+    connection: "{{ connection }}"
+    ntp_enabled: false
+    ntp_servers: "{{ ntp_servers }}"
+  register: result
+
+- name: Test NTP configuration | Check configuration applied
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required.'"

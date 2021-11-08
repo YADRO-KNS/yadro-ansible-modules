@@ -1,42 +1,14 @@
 ---
-# Prepare
-
-- name:  Prepare | Setup connection information
-  set_fact: &connection_info
+- name: Setup connection information
+  set_fact:
     connection:
       hostname:       "{{ connection_hostname }}"
       port:           "{{ connection_port }}"
       username:       "{{ connection_username }}"
       password:       "{{ connection_password }}"
+      timeout:        "{{ connection_timeout }}"
       validate_certs: "{{ connection_validate_certs }}"
 
-# Test check mode
-
-- name: Test check mode | Read firmware info
-  yadro.obmc.bmc_firmware_info:
-    <<: *connection_info
-  register: result
-  check_mode: True
-  delegate_to: localhost
-
-- name: Test check mode | Check result
-  assert:
-    that:
-      - "result.changed == false"
-      - "result.firmware_info != None"
-      - "result.msg == 'Firmware information successfully read.'"
-
-# Test firmware info
-
-- name: Test firmware info | Read firmware info
-  yadro.obmc.bmc_firmware_info:
-    <<: *connection_info
-  register: result
-  delegate_to: localhost
-
-- name: Test firmware info | Check result
-  assert:
-    that:
-      - "result.changed == false"
-      - "result.firmware_info != None"
-      - "result.msg == 'Firmware information successfully read.'"
+- name: Include nested test files
+  include_tasks: "{{ item }}"
+  loop: "{{ lookup('fileglob', 'test_*.yml', wantlist=True) }}"
