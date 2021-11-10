@@ -60,6 +60,7 @@ pages:
     - mv ./build/html public
   artifacts:
     paths:
-      - public
+      - ./build/yadro-obmc-*.tar.gz
+      - ./public
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
