@@ -39,6 +39,6 @@ def module_default_args():
             "password": "password",
             "validate_certs": False,
             "port": 443,
-            "timeout": 10,
+            "timeout": 30,
         }
     }

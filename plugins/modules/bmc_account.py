@@ -19,9 +19,9 @@ version_added: "1.0.0"
 description:
   - Creates, deletes and updates user accounts.
   - This module supports check mode.
+author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:
   - yadro.obmc.connection_options
-author: "Radmir Safin (@radmirsafin)"
 options:
   username:
     required: true
@@ -33,7 +33,7 @@ options:
       - The password of the account.
       - Required when creating a new user.
       - Module can't compare passwords, so if I(password) field is set, module
-      - step will always finished with Changed result.
+      - step will always finished with C(changed) result.
   role:
     type: str
     choices: [Administrator, Operator, ReadOnly, NoAccess]
@@ -63,11 +63,10 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-  sample: Account created.
 error_info:
   type: str
   returned: on error
-  description: Error details.
+  description: Error details if raised.
 """
 
 EXAMPLES = r"""
@@ -104,85 +103,14 @@ EXAMPLES = r"""
     state: "absent"
 """
 
-import json
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.urls import ConnectionError, SSLValidationError
-from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
-from ansible_collections.yadro.obmc.plugins.module_utils.client.client import create_client
+from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
-def run_module(module):
-    params = module.params
-    action = None
-    payload = {}
+class OpenBmcAccountModule(OpenBmcModule):
 
-    client = create_client(**params["connection"])
-    accounts = client.get_account_collection()
-    if params["state"] == "present":
-        if params["username"] in accounts:
-            action = "update"
-            user_account = client.get_account(params["username"])
-            if params["password"]:
-                payload["Password"] = params["password"]
-            if params["role"] and params["role"] != user_account["RoleId"]:
-                payload["RoleId"] = params["role"]
-            if params["enabled"] is not None and params["enabled"] != user_account["Enabled"]:
-                payload["Enabled"] = params["enabled"]
-        else:
-            action = "create"
-            missed_args = []
-            for k in ["password", "role", "enabled"]:
-                if params[k] is None:
-                    missed_args.append(k)
-            if missed_args:
-                module.fail_json(
-                    msg="Cannot create new account.",
-                    error_info="Fields required: {0}.".format(", ".join(missed_args)),
-                    changed=False
-                )
-
-            payload = {
-                "UserName": params["username"],
-                "Password": params["password"],
-                "RoleId": params["role"],
-                "Enabled": params["enabled"],
-            }
-    else:
-        if params["username"] in accounts:
-            action = "delete"
-
-    if action == "create" and payload:
-        if not module.check_mode:
-            client.create_account(payload)
-        module.exit_json(msg="Account created.", changed=True)
-    elif action == "update" and payload:
-        if not module.check_mode:
-            client.update_account(params["username"], payload)
-        module.exit_json(msg="Account updated.", changed=True)
-    elif action == "delete":
-        if not module.check_mode:
-            client.delete_account(params["username"])
-        module.exit_json(msg="Account deleted.", changed=True)
-    else:
-        module.exit_json(msg="No changes required.", changed=False)
-
-
-def main():
-    module = AnsibleModule(
-        argument_spec={
-            "connection": {
-                "required": True,
-                "type": "dict",
-                "options": {
-                    "hostname": {"required": True, "type": "str"},
-                    "username": {"required": True, "type": "str"},
-                    "password": {"required": True, "type": "str", "no_log": True},
-                    "port": {"required": False, "type": "int", "default": 443},
-                    "validate_certs": {"required": False, "type": "bool", "default": True},
-                    "timeout": {"required": False, "type": "int", "default": 10},
-                }
-            },
+    def __init__(self):
+        argument_spec = {
             "username": {"type": "str", "required": True},
             "password": {"type": "str", "required": False, "no_log": True},
             "role": {
@@ -197,16 +125,65 @@ def main():
                 "default": "present",
                 "choices": ["present", "absent"]
             },
-        },
-        supports_check_mode=True
-    )
+        }
+        super(OpenBmcAccountModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
 
-    try:
-        run_module(module)
-    except HTTPError as e:
-        module.fail_json(msg="Request finished with error.", error_info=json.load(e))
-    except (URLError, SSLValidationError, ConnectionError) as e:
-        module.fail_json(msg="Cannot connect to server.", error_info=str(e))
+    def _run(self):
+        action = None
+        payload = {}
+
+        accounts = self.client.get_account_collection()
+        if self.params["state"] == "present":
+            if self.params["username"] in accounts:
+                action = "update"
+                user_account = self.client.get_account(self.params["username"])
+                if self.params["password"]:
+                    payload["Password"] = self.params["password"]
+                if self.params["role"] and self.params["role"] != user_account["RoleId"]:
+                    payload["RoleId"] = self.params["role"]
+                if self.params["enabled"] is not None and self.params["enabled"] != user_account["Enabled"]:
+                    payload["Enabled"] = self.params["enabled"]
+            else:
+                action = "create"
+                missed_args = []
+                for k in ["password", "role", "enabled"]:
+                    if self.params[k] is None:
+                        missed_args.append(k)
+                if missed_args:
+                    self.fail_json(
+                        msg="Cannot create new account.",
+                        error_info="Fields required: {0}.".format(", ".join(missed_args)),
+                        changed=False
+                    )
+
+                payload = {
+                    "UserName": self.params["username"],
+                    "Password": self.params["password"],
+                    "RoleId": self.params["role"],
+                    "Enabled": self.params["enabled"],
+                }
+        else:
+            if self.params["username"] in accounts:
+                action = "delete"
+
+        if action == "create" and payload:
+            if not self.check_mode:
+                self.client.create_account(payload)
+            self.exit_json(msg="Account created.", changed=True)
+        elif action == "update" and payload:
+            if not self.check_mode:
+                self.client.update_account(self.params["username"], payload)
+            self.exit_json(msg="Account updated.", changed=True)
+        elif action == "delete":
+            if not self.check_mode:
+                self.client.delete_account(self.params["username"])
+            self.exit_json(msg="Account deleted.", changed=True)
+        else:
+            self.exit_json(msg="No changes required.", changed=False)
+
+
+def main():
+    OpenBmcAccountModule().run()
 
 
 if __name__ == "__main__":

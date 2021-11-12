@@ -19,9 +19,9 @@ version_added: "1.0.0"
 description:
   - Configures NTP servers. Timezone is always set to GMT.
   - This module supports check mode.
+author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:
   - yadro.obmc.connection_options
-author: "Radmir Safin (@radmirsafin)"
 options:
   ntp_enabled:
     required: false
@@ -45,7 +45,7 @@ msg:
 error_info:
   type: str
   returned: on error
-  description: Error details.
+  description: Error details if raised.
 """
 
 EXAMPLES = r"""
@@ -89,70 +89,51 @@ EXAMPLES = r"""
     ntp_enabled: false
 """
 
-import json
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.urls import ConnectionError, SSLValidationError
-from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
-from ansible_collections.yadro.obmc.plugins.module_utils.client.client import create_client
+from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
-def run_module(module):
-    params = module.params
-    if params["ntp_servers"] and len(params["ntp_servers"]) > 3:
-        module.fail_json(
-            msg="Can't configure NTP servers.",
-            error_info="Supported no more than 3 NTP servers.",
-            changed=False
-        )
+class OpenBmcTimeModule(OpenBmcModule):
 
-    client = create_client(**params["connection"])
-    network_protocols = client.get_network_protocol()
+    def __init__(self):
+        argument_spec = {
+            "ntp_enabled": {"type": "bool", "required": False},
+            "ntp_servers": {"type": "list", "required": False, "elements": "str"},
+        }
+        super(OpenBmcTimeModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
 
-    changed = False
-    payload = {"NTP": {}}
-    if params["ntp_enabled"] is not None and params["ntp_enabled"] != network_protocols["NTP"]["ProtocolEnabled"]:
-        changed = True
-        payload["NTP"]["ProtocolEnabled"] = params["ntp_enabled"]
-    if params["ntp_servers"] is not None and params["ntp_servers"] != network_protocols["NTP"]["NTPServers"]:
-        changed = True
-        payload["NTP"]["NTPServers"] = params["ntp_servers"]
+    def _run(self):
+        if self.params["ntp_servers"] and len(self.params["ntp_servers"]) > 3:
+            self.fail_json(
+                msg="Can't configure NTP servers.",
+                error_info="Supported no more than 3 NTP servers.",
+                changed=False
+            )
 
-    if changed:
-        if not module.check_mode:
-            client.update_network_protocol(payload)
-        module.exit_json(msg="Configuration updated.", changed=changed)
-    else:
-        module.exit_json(msg="No changes required.", changed=changed)
+        network_protocols = self.client.get_network_protocol()
+        changed = False
+        payload = {"NTP": {}}
+
+        if self.params["ntp_enabled"] is not None and \
+                self.params["ntp_enabled"] != network_protocols["NTP"]["ProtocolEnabled"]:
+            changed = True
+            payload["NTP"]["ProtocolEnabled"] = self.params["ntp_enabled"]
+
+        if self.params["ntp_servers"] is not None and \
+                self.params["ntp_servers"] != network_protocols["NTP"]["NTPServers"]:
+            changed = True
+            payload["NTP"]["NTPServers"] = self.params["ntp_servers"]
+
+        if changed:
+            if not self.check_mode:
+                self.client.update_network_protocol(payload)
+            self.exit_json(msg="Configuration updated.", changed=changed)
+        else:
+            self.exit_json(msg="No changes required.", changed=changed)
 
 
 def main():
-    module = AnsibleModule(
-        argument_spec={
-            "connection": {
-                "required": True,
-                "type": "dict",
-                "options": {
-                    "hostname": {"required": True, "type": "str"},
-                    "username": {"required": True, "type": "str"},
-                    "password": {"required": True, "type": "str", "no_log": True},
-                    "port": {"required": False, "type": "int", "default": 443},
-                    "validate_certs": {"required": False, "type": "bool", "default": True},
-                    "timeout": {"required": False, "type": "int", "default": 10},
-                }
-            },
-            "ntp_enabled": {"type": "bool", "required": False},
-            "ntp_servers": {"type": "list", "required": False, "elements": "str"},
-        },
-        supports_check_mode=True
-    )
-
-    try:
-        run_module(module)
-    except HTTPError as e:
-        module.fail_json(msg="Request finished with error.", error_info=json.load(e))
-    except (URLError, SSLValidationError, ConnectionError) as e:
-        module.fail_json(msg="Can't connect to server.", error_info=str(e))
+    OpenBmcTimeModule().run()
 
 
 if __name__ == "__main__":

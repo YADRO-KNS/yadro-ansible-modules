@@ -9,13 +9,23 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
-from ansible_collections.yadro.obmc.plugins.module_utils.client.bmc import OpenBmcRestClient
+
+class Auth:
+    pass
 
 
-class VegmanBmcRestClient(OpenBmcRestClient):
+class BasicAuth(Auth):
 
-    manager_name = "bmc"
-    system_name = "system"
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
 
-    def __init__(self, *args, **kwargs):
-        super(VegmanBmcRestClient, self).__init__(*args, **kwargs)
+
+class SessionAuth(Auth):
+
+    def __init__(self, token):
+        self.token = token
+
+
+class AuthError(Exception):
+    pass

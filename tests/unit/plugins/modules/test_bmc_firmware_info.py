@@ -28,10 +28,12 @@ class TestBmcFirmwareInfo(ModuleTestCase):
     def test_firmware_info_reading(self, mocker, module_args):
         firmware_id = "Image Id"
         firmware_info = {"Id": firmware_id, "Description": "Description"}
+
         client_mock = MagicMock()
         client_mock.get_manager.return_value = {"Links": {"ActiveSoftwareImage": firmware_id}}
         client_mock.get_software_inventory.return_value = firmware_info
-        mocker.patch("{0}.create_client".format(self.module.__name__), return_value=client_mock)
+        mocker.patch("{0}.OpenBmcModule._create_client".format(self.module.__name__),
+                     return_value=client_mock)
 
         expected_json = {
             "msg": "Firmware information successfully read.",
