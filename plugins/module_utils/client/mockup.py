@@ -16,6 +16,9 @@ from ansible_collections.yadro.obmc.plugins.module_utils.client.bmc import OpenB
 
 class DMTFMockupRestClient(OpenBmcRestClient):
 
+    manager_name = "BMC"
+    system_name = "437XR1138R2"
+
     def __init__(self, *args, **kwargs):
         super(DMTFMockupRestClient, self).__init__(*args, **kwargs)
 

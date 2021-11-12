@@ -12,10 +12,12 @@ __metaclass__ = type
 import pytest
 import json
 
-from ansible_collections.yadro.obmc.plugins.module_utils.client.rest import build_url, RestClient, RestClientError
-from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
 from ansible.module_utils.urls import open_url, SSLValidationError, ConnectionError
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
+
+from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
+from ansible_collections.yadro.obmc.plugins.module_utils.client.rest import build_url, RestClient, RestClientError
+from ansible_collections.yadro.obmc.plugins.module_utils.client.auth import BasicAuth
 
 
 class TestRestClinet:
@@ -24,8 +26,7 @@ class TestRestClinet:
     def rest_client_kwargs(self):
         return {
             "hostname": "localhost",
-            "username": "username",
-            "password": "password",
+            "auth": BasicAuth("username", "password"),
             "base_prefix": "/redfish/v1/",
             "validate_certs": True,
             "port": 443,
