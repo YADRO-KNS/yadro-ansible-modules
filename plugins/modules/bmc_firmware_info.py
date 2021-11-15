@@ -14,14 +14,14 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: bmc_firmware_info
-short_description: Returns OpenBmc firmware information.
+short_description: Returns BMC firmware information.
 version_added: "1.0.0"
 description:
-  - Returns OpenBmc firmware information.
+  - Returns BMC firmware information.
   - This module supports check mode.
+author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:
   - yadro.obmc.connection_options
-author: "Radmir Safin (@radmirsafin)"
 """
 
 RETURN = r"""
@@ -33,11 +33,11 @@ msg:
 error_info:
   type: str
   returned: on error
-  description: Error details.
+  description: Error details if raised.
 firmware_info:
   type: dict
   returned: on success
-  description: OpenBmc firmware information.
+  description: BMC firmware information.
   sample: {
     "Description": "BMC image",
     "Status": {
@@ -52,7 +52,7 @@ firmware_info:
 
 EXAMPLES = r"""
 ---
-- name: Get server information
+- name: Get firmware information
   yadro.obmc.bmc_firmware_info:
     connection:
       hostname: "localhost"
@@ -61,47 +61,23 @@ EXAMPLES = r"""
   register: firmware_info
 """
 
-import json
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.urls import ConnectionError, SSLValidationError
-from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
-from ansible_collections.yadro.obmc.plugins.module_utils.client.client import create_client
+from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
-def run_module(module):
-    params = module.params
-    client = create_client(**params["connection"])
-    manager_info = client.get_manager()
-    firmware_info = client.get_software_inventory(manager_info["Links"]["ActiveSoftwareImage"])
-    module.exit_json(msg="Firmware information successfully read.", firmware_info=firmware_info)
+class OpenBmcFirmwareInfoModule(OpenBmcModule):
+
+    def __init__(self):
+        super(OpenBmcFirmwareInfoModule, self).__init__(supports_check_mode=True)
+
+    def _run(self):
+        manager_info = self.client.get_manager()
+        firmware_info = self.client.get_software_inventory(manager_info["Links"]["ActiveSoftwareImage"])
+        self.exit_json(msg="Firmware information successfully read.", firmware_info=firmware_info)
 
 
 def main():
-    module = AnsibleModule(
-        argument_spec={
-            "connection": {
-                "required": True,
-                "type": "dict",
-                "options": {
-                    "hostname": {"required": True, "type": "str"},
-                    "username": {"required": True, "type": "str"},
-                    "password": {"required": True, "type": "str", "no_log": True},
-                    "port": {"required": False, "type": "int", "default": 443, },
-                    "validate_certs": {"required": False, "type": "bool", "default": True},
-                    "timeout": {"required": False, "type": "int", "default": 10},
-                }
-            }
-        },
-        supports_check_mode=True
-    )
-
-    try:
-        run_module(module)
-    except HTTPError as e:
-        module.fail_json(msg="Request finished with error.", error_info=json.load(e))
-    except (URLError, SSLValidationError, ConnectionError) as e:
-        module.fail_json(msg="Can't connect to server.", error_info=str(e))
+    OpenBmcFirmwareInfoModule().run()
 
 
 if __name__ == "__main__":

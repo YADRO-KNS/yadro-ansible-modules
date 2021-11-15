@@ -17,20 +17,24 @@ class ModuleDocFragment(object):
       connection:
         required: True
         type: dict
-        description: I(connection) option describes OpenBmc connection details.
+        description:
+          - I(connection) describes OpenBmc connection configuration. Two authentication methods
+          - available (username and password or session_key). Session key can be received using
+          - bmc_session module. One of authentication methods must be used.
         suboptions:
           hostname:
             required: True
             type: str
             description: OpenBmc server IP address or hostname.
           username:
-            required: True
             type: str
             description: OpenBmc username to login.
           password:
-            required: True
             type: str
             description: OpenBmc user password.
+          session_key:
+            type: str
+            description: OpenBmc session key.
           port:
             type: int
             default: 443
@@ -43,6 +47,6 @@ class ModuleDocFragment(object):
               - If set to False certificates won't validated.
           timeout:
             type: int
-            default: 10
+            default: 30
             description: API request timeout.
 """

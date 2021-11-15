@@ -62,7 +62,7 @@ class ModuleTestCase:
         error_message = {"Error": "Message"}
         http_error = to_text(json.dumps(error_message))
         exception = HTTPError("localhost", 400, "Bad Request Error", {}, StringIO(http_error))
-        mocker.patch("{0}.create_client".format(self.module.__name__), side_effect=exception)
+        mocker.patch("{0}.OpenBmcModule._create_client".format(self.module.__name__), side_effect=exception)
         expected_json = {
             "msg": "Request finished with error.",
             "error_info": error_message,
@@ -74,7 +74,7 @@ class ModuleTestCase:
     @pytest.mark.parametrize("exception", [ConnectionError, SSLValidationError, URLError])
     def test_connection_errors_passthrough(self, mocker, module_args, exception):
         expected_exception = exception("Exception")
-        mocker.patch("{0}.create_client".format(self.module.__name__), side_effect=expected_exception)
+        mocker.patch("{0}.OpenBmcModule._create_client".format(self.module.__name__), side_effect=expected_exception)
         expected_json = {
             "msg": "Can't connect to server.",
             "error_info": str(expected_exception),

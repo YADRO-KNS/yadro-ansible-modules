@@ -18,12 +18,11 @@ class UnsupporedSystemError(Exception):
     pass
 
 
-def create_client(hostname, username, password, base_prefix="/redfish/v1/",
-                  validate_certs=True, port=443, timeout=10):
+def create_client(hostname, auth, base_prefix="/redfish/v1/",
+                  validate_certs=True, port=443, timeout=30):
 
-    client = OpenBmcRestClient(hostname=hostname, username=username, password=password,
-                               base_prefix=base_prefix, validate_certs=validate_certs,
-                               port=port, timeout=timeout)
+    client = OpenBmcRestClient(hostname=hostname, auth=auth, base_prefix=base_prefix,
+                               validate_certs=validate_certs, port=port, timeout=timeout)
 
     systems = client.get_system_collection()
     if len(systems) != 1:
@@ -47,6 +46,4 @@ def create_client(hostname, username, password, base_prefix="/redfish/v1/",
         raise UnsupporedSystemError("Operations with only one BMC manager supported. Found: {0}"
                                     .format(len(managers)))
 
-    client.system_name = systems[0]
-    client.manager_name = managers[0]
     return client
