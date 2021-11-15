@@ -76,7 +76,7 @@ EXAMPLES = r"""
   register: result
 
 - name: Read BMC firmware info via session key
-  yadro.obmc.bmc_session:
+  yadro.obmc.bmc_firmware_info:
     connection:
       hostname: "localhost"
       session_key: "{{ result['session']['key'] }}"
