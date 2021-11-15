@@ -1,0 +1,14 @@
+---
+- name: Setup connection information
+  set_fact:
+    connection:
+      hostname:       "{{ connection_hostname }}"
+      port:           "{{ connection_port }}"
+      username:       "{{ connection_username }}"
+      password:       "{{ connection_password }}"
+      timeout:        "{{ connection_timeout }}"
+      validate_certs: "{{ connection_validate_certs }}"
+
+- name: Include nested test files
+  include_tasks: "{{ item }}"
+  loop: "{{ lookup('fileglob', 'test_*.yml', wantlist=True) }}"

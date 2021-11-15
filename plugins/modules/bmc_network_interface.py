@@ -21,13 +21,13 @@ description:
   - Enables and disables address resolution via DHCP.
   - Configures interface namespace servers.
   - This module supports check mode.
+author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:
   - yadro.obmc.connection_options
-author: "Radmir Safin (@radmirsafin)"
 options:
   name:
+    required: True
     type: str
-    required: true
     description: Ethernet interface name to configure.
   dhcp_enabled:
     type: bool

@@ -21,7 +21,7 @@ from ansible_collections.yadro.obmc.plugins.module_utils.client.auth import Basi
 
 class OpenBmcModule(AnsibleModule):
 
-    def __init__(self, argument_spec=None, supports_check_mode=False):
+    def __init__(self, argument_spec=None, supports_check_mode=False, required_if=None):
         _argument_spec = {
             "connection": {
                 "required": True,
@@ -43,6 +43,7 @@ class OpenBmcModule(AnsibleModule):
         super(OpenBmcModule, self).__init__(
             argument_spec=_argument_spec,
             supports_check_mode=supports_check_mode,
+            required_if=required_if,
         )
 
         # Initialized when module starts
