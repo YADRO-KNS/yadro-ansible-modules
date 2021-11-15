@@ -19,9 +19,9 @@ version_added: "1.0.0"
 description:
   - Returns BMC firmware information.
   - This module supports check mode.
+author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:
   - yadro.obmc.connection_options
-author: "Radmir Safin (@radmirsafin)"
 """
 
 RETURN = r"""

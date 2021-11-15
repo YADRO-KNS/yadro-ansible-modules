@@ -24,7 +24,7 @@ extends_documentation_fragment:
   - yadro.obmc.connection_options
 options:
   username:
-    required: true
+    required: True
     type: str
     description: The user name of the account.
   password:

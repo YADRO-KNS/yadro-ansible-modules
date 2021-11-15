@@ -106,3 +106,20 @@ class DMTFMockupRestClient(OpenBmcRestClient):
                 mockup_payload["IPv4StaticAddresses"] = []
 
         self.patch("/Managers/{0}/EthernetInterfaces/{1}".format(self.manager_name, interface_id), body=mockup_payload)
+
+    def create_session(self, payload):
+        schema = {
+            "type": dict,
+            "suboptions": {
+                "UserName": {"type": str, "required": True},
+                "Password": {"type": str, "required": True},
+            }
+        }
+        validate_schema(schema, payload)
+        return {
+            "id": "1234567890ABCDEF",
+            "key": "MockupSessionKey",
+        }
+
+    def delete_session(self, session_key):
+        pass
