@@ -123,6 +123,24 @@ class OpenBmcRestClient(RestClient):
     def delete_account(self, username):
         self.delete("/AccountService/Accounts/{0}".format(username))
 
+    def create_session(self, payload):
+        schema = {
+            "type": dict,
+            "suboptions": {
+                "UserName": {"type": str, "required": True},
+                "Password": {"type": str, "required": True},
+            }
+        }
+        validate_schema(schema, payload)
+        response = self.post("/SessionService/Sessions", body=payload)
+        return {
+            "id": response.json_data["Id"],
+            "key": response.headers["X-Auth-Token"],
+        }
+
+    def delete_session(self, session_key):
+        self.delete("/SessionService/Sessions/{0}".format(session_key))
+
     def get_network_protocol(self):
         return self.get("/Managers/{0}/NetworkProtocol".format(self.manager_name)).json_data
 

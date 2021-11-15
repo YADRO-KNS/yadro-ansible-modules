@@ -35,7 +35,7 @@ class TestBmcNetworkInterface(ModuleTestCase):
         client_mock = MagicMock()
         client_mock.get_ethernet_interface_collection.return_value = ["eth0"]
         client_mock.get_ethernet_interface.return_value = {"DHCPv4": {"DHCPEnabled": False}}
-        mocker.patch("{0}.create_client".format(self.module.__name__), return_value=client_mock)
+        mocker.patch("{0}.OpenBmcModule._create_client".format(self.module.__name__), return_value=client_mock)
 
         expected_json = {"msg": "Interface configuration updated.", "changed": True}
         result = self.run_module_expect_exit_json(module_args)

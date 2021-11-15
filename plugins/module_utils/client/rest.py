@@ -15,6 +15,8 @@ from ansible.module_utils.urls import open_url, SSLValidationError, ConnectionEr
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
 from ansible.module_utils.six.moves.urllib.parse import urlencode
 
+from ansible_collections.yadro.obmc.plugins.module_utils.client.auth import BasicAuth, SessionAuth, AuthError
+
 
 def build_url(base, path, query_params=None):
     url = "{0}/{1}".format(base.rstrip("/"), path.lstrip("/"))
@@ -53,7 +55,7 @@ class RestClientResponse:
 
 class RestClient:
 
-    def __init__(self, hostname, base_prefix, username, password, validate_certs, port, timeout):
+    def __init__(self, hostname, base_prefix, auth, validate_certs, port, timeout):
 
         if "://" in hostname:
             self._protocol, self._hostname = hostname.split("://")
@@ -68,8 +70,15 @@ class RestClient:
             self._base_prefix
         )
 
-        self._username = username
-        self._password = password
+        self._headers = {}
+        if isinstance(auth, BasicAuth):
+            self._username = auth.username
+            self._password = auth.password
+        elif isinstance(auth, SessionAuth):
+            self._headers["X-Auth-Token"] = auth.token
+        else:
+            raise AuthError("Unsupported auth type: {0}".format(type(auth)))
+
         self.validate_certs = validate_certs
         self.timeout = timeout
 
@@ -78,7 +87,7 @@ class RestClient:
         return self._base_url
 
     def _get_reqeust_params(self, method, headers=None):
-        request_headers = {}
+        request_headers = self._headers
         if headers:
             request_headers.update(headers)
 

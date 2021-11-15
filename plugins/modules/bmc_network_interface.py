@@ -21,13 +21,13 @@ description:
   - Enables and disables address resolution via DHCP.
   - Configures interface namespace servers.
   - This module supports check mode.
+author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:
   - yadro.obmc.connection_options
-author: "Radmir Safin (@radmirsafin)"
 options:
   name:
+    required: True
     type: str
-    required: true
     description: Ethernet interface name to configure.
   dhcp_enabled:
     type: bool
@@ -60,7 +60,7 @@ msg:
 error_info:
   type: str
   returned: on error
-  description: Error details.
+  description: Error details if raised.
 """
 
 EXAMPLES = r"""
@@ -126,106 +126,84 @@ EXAMPLES = r"""
     dhcp_enabled: true
 """
 
-import json
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.urls import ConnectionError, SSLValidationError
-from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
-from ansible_collections.yadro.obmc.plugins.module_utils.client.client import create_client
+from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
-def run_module(module):
-    params = module.params
-    payload = {}
+class OpenBmcNetworkInterfaceModule(OpenBmcModule):
 
-    if params["dhcp_enabled"] and params["ipv4_addresses"]:
-        module.fail_json(
-            msg="Can't configure network interface.",
-            error_info="Conflict between static configuration and DHCP.",
-            changed=False,
-        )
-
-    client = create_client(**params["connection"])
-    interfaces = client.get_ethernet_interface_collection()
-    if params["name"] not in interfaces:
-        module.fail_json(
-            msg="Can't configure network interface.",
-            error_info="Interface {0} not found.".format(params["name"]),
-            changed=False
-        )
-
-    current_config = client.get_ethernet_interface(params["name"])
-
-    if params["dhcp_enabled"] is not None:
-        if current_config["DHCPv4"]["DHCPEnabled"] != params["dhcp_enabled"]:
-            payload["DHCPv4"] = {"DHCPEnabled": params["dhcp_enabled"]}
-
-    if params["ipv4_addresses"] is not None:
-        changed = True
-        if len(current_config["IPv4StaticAddresses"]) == len(params["ipv4_addresses"]):
-            if all(
-                {
-                    "Address": conf["address"],
-                    "AddressOrigin": "Static",
-                    "Gateway": conf["gateway"],
-                    "SubnetMask": conf["subnet_mask"],
-                } in current_config["IPv4StaticAddresses"] for conf in params["ipv4_addresses"]
-            ):
-                changed = False
-        if changed:
-            payload["IPv4StaticAddresses"] = []
-            for conf in params["ipv4_addresses"]:
-                payload["IPv4StaticAddresses"].append({
-                    "Address": conf["address"],
-                    "Gateway": conf["gateway"],
-                    "SubnetMask": conf["subnet_mask"],
-                })
-
-    if params["static_nameservers"] is not None:
-        changed = True
-        if len(current_config["StaticNameServers"]) == len(params["static_nameservers"]):
-            if all(ns in current_config["StaticNameServers"] for ns in params["static_nameservers"]):
-                changed = False
-        if changed:
-            payload["StaticNameServers"] = params["static_nameservers"]
-
-    if payload:
-        if not module.check_mode:
-            client.update_ethernet_interface(params["name"], payload)
-        module.exit_json(msg="Interface configuration updated.", changed=True)
-    else:
-        module.exit_json(msg="No changes required.", changed=False)
-
-
-def main():
-    module = AnsibleModule(
-        argument_spec={
-            "connection": {
-                "required": True,
-                "type": "dict",
-                "options": {
-                    "hostname": {"required": True, "type": "str"},
-                    "username": {"required": True, "type": "str"},
-                    "password": {"required": True, "type": "str", "no_log": True},
-                    "port": {"required": False, "type": "int", "default": 443},
-                    "validate_certs": {"required": False, "type": "bool", "default": True},
-                    "timeout": {"required": False, "type": "int", "default": 10},
-                }
-            },
+    def __init__(self):
+        argument_spec = {
             "name": {"type": "str", "required": True},
             "dhcp_enabled": {"type": "bool", "required": False},
             "ipv4_addresses": {"type": "list", "required": False, "elements": "dict"},
             "static_nameservers": {"type": "list", "required": False, "elements": "str"}
-        },
-        supports_check_mode=True
-    )
+        }
+        super(OpenBmcNetworkInterfaceModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
 
-    try:
-        run_module(module)
-    except HTTPError as e:
-        module.fail_json(msg="Request finished with error.", error_info=json.load(e))
-    except (URLError, SSLValidationError, ConnectionError) as e:
-        module.fail_json(msg="Can't connect to server.", error_info=str(e))
+    def _run(self):
+        payload = {}
+
+        if self.params["dhcp_enabled"] and self.params["ipv4_addresses"]:
+            self.fail_json(
+                msg="Can't configure network interface.",
+                error_info="Conflict between static configuration and DHCP.",
+                changed=False,
+            )
+
+        interfaces = self.client.get_ethernet_interface_collection()
+        if self.params["name"] not in interfaces:
+            self.fail_json(
+                msg="Can't configure network interface.",
+                error_info="Interface {0} not found.".format(self.params["name"]),
+                changed=False
+            )
+
+        current_config = self.client.get_ethernet_interface(self.params["name"])
+
+        if self.params["dhcp_enabled"] is not None:
+            if current_config["DHCPv4"]["DHCPEnabled"] != self.params["dhcp_enabled"]:
+                payload["DHCPv4"] = {"DHCPEnabled": self.params["dhcp_enabled"]}
+
+        if self.params["ipv4_addresses"] is not None:
+            changed = True
+            if len(current_config["IPv4StaticAddresses"]) == len(self.params["ipv4_addresses"]):
+                if all(
+                        {
+                            "Address": conf["address"],
+                            "AddressOrigin": "Static",
+                            "Gateway": conf["gateway"],
+                            "SubnetMask": conf["subnet_mask"],
+                        } in current_config["IPv4StaticAddresses"] for conf in self.params["ipv4_addresses"]
+                ):
+                    changed = False
+            if changed:
+                payload["IPv4StaticAddresses"] = []
+                for conf in self.params["ipv4_addresses"]:
+                    payload["IPv4StaticAddresses"].append({
+                        "Address": conf["address"],
+                        "Gateway": conf["gateway"],
+                        "SubnetMask": conf["subnet_mask"],
+                    })
+
+        if self.params["static_nameservers"] is not None:
+            changed = True
+            if len(current_config["StaticNameServers"]) == len(self.params["static_nameservers"]):
+                if all(ns in current_config["StaticNameServers"] for ns in self.params["static_nameservers"]):
+                    changed = False
+            if changed:
+                payload["StaticNameServers"] = self.params["static_nameservers"]
+
+        if payload:
+            if not self.check_mode:
+                self.client.update_ethernet_interface(self.params["name"], payload)
+            self.exit_json(msg="Interface configuration updated.", changed=True)
+        else:
+            self.exit_json(msg="No changes required.", changed=False)
+
+
+def main():
+    OpenBmcNetworkInterfaceModule().run()
 
 
 if __name__ == "__main__":
