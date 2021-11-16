@@ -2,8 +2,6 @@
 - name: Test session | Create new session
   yadro.obmc.bmc_session:
     connection: "{{ connection }}"
-    username: "{{ connection_username }}"
-    password: "{{ connection_password }}"
     state: "present"
   register: session_result
 
