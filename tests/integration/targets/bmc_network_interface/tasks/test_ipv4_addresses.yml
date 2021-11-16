@@ -40,10 +40,3 @@
   until: not result.changed
   retries: 6
   delay: 5
-
-
-- name: Test ipv4 addresses | Reset configuration
-  yadro.obmc.bmc_network_interface:
-    connection: "{{ connection }}"
-    name: "{{ interface_name }}"
-    dhcp_enabled: true
