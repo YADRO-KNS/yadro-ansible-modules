@@ -17,22 +17,16 @@ module: bmc_session
 short_description: Manages BMC sessions.
 version_added: "1.0.0"
 description:
-  - Creates user session and returns session key.
+  - Creates user session and returns session key. Connection username and password required.
   - Closes previously created sessions.
   - This module supports check mode.
 author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:
   - yadro.obmc.connection_options
 options:
-  username:
-    type: str
-    description: Session username. Required to create session.
-  password:
-    type: str
-    description: Session user password. Required to create session.
   session_id:
     type: str
-    description: Session id. Required to close session.
+    description: Session ID. Required to close session.
   state:
     type: str
     choices: [present, absent]
@@ -64,14 +58,12 @@ session:
 
 EXAMPLES = r"""
 ---
-- name: Create readonly user session
+- name: Create session
   yadro.obmc.bmc_session:
     connection:
       hostname: "localhost"
       username: "username"
       password: "password"
-    username: "readonly"
-    password: "password"
     state: present
   register: result
 
@@ -81,7 +73,7 @@ EXAMPLES = r"""
       hostname: "localhost"
       session_key: "{{ result['session']['key'] }}"
 
-- name: Close readonly user session
+- name: Close session
   yadro.obmc.bmc_session:
     connection:
       hostname: "localhost"
@@ -99,8 +91,6 @@ class OpenBmcSessionModule(OpenBmcModule):
 
     def __init__(self):
         argument_spec = {
-            "username": {"required": False, "type": "str"},
-            "password": {"required": False, "type": "str", "no_log": True},
             "session_id": {"required": False, "type": "str"},
             "state": {
                 "type": "str",
@@ -110,19 +100,25 @@ class OpenBmcSessionModule(OpenBmcModule):
             },
         }
         required_if = [
-            ["state", "present", ["username", "password"]],
             ["state", "absent", ["session_id"]],
         ],
 
         super(OpenBmcSessionModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
 
     def _run(self):
+        if not (self.params["connection"]["username"] and self.params["connection"]["password"]):
+            self.fail_json(
+                msg="Cannot create session.",
+                error_info="Connection username and password required to create session.",
+                changed=False,
+            )
+
         if self.params["state"] == "present":
             result = {"id": "", "key": ""}
             if not self.check_mode:
                 result = self.client.create_session({
-                    "UserName": self.params["username"],
-                    "Password": self.params["password"],
+                    "UserName": self.params["connection"]["username"],
+                    "Password": self.params["connection"]["password"],
                 })
             self.exit_json(msg="Session created.", changed=True, session=result)
         else:
