@@ -39,6 +39,7 @@ options:
     type: list
     elements: dict
     description:
+      - Only one IP address currently supported (will be fixed in future releases).
       - List of IP addresses to set at interface.
       - Cannot be configured if I(dhcp_enabled) is C(true).
       - If static configuration is present, DHCP will be disabled.
@@ -83,9 +84,6 @@ EXAMPLES = r"""
     name: "eth0"
     dhcp_enabled: false
     ipv4_addresses:
-      - gateway: 192.168.0.1
-        address: 192.168.0.2
-        subnet_mask: 255.255.255.0
       - gateway: 192.168.0.1
         address: 192.168.0.2
         subnet_mask: 255.255.255.0
@@ -146,15 +144,22 @@ class OpenBmcNetworkInterfaceModule(OpenBmcModule):
 
         if self.params["dhcp_enabled"] and self.params["ipv4_addresses"]:
             self.fail_json(
-                msg="Can't configure network interface.",
+                msg="Cannot configure network interface.",
                 error_info="Conflict between static configuration and DHCP.",
+                changed=False,
+            )
+
+        if self.params["ipv4_addresses"] and len(self.params["ipv4_addresses"]) > 1:
+            self.fail_json(
+                msg="Cannot configure network interface.",
+                error_info="Only one IP address supported. Please, remove extra configuration.",
                 changed=False,
             )
 
         interfaces = self.client.get_ethernet_interface_collection()
         if self.params["name"] not in interfaces:
             self.fail_json(
-                msg="Can't configure network interface.",
+                msg="Cannot configure network interface.",
                 error_info="Interface {0} not found.".format(self.params["name"]),
                 changed=False
             )
