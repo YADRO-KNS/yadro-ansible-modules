@@ -24,9 +24,7 @@ class TestBmcNetworkInterface(ModuleTestCase):
     @pytest.fixture
     def module_args(self, module_default_args):
         module_args = module_default_args
-        module_args.update({
-            "name": "eth0"
-        })
+        module_args.update({"name": "eth0"})
         return module_args
 
     def test_dhcp_enabled(self, mocker, module_args):
