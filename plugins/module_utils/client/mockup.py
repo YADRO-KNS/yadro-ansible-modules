@@ -61,6 +61,7 @@ class DMTFMockupRestClient(OpenBmcRestClient):
         schema = {
             "type": dict,
             "suboptions": {
+                "HostName": {"type": str, "required": False},
                 "DHCPv4": {
                     "type": dict,
                     "required": False,

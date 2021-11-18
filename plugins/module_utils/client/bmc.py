@@ -169,6 +169,7 @@ class OpenBmcRestClient(RestClient):
         data = self.get("/Managers/{0}/EthernetInterfaces/{1}".format(self.manager_name, interface_id)).json_data
         return {
             "Id": data["Id"],
+            "HostName": data["HostName"],
             "DHCPv4": data["DHCPv4"],
             "IPv4StaticAddresses": data["IPv4StaticAddresses"],
             "StaticNameServers": data["StaticNameServers"],
@@ -178,6 +179,7 @@ class OpenBmcRestClient(RestClient):
         schema = {
             "type": dict,
             "suboptions": {
+                "HostName": {"type": str, "required": False},
                 "DHCPv4": {
                     "type": dict,
                     "required": False,
