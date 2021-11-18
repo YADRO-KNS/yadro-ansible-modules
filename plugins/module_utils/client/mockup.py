@@ -94,6 +94,7 @@ class DMTFMockupRestClient(OpenBmcRestClient):
         validate_schema(schema, payload)
 
         mockup_payload = copy.deepcopy(payload)
+        # Simulating real BMC behaviour
         if "IPv4StaticAddresses" in mockup_payload.keys():
             if mockup_payload["IPv4StaticAddresses"]:
                 if "DHCPv4" not in mockup_payload.keys():

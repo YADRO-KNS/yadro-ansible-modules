@@ -24,7 +24,5 @@ class TestBmcAccount(ModuleTestCase):
     @pytest.fixture
     def module_args(self, module_default_args):
         module_args = module_default_args
-        module_args.update({
-            "username": "TestUser"
-        })
+        module_args.update({"username": "TestUser"})
         return module_args
