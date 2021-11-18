@@ -1,0 +1,38 @@
+---
+- name: Test hostname | Set default hostname
+  yadro.obmc.bmc_hostname:
+    connection: "{{ connection }}"
+    name: "{{ hostname }}"
+
+
+- name: Test hostname | Update hostname
+  yadro.obmc.bmc_hostname:
+    connection: "{{ connection }}"
+    name: "{{ hostname }}-test"
+  register: result
+
+- name: Test hostname | Check configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.msg == 'Hostname updated.'"
+
+
+- name: Test hostname | Check configuration applied
+  yadro.obmc.bmc_hostname:
+    connection: "{{ connection }}"
+    name: "{{ hostname }}-test"
+  check_mode: true
+  register: result
+
+- name: Test hostname | Check configuration applied
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.msg == 'No changes required.'"
+
+
+- name: Test hostname | Set default hostname
+  yadro.obmc.bmc_hostname:
+    connection: "{{ connection }}"
+    name: "{{ hostname }}"

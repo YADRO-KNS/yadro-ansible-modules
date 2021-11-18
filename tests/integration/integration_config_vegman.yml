@@ -6,11 +6,14 @@ connection_password: ...
 connection_timeout: 60
 connection_validate_certs: false
 
-# bmc_time configuration
+# bmc_time
 ntp_servers: [172.30.201.56]
 
-# bmc_network_interface confoguration
+# bmc_network_interface
 interface_name: eth1
 static_nameservers: [172.30.6.2]
 ipv4_addresses:
   - { gateway: 0.0.0.0, address: 192.168.0.100, subnet_mask: 255.255.255.0 }
+
+# bmc_hostname
+hostname: vegman-s220-02112002E1
