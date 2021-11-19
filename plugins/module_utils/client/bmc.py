@@ -70,6 +70,15 @@ class OpenBmcRestClient(RestClient):
         validate_schema(schema, payload)
         self.post("/Managers/{0}/Actions/Manager.Reset".format(self.manager_name), body=payload)
 
+    def get_bios(self):
+        data = self.get("/Systems/{0}/Bios".format(self.system_name)).json_data
+        return {
+            "Id": data["Id"],
+            "Links": {
+                "ActiveSoftwareImage": data["Links"]["ActiveSoftwareImage"]["@odata.id"].split("/")[-1]
+            }
+        }
+
     def get_managers_collection(self):
         data = self.get("/Managers").json_data
         return parse_members(data)
