@@ -14,7 +14,7 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: bmc_network_interface
-short_description: Module for managing OpenBmc network interfaces.
+short_description: Manage BMC network interfaces.
 version_added: "1.0.0"
 description:
   - Configures IP address at specific ethernet device.

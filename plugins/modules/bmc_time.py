@@ -14,7 +14,7 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: bmc_time
-short_description: Module for configure OpenBmc time.
+short_description: Manage BMC time.
 version_added: "1.0.0"
 description:
   - Configures NTP servers. Timezone is always set to GMT.

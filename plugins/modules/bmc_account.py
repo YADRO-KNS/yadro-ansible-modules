@@ -14,10 +14,9 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: bmc_account
-short_description: Module for managing OpenBmc accounts.
+short_description: Manage BMC accounts.
 version_added: "1.0.0"
 description:
-  - Creates, deletes and updates user accounts.
   - This module supports check mode.
 author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:

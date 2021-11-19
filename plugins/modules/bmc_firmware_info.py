@@ -14,10 +14,9 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: bmc_firmware_info
-short_description: Returns BMC firmware information.
+short_description: Return BMC firmware information.
 version_added: "1.0.0"
 description:
-  - Returns BMC firmware information.
   - This module supports check mode.
 author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:

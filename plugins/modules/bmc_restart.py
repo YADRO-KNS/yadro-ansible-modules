@@ -14,7 +14,7 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: bmc_restart
-short_description: Resets the BMC.
+short_description: Restart BMC.
 version_added: "1.0.0"
 description:
   - This module supports check mode.

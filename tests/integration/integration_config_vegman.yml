@@ -1,11 +1,4 @@
 ---
-connection_hostname: https://172.30.200.210
-connection_port: 443
-connection_username: admin
-connection_password: ...
-connection_timeout: 60
-connection_validate_certs: false
-
 is_hw_server: true
 
 # bmc_time
@@ -19,3 +12,14 @@ ipv4_addresses:
 
 # bmc_hostname
 hostname: vegman-s220-02112002E1
+
+# connection options
+
+connection_hostname: https://172.30.200.210
+connection_port: 443
+connection_username: admin
+connection_password: ...
+connection_timeout: 60
+connection_validate_certs: false
+
+
