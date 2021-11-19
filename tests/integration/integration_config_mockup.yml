@@ -10,6 +10,8 @@
 # connection_timeout: 60
 # connection_validate_certs: false
 
+is_hw_server: false
+
 # bmc_time
 ntp_servers: [10.10.0.100]
 
@@ -20,4 +22,4 @@ ipv4_addresses:
   - { gateway: 10.10.0.10, address: 10.10.0.1, subnet_mask: 255.255.0.0 }
 
 # bmc_hostname
-hostname: mockup-server
+hostname: mockup

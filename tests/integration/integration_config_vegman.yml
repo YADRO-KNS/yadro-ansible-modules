@@ -6,6 +6,8 @@ connection_password: ...
 connection_timeout: 60
 connection_validate_certs: false
 
+is_hw_server: true
+
 # bmc_time
 ntp_servers: [172.30.201.56]
 

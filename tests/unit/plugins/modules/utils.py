@@ -76,7 +76,7 @@ class ModuleTestCase:
         expected_exception = exception("Exception")
         mocker.patch("{0}.OpenBmcModule._create_client".format(self.module.__name__), side_effect=expected_exception)
         expected_json = {
-            "msg": "Can't connect to server.",
+            "msg": "Cannot connect to server.",
             "error_info": str(expected_exception),
             "failed": True,
         }
