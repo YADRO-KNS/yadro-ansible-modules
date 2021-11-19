@@ -16,8 +16,8 @@ DOCUMENTATION = r"""
 module: bmc_hostname
 short_description: Manage BMC hostname.
 version_added: "1.0.0"
-description: 
-  - Set system’s hostname.
+description:
+  - Set system's hostname.
   - This module supports check mode.
 author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:
