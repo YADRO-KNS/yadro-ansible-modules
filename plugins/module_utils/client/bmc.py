@@ -60,6 +60,16 @@ class OpenBmcRestClient(RestClient):
     def get_system(self):
         return self.get_system_by_id(self.system_name)
 
+    def reset(self, payload):
+        schema = {
+            "type": dict,
+            "suboptions": {
+                "ResetType": {"type": str, "required": True},
+            }
+        }
+        validate_schema(schema, payload)
+        self.post("/Managers/{0}/Actions/Manager.Reset".format(self.manager_name), body=payload)
+
     def get_managers_collection(self):
         data = self.get("/Managers").json_data
         return parse_members(data)

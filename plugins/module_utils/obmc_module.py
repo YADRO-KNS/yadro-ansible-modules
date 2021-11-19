@@ -46,7 +46,6 @@ class OpenBmcModule(AnsibleModule):
             required_if=required_if,
         )
 
-        # Initialized when module starts
         self.client = None
 
     def _create_client(self):
@@ -69,7 +68,7 @@ class OpenBmcModule(AnsibleModule):
         except HTTPError as e:
             self.fail_json(msg="Request finished with error.", error_info=json.load(e))
         except (URLError, SSLValidationError, ConnectionError) as e:
-            self.fail_json(msg="Can't connect to server.", error_info=str(e))
+            self.fail_json(msg="Cannot connect to server.", error_info=str(e))
 
     def _run(self):
         raise NotImplementedError("Method not implemented!")
