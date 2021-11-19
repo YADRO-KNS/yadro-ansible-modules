@@ -1,0 +1,12 @@
+---
+- name: Test bios info | Read firmware information
+  yadro.obmc.bios_info:
+    connection: "{{ connection }}"
+  register: result
+
+- name: Test bios info | Check state didn't changed and bios_info returned
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.bios_info != None"
+      - "result.msg == 'BIOS information successfully read.'"
