@@ -14,7 +14,7 @@ __metaclass__ = type
 DOCUMENTATION = r"""
 ---
 module: bmc_session
-short_description: Manages BMC sessions.
+short_description: Manage BMC sessions.
 version_added: "1.0.0"
 description:
   - Creates user session and returns session key. Connection username and password required.

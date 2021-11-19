@@ -1,15 +1,4 @@
 ---
-# Mockup connection options generated at runtime by utils.sh script
-#
-#  Example:
-#
-# connection_hostname: http://10.10.0.2
-# connection_port: 447
-# connection_username: username
-# connection_password: password
-# connection_timeout: 60
-# connection_validate_certs: false
-
 is_hw_server: false
 
 # bmc_time
@@ -23,3 +12,12 @@ ipv4_addresses:
 
 # bmc_hostname
 hostname: mockup
+
+# Mockup connection options generated at runtime by utils.sh script
+#
+# connection_hostname: http://10.10.0.2
+# connection_port: 447
+# connection_username: username
+# connection_password: password
+# connection_timeout: 60
+# connection_validate_certs: false
