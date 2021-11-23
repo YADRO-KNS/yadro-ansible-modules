@@ -13,13 +13,13 @@ import json
 import pytest
 
 from ansible_collections.yadro.obmc.tests.unit.compat.mock import MagicMock
-from ansible_collections.yadro.obmc.plugins.modules import bios_info
+from ansible_collections.yadro.obmc.plugins.modules import firmware_info
 from ansible_collections.yadro.obmc.tests.unit.plugins.modules.utils import ModuleTestCase
 
 
-class TestBmcBiosInfo(ModuleTestCase):
+class TestFirmwareInfo(ModuleTestCase):
 
-    module = bios_info
+    module = firmware_info
 
     @pytest.fixture
     def module_args(self, module_default_args):

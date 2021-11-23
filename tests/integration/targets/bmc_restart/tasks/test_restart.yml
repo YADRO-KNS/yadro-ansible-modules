@@ -13,7 +13,7 @@
 - block:
 
     - name: Test restart | Wait server offline
-      yadro.obmc.bmc_firmware_info:
+      yadro.obmc.firmware_info:
         connection: "{{ connection }}"
       ignore_errors: true
       register: result
@@ -23,7 +23,7 @@
       when:
 
     - name: Test restart | Wait server online
-      yadro.obmc.bmc_firmware_info:
+      yadro.obmc.firmware_info:
         connection: "{{ connection }}"
       ignore_errors: true
       register: result

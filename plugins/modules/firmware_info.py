@@ -13,8 +13,8 @@ __metaclass__ = type
 
 DOCUMENTATION = r"""
 ---
-module: bmc_firmware_info
-short_description: Return BMC firmware information.
+module: firmware_info
+short_description: Return BMC and BIOS firmware information.
 version_added: "1.0.0"
 description:
   - This module supports check mode.
@@ -36,23 +36,35 @@ error_info:
 firmware_info:
   type: dict
   returned: on success
-  description: BMC firmware information.
+  description: BMC, BIOS firmware versions.
   sample: {
-    "Description": "BMC image",
-    "Status": {
-      "Health": "OK",
-      "HealthRollup": "OK",
-      "State": "Enabled"
+    "BMC": {
+        "Description": "BMC image",
+        "Status": {
+          "Health": "OK",
+          "HealthRollup": "OK",
+          "State": "Enabled"
+        },
+        "Updateable": true,
+        "Version": "v1.0"
     },
-    "Updateable": true,
-    "Version": "v1.0"
+    "BIOS": {
+      "Description": "BIOS image",
+      "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "Enabled"
+      },
+      "Updateable": true,
+      "Version": "v1.0"
+    },
   }
 """
 
 EXAMPLES = r"""
 ---
 - name: Get firmware information
-  yadro.obmc.bmc_firmware_info:
+  yadro.obmc.firmware_info:
     connection:
       hostname: "localhost"
       username: "username"
@@ -71,8 +83,11 @@ class OpenBmcFirmwareInfoModule(OpenBmcModule):
 
     def _run(self):
         manager_info = self.client.get_manager()
-        firmware_info = self.client.get_software_inventory(manager_info["Links"]["ActiveSoftwareImage"])
-        self.exit_json(msg="Firmware information successfully read.", firmware_info=firmware_info)
+        bios_info = self.client.get_bios()
+        self.exit_json(msg="Firmware information successfully read.", firmware_info={
+            "BMC": self.client.get_software_inventory(manager_info["Links"]["ActiveSoftwareImage"]),
+            "BIOS": self.client.get_software_inventory(bios_info["Links"]["ActiveSoftwareImage"]),
+        })
 
 
 def main():

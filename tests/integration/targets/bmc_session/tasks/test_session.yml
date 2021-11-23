@@ -13,7 +13,7 @@
 
 
 - name: Test session | Read BMC firmware info
-  yadro.obmc.bmc_firmware_info:
+  yadro.obmc.firmware_info:
     connection:
       hostname:       "{{ connection_hostname }}"
       port:           "{{ connection_port }}"

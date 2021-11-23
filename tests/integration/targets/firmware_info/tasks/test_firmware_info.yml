@@ -1,6 +1,6 @@
 ---
 - name: Test firmware info | Read firmware information
-  yadro.obmc.bmc_firmware_info:
+  yadro.obmc.firmware_info:
     connection: "{{ connection }}"
   register: result
 
@@ -9,4 +9,6 @@
     that:
       - "result.changed == false"
       - "result.firmware_info != None"
+      - "result.firmware_info.BMC != None"
+      - "result.firmware_info.BIOS != None"
       - "result.msg == 'Firmware information successfully read.'"
