@@ -34,9 +34,9 @@ def module_mock(mocker):
 def module_default_args():
     return {
         "connection": {
-            "hostname": "localhost",
-            "username": "username",
-            "password": "password",
+            "hostname": "172.30.200.210",
+            "username": "admin",
+            "password": "V36man",
             "validate_certs": False,
             "port": 443,
             "timeout": 30,

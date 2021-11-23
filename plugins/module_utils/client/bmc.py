@@ -55,10 +55,33 @@ class OpenBmcRestClient(RestClient):
         return {
             "Id": data["Id"],
             "Model": data["Model"],
+            "PartNumber": data["PartNumber"],
+            "SerialNumber": data["SerialNumber"],
+            "Status": data["Status"],
         }
 
     def get_system(self):
         return self.get_system_by_id(self.system_name)
+
+    def get_memory_collection(self):
+        data = self.get("/Systems/{0}/Memory".format(self.system_name)).json_data
+        return parse_members(data)
+
+    def get_memory(self, memory_id):
+        data = self.get("/Systems/{0}/Memory/{1}".format(self.system_name, memory_id)).json_data
+        data.pop("@odata.id")
+        data.pop("@odata.type")
+        return data
+
+    def get_processors_collection(self):
+        data = self.get("/Systems/{0}/Processors".format(self.system_name)).json_data
+        return parse_members(data)
+
+    def get_processor(self, processor_id):
+        data = self.get("/Systems/{0}/Processors/{1}".format(self.system_name, processor_id)).json_data
+        data.pop("@odata.id")
+        data.pop("@odata.type")
+        return data
 
     def reset(self, payload):
         schema = {

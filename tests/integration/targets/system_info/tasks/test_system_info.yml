@@ -1,0 +1,15 @@
+---
+- name: Test system info | Read system information
+  yadro.obmc.system_info:
+    connection: "{{ connection }}"
+  register: result
+
+- debug:
+    msg: "{{ result }}"
+
+- name: Test system info | Check state didn't changed and system_info returned
+  assert:
+    that:
+      - "result.changed == false"
+      - "result.system_info != None"
+      - "result.msg == 'System information successfully read.'"
