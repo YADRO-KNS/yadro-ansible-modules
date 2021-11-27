@@ -25,7 +25,7 @@ options:
   name:
     required: True
     type: str
-    description: Name of the BMC.
+    description: The DNS Host Name of this BMC, without any domain information.
 """
 
 RETURN = r"""
@@ -34,7 +34,7 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-error_info:
+error:
   type: str
   returned: on error
   description: Error details if raised.
@@ -52,30 +52,34 @@ EXAMPLES = r"""
 """
 
 
+from functools import partial
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
 class OpenBmcHostnameModule(OpenBmcModule):
 
     def __init__(self):
-        argument_spec = {
-            "name": {"required": True, "type": "str"},
-        }
-
-        super(OpenBmcHostnameModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
+        argument_spec = {"name": {"required": True, "type": "str"}}
+        super(OpenBmcHostnameModule, self).__init__(
+            argument_spec=argument_spec,
+            supports_check_mode=True
+        )
 
     def _run(self):
-        iface = self.client.get_ethernet_interface_collection()[0]
-        config = self.client.get_ethernet_interface(iface)
+        changes = []
 
-        payload = {}
-        if self.params["name"] != config["HostName"]:
-            payload["HostName"] = self.params["name"]
+        network_protocol = self.redfish.get_manager("bmc").get_network_protocol()
+        if self.params["name"] != network_protocol.get_hostname():
+            changes.append(partial(
+                network_protocol.set_hostname,
+                self.params["name"],
+            ))
 
-        if payload:
+        if changes:
             if not self.check_mode:
-                self.client.update_ethernet_interface(iface, payload)
-            self.exit_json(msg="Hostname updated.", changed=True)
+                for action in changes:
+                    action()
+            self.exit_json(msg="Operation successful.", changed=True)
         else:
             self.exit_json(msg="No changes required.", changed=False)
 

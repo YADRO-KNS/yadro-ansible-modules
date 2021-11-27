@@ -1,9 +1,17 @@
 ---
+#################################################
+# Setup
+#################################################
+
 - name: Test user deletion | Ensure TestUser absent
   yadro.obmc.bmc_account:
     connection: "{{ connection }}"
     username: "TestUser"
     state: "absent"
+
+#################################################
+# Test
+#################################################
 
 - name: Test user deletion | Create TestUser
   yadro.obmc.bmc_account:
@@ -13,31 +21,31 @@
     role: "Operator"
     enabled: true
     state: "present"
+  register: result
 
+- name: Test user deletion | Check state
+  assert:
+    that: "result.changed == true"
 
-- name: Test user deletion | Delete TestUser absent
+- name: Test user deletion | Remove TestUser
   yadro.obmc.bmc_account:
     connection: "{{ connection }}"
     username: "TestUser"
     state: "absent"
   register: result
 
-- name: Test user deletion | Check state changed and user deleted
+- name: Test user deletion | Check state
   assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Account deleted.'"
+    that: "result.changed == true"
 
-
-- name: Test user deletion | Ensure TestUser absent
+- name: Test user deletion | Check TestUser removed
   yadro.obmc.bmc_account:
     connection: "{{ connection }}"
     username: "TestUser"
     state: "absent"
+  check_mode: true
   register: result
 
-- name: Test user deletion | Check state didn't changed
+- name: Test user deletion | Check state
   assert:
-    that:
-      - "result.changed == false"
-      - "result.msg == 'No changes required.'"
+    that: "result.changed == false"

@@ -42,7 +42,7 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-error_info:
+error:
   type: str
   returned: on error
   description: Error details if raised.
@@ -90,6 +90,7 @@ EXAMPLES = r"""
 """
 
 
+from functools import partial
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
@@ -100,36 +101,45 @@ class OpenBmcTimeModule(OpenBmcModule):
             "ntp_enabled": {"type": "bool", "required": False},
             "ntp_servers": {"type": "list", "required": False, "elements": "str"},
         }
-        super(OpenBmcTimeModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
+        super(OpenBmcTimeModule, self).__init__(
+            argument_spec=argument_spec,
+            supports_check_mode=True
+        )
 
     def _run(self):
+        changes = []
+
         if self.params["ntp_servers"] and len(self.params["ntp_servers"]) > 3:
             self.fail_json(
-                msg="Can't configure NTP servers.",
-                error_info="Supported no more than 3 NTP servers.",
+                msg="Cannot configure NTP servers.",
+                error="Supported no more than 3 NTP servers.",
                 changed=False
             )
 
-        network_protocols = self.client.get_network_protocol()
-        changed = False
-        payload = {"NTP": {}}
+        manager = self.redfish.get_manager("bmc")
+        network_protocol = manager.get_network_protocol()
 
         if self.params["ntp_enabled"] is not None and \
-                self.params["ntp_enabled"] != network_protocols["NTP"]["ProtocolEnabled"]:
-            changed = True
-            payload["NTP"]["ProtocolEnabled"] = self.params["ntp_enabled"]
+                self.params["ntp_enabled"] != network_protocol.get_ntp_enabled():
+            changes.append(partial(
+                network_protocol.set_ntp_enabled,
+                self.params["ntp_enabled"],
+            ))
 
         if self.params["ntp_servers"] is not None and \
-                self.params["ntp_servers"] != network_protocols["NTP"]["NTPServers"]:
-            changed = True
-            payload["NTP"]["NTPServers"] = self.params["ntp_servers"]
+                self.params["ntp_servers"] != network_protocol.get_ntp_servers():
+            changes.append(partial(
+                network_protocol.set_ntp_servers,
+                self.params["ntp_servers"],
+            ))
 
-        if changed:
+        if changes:
             if not self.check_mode:
-                self.client.update_network_protocol(payload)
-            self.exit_json(msg="Configuration updated.", changed=changed)
+                for action in changes:
+                    action()
+            self.exit_json(msg="Operation successful.", changed=True)
         else:
-            self.exit_json(msg="No changes required.", changed=changed)
+            self.exit_json(msg="No changes required.", changed=False)
 
 
 def main():

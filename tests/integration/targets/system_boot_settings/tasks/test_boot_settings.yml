@@ -1,0 +1,72 @@
+---
+#################################################
+# Setup
+#################################################
+
+- name: Test boot settings | Disable boot overrides
+  yadro.obmc.system_boot_settings:
+    connection: "{{ connection }}"
+    override_enabled: Disabled
+
+#################################################
+# Test
+#################################################
+
+- name: Test boot settings | Set once boot from USB
+  yadro.obmc.system_boot_settings:
+    connection: "{{ connection }}"
+    override_enabled: Once
+    override_mode: Legacy
+    override_target: Usb
+  register: result
+
+- name: Test boot settings | Check state
+  assert:
+    that: "result.changed == true"
+
+
+- name: Test boot settings | Check configuration applied
+  yadro.obmc.system_boot_settings:
+    connection: "{{ connection }}"
+    override_enabled: Once
+    override_mode: Legacy
+    override_target: Usb
+  check_mode: true
+  register: result
+
+- name: Test boot settings | Check state
+  assert:
+    that: "result.changed == false"
+
+
+- name: Test boot settings | Set continious boot from USB
+  yadro.obmc.system_boot_settings:
+    connection: "{{ connection }}"
+    override_enabled: Continuous
+    override_mode: UEFI
+    override_target: Hdd
+  register: result
+
+- name: Test boot settings | Check state
+  assert:
+    that: "result.changed == true"
+
+
+- name: Test boot settings | Check configuration applied
+  yadro.obmc.system_boot_settings:
+    connection: "{{ connection }}"
+    override_enabled: Continuous
+    override_mode: UEFI
+    override_target: Hdd
+  check_mode: true
+  register: result
+
+- name: Test boot settings | Check state
+  assert:
+    that: "result.changed == false"
+
+
+- name: Test boot settings | Disable boot overrides
+  yadro.obmc.system_boot_settings:
+    connection: "{{ connection }}"
+    override_enabled: Disabled

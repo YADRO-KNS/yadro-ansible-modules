@@ -1,34 +1,35 @@
 ---
-- name: Test restart | Restart BMC
-  yadro.obmc.bmc_restart:
-    connection: "{{ connection }}"
-  register: result
-
-- name: Test restart | Check restart scheduled
-  assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'BMC restart scheduled.'"
-
 - block:
 
-    - name: Test restart | Wait server offline
-      yadro.obmc.firmware_info:
-        connection: "{{ connection }}"
-      ignore_errors: true
-      register: result
-      until: result.msg == "Cannot connect to server."
-      retries: 10
-      delay: 5
-      when:
+  - name: Test BMC restart | Restart BMC
+    yadro.obmc.bmc_restart:
+      connection: "{{ connection }}"
+    register: result
 
-    - name: Test restart | Wait server online
-      yadro.obmc.firmware_info:
-        connection: "{{ connection }}"
-      ignore_errors: true
-      register: result
-      until: not result.failed
-      retries: 50
-      delay: 5
+  - name: Test BMC restart | Check state
+    assert:
+      that: "result.changed == true"
 
-  when: is_hw_server
+  - name: Test BMC restart | Pause for 10 seconds to initiate restart
+    pause:
+      seconds: 10
+
+  - name: Test BMC restart | Wait BMC offline
+    yadro.obmc.firmware_info:
+      connection: "{{ connection }}"
+    ignore_errors: true
+    register: result
+    until: result.failed
+    retries: 10
+    delay: 5
+
+  - name: Test BMC restart | Wait BMC online
+    yadro.obmc.firmware_info:
+      connection: "{{ connection }}"
+    ignore_errors: true
+    register: result
+    until: not result.failed
+    retries: 50
+    delay: 5
+
+  when: is_hw

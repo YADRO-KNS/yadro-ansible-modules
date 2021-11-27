@@ -5,14 +5,12 @@
     state: "present"
   register: session_result
 
-- name: Test session | Check session created
+- name: Test session | Check state
   assert:
-    that:
-      - "session_result.changed == true"
-      - "session_result.msg == 'Session created.'"
+    that: "session_result.changed == true"
 
 
-- name: Test session | Read BMC firmware info
+- name: Test session | Read BMC firmware info with session key
   yadro.obmc.firmware_info:
     connection:
       hostname:       "{{ connection_hostname }}"
@@ -27,8 +25,6 @@
     that:
       - "result.changed == false"
       - "result.firmware_info != None"
-      - "result.msg == 'Firmware information successfully read.'"
-
 
 - name: Test session | Delete session
   yadro.obmc.bmc_session:
@@ -37,8 +33,19 @@
     state: "absent"
   register: result
 
-- name: Test session | Check session deleted
+- name: Test session | Check state
   assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Session deleted.'"
+    that: "result.changed == true"
+
+
+- name: Test session | Check session absent
+  yadro.obmc.bmc_session:
+    connection: "{{ connection }}"
+    session_id: "{{ session_result['session']['id'] }}"
+    state: "absent"
+  check_mode: true
+  register: result
+
+- name: Test session | Check state
+  assert:
+    that: "result.changed == false"

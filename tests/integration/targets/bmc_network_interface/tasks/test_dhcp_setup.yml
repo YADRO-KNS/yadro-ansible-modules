@@ -1,10 +1,28 @@
 ---
-- name: Test DHCP setup | Set DHCP enabled
+#################################################
+# Setup
+#################################################
+
+- name: Test DHCP setup | Ensure DHCP enabled
   yadro.obmc.bmc_network_interface:
     connection: "{{ connection }}"
     name: "{{ interface_name }}"
     dhcp_enabled: true
 
+- name: Test DHCP setup | Wait until changes applied
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    dhcp_enabled: true
+  check_mode: true
+  register: result
+  until: not result.changed
+  retries: 6
+  delay: 5
+
+#################################################
+# Test
+#################################################
 
 - name: Test DHCP setup | Disable DHCP
   yadro.obmc.bmc_network_interface:
@@ -13,25 +31,20 @@
     dhcp_enabled: false
   register: result
 
-- name: Test DHCP setup | Check state changed
+- name: Test DHCP setup | Check state
   assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Interface configuration updated.'"
+    that: "result.changed == true"
 
-
-- name: Test DHCP setup | Check configuration applied
+- name: Test DHCP setup | Wait until changes applied
   yadro.obmc.bmc_network_interface:
     connection: "{{ connection }}"
     name: "{{ interface_name }}"
     dhcp_enabled: false
+  check_mode: true
   register: result
-
-- name: Test DHCP setup | Check configuration applied
-  assert:
-    that:
-      - "result.changed == false"
-      - "result.msg == 'No changes required.'"
+  until: not result.changed
+  retries: 6
+  delay: 5
 
 
 - name: Test DHCP setup | Enable DHCP
@@ -41,22 +54,17 @@
     dhcp_enabled: true
   register: result
 
-- name: Test DHCP setup | Check state changed
+- name: Test DHCP setup | Check state
   assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Interface configuration updated.'"
+    that: "result.changed == true"
 
-
-- name: Test DHCP setup | Check configuration applied
+- name: Test DHCP setup | Wait until changes applied
   yadro.obmc.bmc_network_interface:
     connection: "{{ connection }}"
     name: "{{ interface_name }}"
     dhcp_enabled: true
+  check_mode: true
   register: result
-
-- name: Test DHCP setup | Check configuration applied
-  assert:
-    that:
-      - "result.changed == false"
-      - "result.msg == 'No changes required.'"
+  until: not result.changed
+  retries: 6
+  delay: 5

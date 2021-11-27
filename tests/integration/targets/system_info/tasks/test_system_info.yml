@@ -12,4 +12,10 @@
     that:
       - "result.changed == false"
       - "result.system_info != None"
-      - "result.msg == 'System information successfully read.'"
+      - "result.system_info.BMC != None"
+      - "result.system_info.Chassis != None"
+      - "result.system_info.Processors != None"
+      - "result.system_info.DIMM != None"
+      - "result.system_info.PCIeDevices != None"
+      - "result.system_info.Fans != None"
+      - "result.system_info.PowerSupplies != None"

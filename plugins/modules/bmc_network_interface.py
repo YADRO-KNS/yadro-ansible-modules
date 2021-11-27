@@ -17,9 +17,7 @@ module: bmc_network_interface
 short_description: Manage BMC network interfaces.
 version_added: "1.0.0"
 description:
-  - Configures IP address at specific ethernet device.
-  - Enables and disables address resolution via DHCP.
-  - Configures interface namespace servers.
+  - Updates properties in Ethernet interface resource for a BMC.
   - This module supports check mode.
 author: "Radmir Safin (@radmirsafin)"
 extends_documentation_fragment:
@@ -28,19 +26,19 @@ options:
   name:
     required: True
     type: str
-    description: Ethernet interface name to configure.
+    description: The identifier of the Ethernet interface.
   dhcp_enabled:
     type: bool
     description:
-      - Responsible for interface DHCP activation.
+      - An indication of whether DHCPv4 is enabled on this Ethernet interface.
       - Cannot be set to C(true) together I(ipv4_addresses) option.
       - If DHCP is enabled, static network configuration will be lost.
   ipv4_addresses:
     type: list
     elements: dict
     description:
+      - The IPv4 static addresses assigned to this interface.
       - Only one IP address currently supported (will be fixed in future releases).
-      - List of IP addresses to set at interface.
       - Cannot be configured if I(dhcp_enabled) is C(true).
       - If static configuration is present, DHCP will be disabled.
       - Each IP address record it is dictionary which must contains
@@ -49,7 +47,7 @@ options:
   static_nameservers:
     type: list
     elements: str
-    description: List of static nameservers assigned to interface.
+    description: List of static DNS server names.
 """
 
 RETURN = r"""
@@ -58,7 +56,7 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-error_info:
+error:
   type: str
   returned: on error
   description: Error details if raised.
@@ -125,6 +123,7 @@ EXAMPLES = r"""
 """
 
 
+from functools import partial
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
@@ -137,72 +136,86 @@ class OpenBmcNetworkInterfaceModule(OpenBmcModule):
             "ipv4_addresses": {"type": "list", "required": False, "elements": "dict"},
             "static_nameservers": {"type": "list", "required": False, "elements": "str"}
         }
-        super(OpenBmcNetworkInterfaceModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
+        super(OpenBmcNetworkInterfaceModule, self).__init__(
+            argument_spec=argument_spec,
+            supports_check_mode=True
+        )
 
     def _run(self):
-        payload = {}
+        changes = []
 
         if self.params["dhcp_enabled"] and self.params["ipv4_addresses"]:
             self.fail_json(
                 msg="Cannot configure network interface.",
-                error_info="Conflict between static configuration and DHCP.",
+                error="Conflict between static configuration and DHCP.",
                 changed=False,
             )
 
         if self.params["ipv4_addresses"] and len(self.params["ipv4_addresses"]) > 1:
             self.fail_json(
                 msg="Cannot configure network interface.",
-                error_info="Only one IP address supported. Please, remove extra configuration.",
+                error="Only one IP address supported.",
                 changed=False,
             )
 
-        interfaces = self.client.get_ethernet_interface_collection()
-        if self.params["name"] not in interfaces:
+        interface = self.redfish.get_manager("bmc").get_ethernet_interface(self.params["name"])
+        if interface is None:
             self.fail_json(
                 msg="Cannot configure network interface.",
-                error_info="Interface {0} not found.".format(self.params["name"]),
+                error="Interface {0} not found.".format(self.params["name"]),
                 changed=False
             )
 
-        current_config = self.client.get_ethernet_interface(self.params["name"])
-
         if self.params["dhcp_enabled"] is not None:
-            if current_config["DHCPv4"]["DHCPEnabled"] != self.params["dhcp_enabled"]:
-                payload["DHCPv4"] = {"DHCPEnabled": self.params["dhcp_enabled"]}
+            if interface.get_dhcpv4_enabled() != self.params["dhcp_enabled"]:
+                changes.append(partial(
+                    interface.set_dhcpv4_enabled,
+                    self.params["dhcp_enabled"],
+                ))
 
+        ip_addresses = interface.get_static_ipv4_addresses()
         if self.params["ipv4_addresses"] is not None:
-            changed = True
-            if len(current_config["IPv4StaticAddresses"]) == len(self.params["ipv4_addresses"]):
+            ip_changed = True
+            if len(ip_addresses) == len(self.params["ipv4_addresses"]):
                 if all(
                         {
                             "Address": conf["address"],
                             "AddressOrigin": "Static",
                             "Gateway": conf["gateway"],
                             "SubnetMask": conf["subnet_mask"],
-                        } in current_config["IPv4StaticAddresses"] for conf in self.params["ipv4_addresses"]
+                        } in ip_addresses for conf in self.params["ipv4_addresses"]
                 ):
-                    changed = False
-            if changed:
-                payload["IPv4StaticAddresses"] = []
+                    ip_changed = False
+            if ip_changed:
+                payload = []
                 for conf in self.params["ipv4_addresses"]:
-                    payload["IPv4StaticAddresses"].append({
+                    payload.append({
                         "Address": conf["address"],
                         "Gateway": conf["gateway"],
                         "SubnetMask": conf["subnet_mask"],
                     })
+                changes.append(partial(
+                    interface.set_ipv4_addresses,
+                    payload,
+                ))
 
+        static_nameservers = interface.get_static_nameservers()
         if self.params["static_nameservers"] is not None:
-            changed = True
-            if len(current_config["StaticNameServers"]) == len(self.params["static_nameservers"]):
-                if all(ns in current_config["StaticNameServers"] for ns in self.params["static_nameservers"]):
-                    changed = False
-            if changed:
-                payload["StaticNameServers"] = self.params["static_nameservers"]
+            nameservers_changed = True
+            if len(static_nameservers) == len(self.params["static_nameservers"]):
+                if all(ns in static_nameservers for ns in self.params["static_nameservers"]):
+                    nameservers_changed = False
+            if nameservers_changed:
+                changes.append(partial(
+                    interface.set_static_nameservers,
+                    self.params["static_nameservers"],
+                ))
 
-        if payload:
+        if changes:
             if not self.check_mode:
-                self.client.update_ethernet_interface(self.params["name"], payload)
-            self.exit_json(msg="Interface configuration updated.", changed=True)
+                for action in changes:
+                    action()
+            self.exit_json(msg="Operation successful.", changed=True)
         else:
             self.exit_json(msg="No changes required.", changed=False)
 

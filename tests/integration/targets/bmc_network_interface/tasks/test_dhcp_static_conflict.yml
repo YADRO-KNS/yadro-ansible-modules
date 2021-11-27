@@ -1,0 +1,16 @@
+---
+- name: Test DHCP and static conflict | Try to set static configuration and DHCP
+  yadro.obmc.bmc_network_interface:
+    connection: "{{ connection }}"
+    name: "{{ interface_name }}"
+    dhcp_enabled: true
+    ipv4_addresses: "{{ ipv4_addresses }}"
+  register: result
+  ignore_errors: true
+
+- name: Test DHCP and static conflict | Check error raised
+  assert:
+    that:
+      - "result.failed == true"
+      - "result.changed == false"
+      - "result.error != None"

@@ -9,19 +9,23 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+try:
+    from typing import Callable, Tuple, Any, Dict, List
+except ImportError:
+    # Satisfy Python 2 which doesn't have typing.
+    Callable = Tuple = Any = Dict = List = None
+
 import json
-
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.urls import ConnectionError, SSLValidationError
-from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError
-
-from ansible_collections.yadro.obmc.plugins.module_utils.client.client import create_client
-from ansible_collections.yadro.obmc.plugins.module_utils.client.auth import BasicAuth, SessionAuth
+from ansible_collections.yadro.obmc.plugins.module_utils.redfish.redfish import RedfishAPI
+from ansible_collections.yadro.obmc.plugins.module_utils.redfish.auth import BasicAuth, SessionAuth
+from ansible_collections.yadro.obmc.plugins.module_utils.redfish.exceptions import RedfishError
 
 
 class OpenBmcModule(AnsibleModule):
 
     def __init__(self, argument_spec=None, supports_check_mode=False, required_if=None):
+        # type: (Dict, bool, List) -> None
         _argument_spec = {
             "connection": {
                 "required": True,
@@ -46,29 +50,30 @@ class OpenBmcModule(AnsibleModule):
             required_if=required_if,
         )
 
-        self.client = None
+        self.redfish = None  # type: RedfishAPI
 
-    def _create_client(self):
-        conn = self.params["connection"]
-        if conn["session_key"]:
-            auth = SessionAuth(conn["session_key"])
-        elif conn["username"] and conn["password"]:
-            auth = BasicAuth(conn["username"], conn["password"])
-        else:
-            self.fail_json(msg="Required connection options missed. Username and password "
-                               "or session_key must be defined")
-
-        return create_client(conn["hostname"], auth, validate_certs=conn["validate_certs"],
-                             port=conn["port"], timeout=conn["timeout"])
-
-    def run(self):
+    def run(self):  # type: () -> None
         try:
-            self.client = self._create_client()
-            self._run()
-        except HTTPError as e:
-            self.fail_json(msg="Request finished with error.", error_info=json.load(e))
-        except (URLError, SSLValidationError, ConnectionError) as e:
-            self.fail_json(msg="Cannot connect to server.", error_info=str(e))
+            connection = self.params["connection"]
+            if connection["session_key"]:
+                auth = SessionAuth(connection["session_key"])
+            elif connection["username"] and connection["password"]:
+                auth = BasicAuth(connection["username"], connection["password"])
+            else:
+                self.fail_json(msg="Cannot define authentication method.")
 
-    def _run(self):
+            self.redfish = RedfishAPI(
+                hostname=connection["hostname"],
+                base_prefix="/redfish/v1",
+                port=connection["port"],
+                validate_certs=connection["validate_certs"],
+                timeout=connection["timeout"],
+                auth=auth,
+            )
+
+            self._run()
+        except RedfishError as e:
+            self.fail_json(msg="Operation failed.", error=str(e))
+
+    def _run(self):  # type: () -> None
         raise NotImplementedError("Method not implemented!")

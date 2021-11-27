@@ -15,9 +15,7 @@
 
 - name: Test NTP configuration | Check configuration updated
   assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Configuration updated.'"
+    that: "result.changed == true"
 
 
 - name: Test NTP configuration | Check configuration applied
@@ -25,13 +23,12 @@
     connection: "{{ connection }}"
     ntp_enabled: true
     ntp_servers: "{{ ntp_servers }}"
+  check_mode: true
   register: result
 
 - name: Test NTP configuration | Check configuration applied
   assert:
-    that:
-      - "result.changed == false"
-      - "result.msg == 'No changes required.'"
+    that: "result.changed == false"
 
 
 - name: Test NTP configuration | Disable NTP support
@@ -42,9 +39,7 @@
 
 - name: Test NTP configuration | Check configuration updated
   assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Configuration updated.'"
+    that: "result.changed == true"
 
 
 - name: Test NTP configuration | Check configuration applied
@@ -52,10 +47,16 @@
     connection: "{{ connection }}"
     ntp_enabled: false
     ntp_servers: "{{ ntp_servers }}"
+  check_mode: true
   register: result
 
 - name: Test NTP configuration | Check configuration applied
   assert:
-    that:
-      - "result.changed == false"
-      - "result.msg == 'No changes required.'"
+    that: "result.changed == false"
+
+
+- name: Test NTP configuration | Ensure NTP not configred
+  yadro.obmc.bmc_time:
+    connection: "{{ connection }}"
+    ntp_enabled: false
+    ntp_servers: []

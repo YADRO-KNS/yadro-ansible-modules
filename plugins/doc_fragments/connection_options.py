@@ -25,20 +25,20 @@ class ModuleDocFragment(object):
           hostname:
             required: True
             type: str
-            description: OpenBmc server IP address or hostname.
+            description: BMC server IP address or hostname.
           username:
             type: str
-            description: OpenBmc username to login.
+            description: BMC username to login.
           password:
             type: str
-            description: OpenBmc user password.
+            description: BMC user password.
           session_key:
             type: str
-            description: OpenBmc session key.
+            description: BMC session key.
           port:
             type: int
             default: 443
-            description: OpenBmc REST API port.
+            description: BMC REST API port.
           validate_certs:
             type: bool
             default: True
@@ -48,5 +48,5 @@ class ModuleDocFragment(object):
           timeout:
             type: int
             default: 30
-            description: API request timeout.
+            description: BMC REST API request timeout.
 """

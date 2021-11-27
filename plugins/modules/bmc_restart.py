@@ -34,7 +34,7 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-error_info:
+error:
   type: str
   returned: on error
   description: Error details if raised.
@@ -59,6 +59,7 @@ EXAMPLES = r"""
 """
 
 
+from functools import partial
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
@@ -66,16 +67,29 @@ class OpenBmcRestartModule(OpenBmcModule):
 
     def __init__(self):
         argument_spec = {"force": {"required": False, "type": "bool", "default": False}}
-        super(OpenBmcRestartModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
+        super(OpenBmcRestartModule, self).__init__(
+            argument_spec=argument_spec,
+            supports_check_mode=True
+        )
 
     def _run(self):
-        payload = {"ResetType": "GracefulRestart"}
+        changes = []
+
+        manager = self.redfish.get_manager("bmc")
         if self.params["force"]:
-            payload["ResetType"] = "ForceRestart"
+            changes.append(partial(
+                manager.reset_force,
+            ))
+        else:
+            changes.append(partial(
+                manager.reset_graceful,
+            ))
 
         if not self.check_mode:
-            self.client.reset(payload)
-        self.exit_json(msg="BMC restart scheduled.", changed=True)
+            for action in changes:
+                action()
+
+        self.exit_json(msg="Operation successful.", changed=True)
 
 
 def main():

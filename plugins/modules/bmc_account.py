@@ -31,8 +31,6 @@ options:
     description:
       - The password of the account.
       - Required when creating a new user.
-      - Module can't compare passwords, so if I(password) field is set, module
-      - step will always finished with C(changed) result.
   role:
     type: str
     choices: [Administrator, Operator, ReadOnly, NoAccess]
@@ -52,7 +50,6 @@ options:
     default: present
     description:
       - C(present) creates a new account if I(username) does not exists.
-      - If account exists module will try to modify it.
       - C(absent) deletes an existing account.
 """
 
@@ -62,7 +59,7 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-error_info:
+error:
   type: str
   returned: on error
   description: Error details if raised.
@@ -103,6 +100,7 @@ EXAMPLES = r"""
 """
 
 
+from functools import partial
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
@@ -125,58 +123,66 @@ class OpenBmcAccountModule(OpenBmcModule):
                 "choices": ["present", "absent"]
             },
         }
-        super(OpenBmcAccountModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
+        super(OpenBmcAccountModule, self).__init__(
+            argument_spec=argument_spec,
+            supports_check_mode=True
+        )
 
     def _run(self):
-        action = None
-        payload = {}
+        changes = []
 
-        accounts = self.client.get_account_collection()
+        account_service = self.redfish.get_account_service()
+        account = account_service.get_account(self.params["username"])
+
         if self.params["state"] == "present":
-            if self.params["username"] in accounts:
-                action = "update"
-                user_account = self.client.get_account(self.params["username"])
+            if account:
                 if self.params["password"]:
-                    payload["Password"] = self.params["password"]
-                if self.params["role"] and self.params["role"] != user_account["RoleId"]:
-                    payload["RoleId"] = self.params["role"]
-                if self.params["enabled"] is not None and self.params["enabled"] != user_account["Enabled"]:
-                    payload["Enabled"] = self.params["enabled"]
+                    changes.append(partial(
+                        account.set_password,
+                        self.params["password"],
+                    ))
+                if self.params["role"] and self.params["role"] != account.get_role_id():
+                    changes.append(partial(
+                        account.set_role_id,
+                        self.params["role"],
+                    ))
+                if self.params["enabled"] is not None and self.params["enabled"] != account.get_enabled():
+                    changes.append(partial(
+                        account.set_enabled,
+                        self.params["enabled"]
+                    ))
             else:
-                action = "create"
                 missed_args = []
-                for k in ["password", "role", "enabled"]:
-                    if self.params[k] is None:
-                        missed_args.append(k)
+                for arg in ["password", "role", "enabled"]:
+                    if self.params[arg] is None:
+                        missed_args.append(arg)
+
                 if missed_args:
                     self.fail_json(
                         msg="Cannot create new account.",
-                        error_info="Fields required: {0}.".format(", ".join(missed_args)),
+                        error="Fields required: {0}.".format(", ".join(missed_args)),
                         changed=False
                     )
 
-                payload = {
-                    "UserName": self.params["username"],
-                    "Password": self.params["password"],
-                    "RoleId": self.params["role"],
-                    "Enabled": self.params["enabled"],
-                }
+                changes.append(partial(
+                    account_service.create_account,
+                    self.params["username"],
+                    self.params["password"],
+                    self.params["role"],
+                    self.params["enabled"],
+                ))
         else:
-            if self.params["username"] in accounts:
-                action = "delete"
+            if account:
+                changes.append(partial(
+                    account_service.delete_account,
+                    self.params["username"],
+                ))
 
-        if action == "create" and payload:
+        if changes:
             if not self.check_mode:
-                self.client.create_account(payload)
-            self.exit_json(msg="Account created.", changed=True)
-        elif action == "update" and payload:
-            if not self.check_mode:
-                self.client.update_account(self.params["username"], payload)
-            self.exit_json(msg="Account updated.", changed=True)
-        elif action == "delete":
-            if not self.check_mode:
-                self.client.delete_account(self.params["username"])
-            self.exit_json(msg="Account deleted.", changed=True)
+                for action in changes:
+                    action()
+            self.exit_json(msg="Operation successful.", changed=True)
         else:
             self.exit_json(msg="No changes required.", changed=False)
 
