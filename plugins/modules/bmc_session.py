@@ -42,7 +42,7 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-error_info:
+error:
   type: str
   returned: on error
   description: Error details if raised.
@@ -51,8 +51,8 @@ session:
   returned: on success and state present
   description: Contains session information.
   sample: {
-    "Id": "IzQa2ZTHT5",
-    "Key" : "UOaFqhn7mYnmg5hMaCsx",
+    "id": "IzQa2ZTHT5",
+    "key" : "UOaFqhn7mYnmg5hMaCsx",
   }
 """
 
@@ -67,8 +67,8 @@ EXAMPLES = r"""
     state: present
   register: result
 
-- name: Read BMC firmware info via session key
-  yadro.obmc.bmc_firmware_info:
+- name: Read firmware info via session key
+  yadro.obmc.firmware_info:
     connection:
       hostname: "localhost"
       session_key: "{{ result['session']['key'] }}"
@@ -84,6 +84,7 @@ EXAMPLES = r"""
 """
 
 
+from functools import partial
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
@@ -103,28 +104,40 @@ class OpenBmcSessionModule(OpenBmcModule):
             ["state", "absent", ["session_id"]],
         ],
 
-        super(OpenBmcSessionModule, self).__init__(argument_spec=argument_spec, supports_check_mode=True)
+        super(OpenBmcSessionModule, self).__init__(
+            argument_spec=argument_spec,
+            supports_check_mode=True,
+        )
 
     def _run(self):
         if not (self.params["connection"]["username"] and self.params["connection"]["password"]):
             self.fail_json(
                 msg="Cannot create session.",
-                error_info="Connection username and password required to create session.",
+                error="Connection username and password required to create session.",
                 changed=False,
             )
 
         if self.params["state"] == "present":
             result = {"id": "", "key": ""}
             if not self.check_mode:
-                result = self.client.create_session({
-                    "UserName": self.params["connection"]["username"],
-                    "Password": self.params["connection"]["password"],
-                })
-            self.exit_json(msg="Session created.", changed=True, session=result)
+                session = self.redfish.create_session(
+                    self.params["connection"]["username"],
+                    self.params["connection"]["password"],
+                )
+                result = {
+                    "id": session.get_id(),
+                    "key": session.get_token(),
+                }
+            self.exit_json(msg="Operation successful.", changed=True, session=result)
         else:
-            if not self.check_mode:
-                self.client.delete_session(self.params["session_id"])
-            self.exit_json(msg="Session deleted.", changed=True)
+            session_service = self.redfish.get_session_service()
+            session = session_service.get_session(self.params["session_id"])
+            if session:
+                if not self.check_mode:
+                    session_service.delete_session(self.params["session_id"])
+                self.exit_json(msg="Operation successful.", changed=True)
+            else:
+                self.exit_json(msg="No changes required.", changed=False)
 
 
 def main():

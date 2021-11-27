@@ -1,11 +1,19 @@
 ---
+#################################################
+# Setup
+#################################################
+
 - name: Test check mode | Ensure TestUser absent
   yadro.obmc.bmc_account:
     connection: "{{ connection }}"
     username: "TestUser"
     state: "absent"
 
-- name: Test check mode | Create TestUser
+#################################################
+# Test
+#################################################
+
+- name: Test check mode | Create TestUser in check mode
   yadro.obmc.bmc_account:
     connection: "{{ connection }}"
     username: "TestUser"
@@ -13,9 +21,14 @@
     role: "Operator"
     enabled: true
     state: "present"
+  check_mode: true
+  register: result
 
+- name: Test check mode | Check state
+  assert:
+    that: "result.changed == true"
 
-- name: Test check mode | Delete TestUser in check mode
+- name: Test check mode | Check TestUser absent
   yadro.obmc.bmc_account:
     connection: "{{ connection }}"
     username: "TestUser"
@@ -23,56 +36,6 @@
   check_mode: true
   register: result
 
-- name: Test check mode | Check state changed
+- name: Test check mode | Check state
   assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Account deleted.'"
-
-
-- name: Test check mode | Ensure TestUser exists
-  yadro.obmc.bmc_account:
-    connection: "{{ connection }}"
-    username: "TestUser"
-    role: "Operator"
-    enabled: true
-    state: "present"
-  register: result
-
-- name: Test check mode | Check state didn't changed
-  assert:
-    that:
-      - "result.changed == false"
-      - "result.msg == 'No changes required.'"
-
-
-- name: Test check mode | Modify TestUser in check mode
-  yadro.obmc.bmc_account:
-    connection: "{{ connection }}"
-    username: "TestUser"
-    enabled: false
-    state: "present"
-  check_mode: true
-  register: result
-
-- name: Test check mode | Check state changed
-  assert:
-    that:
-      - "result.changed == true"
-      - "result.msg == 'Account updated.'"
-
-
-- name: Test check mode | Ensure TestUser exists
-  yadro.obmc.bmc_account:
-    connection: "{{ connection }}"
-    username: "TestUser"
-    role: "Operator"
-    enabled: true
-    state: "present"
-  register: result
-
-- name: Test check mode | Check state didn't changed
-  assert:
-    that:
-      - "result.changed == false"
-      - "result.msg == 'No changes required.'"
+    that: "result.changed == false"

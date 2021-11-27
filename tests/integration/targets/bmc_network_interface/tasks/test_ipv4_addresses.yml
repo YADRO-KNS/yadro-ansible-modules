@@ -1,10 +1,13 @@
 ---
+#################################################
+# Setup
+#################################################
+
 - name: Test ipv4 addresses | Reset configuration
   yadro.obmc.bmc_network_interface:
     connection: "{{ connection }}"
     name: "{{ interface_name }}"
     dhcp_enabled: true
-    static_nameservers: []
 
 - name: Test ipv4 addresses | Wait until changes applied
   yadro.obmc.bmc_network_interface:
@@ -17,6 +20,9 @@
   retries: 6
   delay: 5
 
+#################################################
+# Test
+#################################################
 
 - name: Test ipv4 addresses | Set static addresses
   yadro.obmc.bmc_network_interface:
@@ -25,7 +31,7 @@
     ipv4_addresses: "{{ ipv4_addresses }}"
   register: result
 
-- name: Test ipv4 addresses | Check state changed
+- name: Test ipv4 addresses | Check state
   assert:
     that: "result.changed == true"
 

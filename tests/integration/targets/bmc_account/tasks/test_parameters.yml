@@ -1,0 +1,15 @@
+---
+- name: Test parameters | Create TestUser without required parameter
+  yadro.obmc.bmc_account:
+    connection: "{{ connection }}"
+    username: "TestUser"
+    state: "present"
+  register: result
+  ignore_errors: true
+
+- name: Test parameters | Check error raised
+  assert:
+    that:
+      - "result.failed == true"
+      - "result.changed == false"
+      - "result.error != None"

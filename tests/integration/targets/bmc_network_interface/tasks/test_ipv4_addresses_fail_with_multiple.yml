@@ -1,22 +1,4 @@
 ---
-- name: Test ipv4 setup fail with multiple | Reset configuration
-  yadro.obmc.bmc_network_interface:
-    connection: "{{ connection }}"
-    name: "{{ interface_name }}"
-    dhcp_enabled: true
-    static_nameservers: []
-
-- name: Test ipv4 setup fail with multiple | Wait until changes applied
-  yadro.obmc.bmc_network_interface:
-    connection: "{{ connection }}"
-    name: "{{ interface_name }}"
-    dhcp_enabled: true
-  check_mode: true
-  register: result
-  until: not result.changed
-  retries: 6
-  delay: 5
-
 - name: Test ipv4 setup fail with multiple | Set static addresses
   yadro.obmc.bmc_network_interface:
     connection: "{{ connection }}"
@@ -32,5 +14,4 @@
     that:
       - "result.failed == true"
       - "result.changed == false"
-      - "result.msg == 'Cannot configure network interface.'"
-      - "result.error_info == 'Only one IP address supported. Please, remove extra configuration.'"
+      - "result.error != None"

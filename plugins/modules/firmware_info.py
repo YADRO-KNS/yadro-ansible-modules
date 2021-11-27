@@ -29,7 +29,7 @@ msg:
   type: str
   returned: always
   description: Operation status message.
-error_info:
+error:
   type: str
   returned: on error
   description: Error details if raised.
@@ -69,7 +69,6 @@ EXAMPLES = r"""
       hostname: "localhost"
       username: "username"
       password: "password"
-  register: firmware_info
 """
 
 
@@ -82,11 +81,24 @@ class OpenBmcFirmwareInfoModule(OpenBmcModule):
         super(OpenBmcFirmwareInfoModule, self).__init__(supports_check_mode=True)
 
     def _run(self):
-        manager_info = self.client.get_manager()
-        bios_info = self.client.get_bios()
-        self.exit_json(msg="Firmware information successfully read.", firmware_info={
-            "BMC": self.client.get_software_inventory(manager_info["Links"]["ActiveSoftwareImage"]),
-            "BIOS": self.client.get_software_inventory(bios_info["Links"]["ActiveSoftwareImage"]),
+        update_service = self.redfish.get_update_service()
+        bmc_inventory = update_service.get_firmware_inventory("bmc_active")
+        bios_inventory = update_service.get_firmware_inventory("bios_active")
+        self.exit_json(msg="Operation successful.", firmware_info={
+            "BMC": {
+                "Id": bmc_inventory.get_id(),
+                "Name": bmc_inventory.get_name(),
+                "Updatable": bmc_inventory.get_updateable(),
+                "Version": bmc_inventory.get_version(),
+                "Status": bmc_inventory.get_status(),
+            },
+            "BIOS": {
+                "Id": bios_inventory.get_id(),
+                "Name": bios_inventory.get_name(),
+                "Updatable": bios_inventory.get_updateable(),
+                "Version": bios_inventory.get_version(),
+                "Status": bios_inventory.get_status(),
+            },
         })
 
 
