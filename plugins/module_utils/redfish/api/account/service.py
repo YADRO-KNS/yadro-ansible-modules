@@ -31,22 +31,22 @@ class AccountService(RedfishAPIObject):
             return AccountServiceMockup_v1_5_0
 
     def create_account(self, username, password, role_id, enabled):  # type: (str, str, str, bool) -> None
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def get_account_collection(self):  # type: () -> List[Account]
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def get_role_collection(self):  # type: () -> List[Role]
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def get_account(self, account_id):  # type: (str) -> Optional[Account]
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def get_role(self, role_id):  # type: (str) -> Optional[Role]
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def delete_account(self, account_id):  # type: (str) -> None
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
 
 class AccountService_v1_5_0(AccountService):

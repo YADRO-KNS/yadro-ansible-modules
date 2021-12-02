@@ -114,12 +114,12 @@ class Manager_v1_9_0(Manager):
             return None
         return EthernetInterface.from_json(self._client, interface_data)
 
-    def reset_graceful(self): # type: () -> None
+    def reset_graceful(self):  # type: () -> None
         self._client.post("{0}/Actions/Manager.Reset".format(self._path), body={
             "ResetType": "GracefulRestart",
         })
 
-    def reset_force(self): # type: () -> None
+    def reset_force(self):  # type: () -> None
         self._client.post("{0}/Actions/Manager.Reset".format(self._path), body={
             "ResetType": "ForceRestart",
         })

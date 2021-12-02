@@ -19,6 +19,7 @@ from ansible_collections.yadro.obmc.plugins.module_utils.redfish.client.rest imp
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.exceptions import (
     RedfishFieldNotFoundError,
     RedfishModelVersionError,
+    RedfishModelLoadError,
 )
 
 
@@ -29,7 +30,7 @@ class RedfishAPIObject:
         self._path = path.rstrip("/")
         self._data = data
 
-    def _get_field(self, name): # type: (str) -> Any
+    def _get_field(self, name):  # type: (str) -> Any
         try:
             return self._data[name]
         except KeyError:
