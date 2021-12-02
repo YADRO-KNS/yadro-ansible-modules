@@ -25,7 +25,7 @@ options:
   force:
     type: bool
     default: False
-    description: It indicates BMC will be restart right away.
+    description: It indicates BMC will be restart right away. May cause data corruption.
 """
 
 RETURN = r"""

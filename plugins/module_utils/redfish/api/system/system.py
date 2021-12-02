@@ -58,6 +58,27 @@ class System(RedfishAPIObject):
     def set_boot_source_override(self, config):  # type: (Dict) -> None
         raise NotImplementedError("Method not implemented")
 
+    def get_power_state(self):  # type: () -> str
+        raise NotImplementedError("Method not implemented")
+
+    def power_on_graceful(self):  # type: () -> None
+        raise NotImplementedError("Method not implemented")
+
+    def power_on_force(self):  # type: () -> None
+        raise NotImplementedError("Method not implemented")
+
+    def power_off_graceful(self):  # type: () -> None
+        raise NotImplementedError("Method not implemented")
+
+    def power_off_force(self):  # type: () -> None
+        raise NotImplementedError("Method not implemented")
+
+    def power_reset_graceful(self):  # type: () -> None
+        raise NotImplementedError("Method not implemented")
+
+    def power_reset_force(self):  # type: () -> None
+        raise NotImplementedError("Method not implemented")
+
 
 class System_v1_13_0(System):
 
@@ -116,3 +137,36 @@ class System_v1_13_0(System):
                 raise ValueError("Unknown key: {0}".format(k))
 
         self._client.patch(self._path, body={"Boot": config})
+
+    def get_power_state(self):  # type: () -> str
+        return self._get_field("PowerState")
+
+    def power_on_graceful(self):  # type: () -> None
+        self._client.post("{0}/Actions/ComputerSystem.Reset".format(self._path), body={
+            "ResetType": "On",
+        })
+
+    def power_on_force(self):  # type: () -> None
+        self._client.post("{0}/Actions/ComputerSystem.Reset".format(self._path), body={
+            "ResetType": "ForceOn",
+        })
+
+    def power_off_graceful(self):  # type: () -> None
+        self._client.post("{0}/Actions/ComputerSystem.Reset".format(self._path), body={
+            "ResetType": "GracefulShutdown",
+        })
+
+    def power_off_force(self):  # type: () -> None
+        self._client.post("{0}/Actions/ComputerSystem.Reset".format(self._path), body={
+            "ResetType": "ForceOff",
+        })
+
+    def power_reset_graceful(self):  # type: () -> None
+        self._client.post("{0}/Actions/ComputerSystem.Reset".format(self._path), body={
+            "ResetType": "GracefulRestart",
+        })
+
+    def power_reset_force(self):  # type: () -> None
+        self._client.post("{0}/Actions/ComputerSystem.Reset".format(self._path), body={
+            "ResetType": "ForceRestart",
+        })

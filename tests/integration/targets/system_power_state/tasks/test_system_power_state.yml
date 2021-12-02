@@ -1,0 +1,5 @@
+---
+- name: Test power state | Ensure system online
+  yadro.obmc.system_power_state:
+    connection: "{{ connection }}"
+    state: Online
