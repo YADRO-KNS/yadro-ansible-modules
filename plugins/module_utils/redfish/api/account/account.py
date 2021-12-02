@@ -26,25 +26,25 @@ class Account(RedfishAPIObject):
             return Account_v1_4_0
 
     def get_username(self):  # type: () -> str
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def get_enabled(self):  # type: () -> bool
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def get_locked(self):  # type: () -> bool
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def get_role_id(self):  # type: () -> str
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def set_password(self, password):  # type: (str) -> None
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def set_role_id(self, role_id):  # type: (str) -> None
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
     def set_enabled(self, enabled):  # type: (bool) -> None
-        raise NotImplemented("Method not implemented")
+        raise NotImplementedError("Method not implemented")
 
 
 class Account_v1_4_0(Account):

@@ -11,4 +11,3 @@
       - "result.firmware_info != None"
       - "result.firmware_info.BMC != None"
       - "result.firmware_info.BIOS != None"
-

@@ -52,10 +52,10 @@ class System(RedfishAPIObject):
     def get_memory_collection(self):  # type: () -> List[Memory]
         raise NotImplementedError("Method not implemented")
 
-    def get_boot_source_override(self): # type: () -> Dict
+    def get_boot_source_override(self):  # type: () -> Dict
         raise NotImplementedError("Method not implemented")
 
-    def set_boot_source_override(self, config): # type: (Dict) -> None
+    def set_boot_source_override(self, config):  # type: (Dict) -> None
         raise NotImplementedError("Method not implemented")
 
 
@@ -103,10 +103,10 @@ class System_v1_13_0(System):
             memory.append(Memory.from_json(self._client, memory_data))
         return memory
 
-    def get_boot_source_override(self): # type: () -> Dict
+    def get_boot_source_override(self):  # type: () -> Dict
         return self._get_field("Boot")
 
-    def set_boot_source_override(self, config): # type: (Dict) -> None
+    def set_boot_source_override(self, config):  # type: (Dict) -> None
         if not isinstance(config, dict):
             raise TypeError("Configuration must be dictionary. Received: {0}".format(type(config)))
 

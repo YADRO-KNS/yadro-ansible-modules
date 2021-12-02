@@ -85,7 +85,7 @@ class HTTPClient:
         elif isinstance(self._auth, SessionAuth):
             request_kwargs["headers"]["X-Auth-Token"] = self._auth.token
         else:
-            raise HTTPClientError("Unsupported auth type: {0}".format(type(auth)))
+            raise HTTPClientError("Unsupported auth type: {0}".format(type(self._auth)))
 
         if headers:
             request_kwargs["headers"].update(headers)

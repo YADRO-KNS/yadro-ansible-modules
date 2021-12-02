@@ -91,7 +91,7 @@ class EthernetInterface_v1_4_1(EthernetInterface):
 
     def set_static_nameservers(self, static_nameservers):  # type: (List[str]) -> None
         if not isinstance(static_nameservers, list):
-            raise TypeError("Static nameservers must be list. Received: {0}".format(type(addresses)))
+            raise TypeError("Static nameservers must be list. Received: {0}".format(type(static_nameservers)))
 
         for server in static_nameservers:
             if not isinstance(server, str):

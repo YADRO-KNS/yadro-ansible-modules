@@ -26,11 +26,11 @@ options:
     required: True
     type: str
     choices: [Disabled, Once, Continuous]
-    description: 
-     - The state of the boot source override feature. 
-     - This property shall contain C(Once) for a one-time boot override, and C(Continuous) for a 
-     - remain-active-until-cancelled override. If set to C(Once), the value is reset to C(Disabled) after the 
-     - I(override_target) actions have completed successfully. Changes to this property do not alter the BIOS 
+    description:
+     - The state of the boot source override feature.
+     - This property shall contain C(Once) for a one-time boot override, and C(Continuous) for a
+     - remain-active-until-cancelled override. If set to C(Once), the value is reset to C(Disabled) after the
+     - I(override_target) actions have completed successfully. Changes to this property do not alter the BIOS
      - persistent boot order configuration.
   override_mode:
     type: str
