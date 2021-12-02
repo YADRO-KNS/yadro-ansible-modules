@@ -26,7 +26,7 @@ class RedfishAPIObject:
 
     def __init__(self, client, path, data):  # type: (RESTClient, str, Dict) -> None
         self._client = client
-        self._path = path
+        self._path = path.rstrip("/")
         self._data = data
 
     def _get_field(self, name): # type: (str) -> Any
@@ -52,9 +52,15 @@ class RedfishAPIObject:
             raise RedfishModelLoadError("Cannot identify object id from data.")
         if "@odata.type" not in data:
             raise RedfishModelLoadError("Cannot identify object type from data.")
-        impl = cls.select_version(data["@odata.type"])
+        # Manually created field. Exists only on mockup systems.
+        # Responsible for additional functionality activating
+        if "@odata.mockup" in data and data["@odata.mockup"]:
+            version = "{0}.Mockup".format(data["@odata.type"])
+        else:
+            version = data["@odata.type"]
+        impl = cls.select_version(version)
         if impl is None:
-            raise RedfishModelVersionError(data["@odata.type"])
+            raise RedfishModelVersionError(version)
         return impl(client, data["@odata.id"], data)
 
     @classmethod

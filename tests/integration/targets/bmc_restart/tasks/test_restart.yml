@@ -1,14 +1,14 @@
 ---
+- name: Test BMC restart | Restart BMC
+  yadro.obmc.bmc_restart:
+    connection: "{{ connection }}"
+  register: result
+
+- name: Test BMC restart | Check state
+  assert:
+    that: "result.changed == true"
+
 - block:
-
-  - name: Test BMC restart | Restart BMC
-    yadro.obmc.bmc_restart:
-      connection: "{{ connection }}"
-    register: result
-
-  - name: Test BMC restart | Check state
-    assert:
-      that: "result.changed == true"
 
   - name: Test BMC restart | Pause for 10 seconds to initiate restart
     pause:

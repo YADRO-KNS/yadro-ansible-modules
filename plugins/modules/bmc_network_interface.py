@@ -180,7 +180,6 @@ class OpenBmcNetworkInterfaceModule(OpenBmcModule):
                 if all(
                         {
                             "Address": conf["address"],
-                            "AddressOrigin": "Static",
                             "Gateway": conf["gateway"],
                             "SubnetMask": conf["subnet_mask"],
                         } in ip_addresses for conf in self.params["ipv4_addresses"]

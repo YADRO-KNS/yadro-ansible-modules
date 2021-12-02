@@ -18,7 +18,7 @@ print_usage() {
 	echo "    help                  display this help menu"
 	echo "    prepare               prepare environment"
 	echo "    sanity                execute collection sanity tests (docker required)"
-	echo "    units                 execute collection unit tests (docker required)"
+#	echo "    units                 execute collection unit tests (docker required)"
 	echo "    integration           execute collection integration tests (docker required, mockup server will be used)"
 	echo "    build                 pack collection to galaxy tarball"
 	echo "    report                disaply test report"
@@ -58,9 +58,7 @@ clean() {
   rm -rfv "${BUILD_DIR}"/yadro-obmc-*.tar.gz
   rm -rfv "${BUILD_DIR}/rst"
   rm -rfv "${BUILD_DIR}/html"
-  if [[ -d "${TEST_DIR}/output" ]]; then
-    rm -rfv "${TEST_DIR}/output"
-  fi
+  rm -rfv "${TEST_DIR}/output"
 }
 
 sanity() {
@@ -69,14 +67,14 @@ sanity() {
   ansible-test sanity -v --docker ${SUBCOMMAND_ARGS}
 }
 
-units() {
-  echo "=> UNIT TESTS"
-  # shellcheck disable=SC2086
-  ansible-test units -v --docker --coverage ${SUBCOMMAND_ARGS}
-  sed -i 's/file="/file="tests\/unit\/plugins\//g' "${TEST_DIR}"/output/junit/*
-  ansible-test coverage xml
-  ansible-test coverage report --omit="tests/unit/compat/*"
-}
+#units() {
+#  echo "=> UNIT TESTS"
+#  # shellcheck disable=SC2086
+#  ansible-test units -v --docker --coverage ${SUBCOMMAND_ARGS}
+#  sed -i 's/file="/file="tests\/unit\/plugins\//g' "${TEST_DIR}"/output/junit/*
+#  ansible-test coverage xml
+#  ansible-test coverage report --omit="tests/unit/compat/*"
+#}
 
 integration() {
   echo "=> INTEGRATION TESTS"
@@ -160,12 +158,12 @@ case $1 in
     sanity
     exit 0
     ;;
-  units)
-    clean
-    prepare
-    units
-    exit 0
-    ;;
+#  units)
+#    clean
+#    prepare
+#    units
+#    exit 0
+#    ;;
   integration)
     clean
     prepare

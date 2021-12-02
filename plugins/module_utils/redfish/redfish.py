@@ -46,14 +46,30 @@ class RedfishAPI:
         if not isinstance(password, str):
             raise TypeError("Password must be string. Received: {0}".format(type(password)))
 
-        sessions_path = "{0}/SessionService/Sessions".format(self._base_prefix)
-        response = self._client.post(sessions_path, body={
-            "UserName": username,
-            "Password": password,
-        })
-        session_data = response.json
-        session_data["Token"] = response.headers["X-Auth-Token"]
-        return Session.from_json(self._client, session_data)
+        service_root_data = self._client.get(self._base_prefix).json
+        if "@odata.mockup" in service_root_data and service_root_data["@odata.mockup"]:
+            session_path = "{0}/SessionService/Sessions".format(self._base_prefix)
+            session_data = {
+                "@odata.id": session_path,
+                "@odata.type": "#Session.v1_3_0.Session",
+                "ClientOriginIPAddress": "0.0.0.0",
+                "Description": "Manager User Session",
+                "Id": "TestSession",
+                "Name": "User Session",
+                "UserName": username,
+                "Token": "TestToken",
+            }
+            self._client.post(session_path, body=session_data)
+            return Session.from_json(self._client, session_data)
+        else:
+            sessions_path = "{0}/SessionService/Sessions".format(self._base_prefix)
+            response = self._client.post(sessions_path, body={
+                "UserName": username,
+                "Password": password,
+            })
+            session_data = response.json
+            session_data["Token"] = response.headers["X-Auth-Token"]
+            return Session.from_json(self._client, session_data)
 
     def get_session_service(self):  # type: () -> SessionService
         session_service_path = "{0}/SessionService".format(self._base_prefix)

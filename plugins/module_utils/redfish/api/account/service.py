@@ -27,6 +27,8 @@ class AccountService(RedfishAPIObject):
     def select_version(cls, version):  # type: (str) -> Optional[ClassVar[AccountService]]
         if version == "#AccountService.v1_5_0.AccountService":
             return AccountService_v1_5_0
+        elif version == "#AccountService.v1_5_0.AccountService.Mockup":
+            return AccountServiceMockup_v1_5_0
 
     def create_account(self, username, password, role_id, enabled):  # type: (str, str, str, bool) -> None
         raise NotImplemented("Method not implemented")
@@ -111,3 +113,42 @@ class AccountService_v1_5_0(AccountService):
         if not isinstance(account_id, str):
             raise TypeError("Account id must be string. Received: {0}".format(type(account_id)))
         self._client.delete("{0}/Accounts/{1}".format(self._path, account_id))
+
+
+class AccountServiceMockup_v1_5_0(AccountService_v1_5_0):
+
+    def __init__(self, *args, **kwargs):
+        super(AccountServiceMockup_v1_5_0, self).__init__(*args, **kwargs)
+
+    def create_account(self, username, password, role_id, enabled):  # type: (str, str, str, bool) -> None
+        if not isinstance(username, str):
+            raise TypeError("Username must be string. Received: {0}".format(type(username)))
+        if not isinstance(password, str):
+            raise TypeError("Password must be string. Received: {0}".format(type(password)))
+        if not isinstance(role_id, str):
+            raise TypeError("Role id must be string. Received: {0}".format(type(role_id)))
+        if not isinstance(enabled, bool):
+            raise TypeError("Enabled must be boolean. Received: {0}".format(type(enabled)))
+
+        self._client.post("{0}/Accounts".format(self._path), body={
+            "@odata.type": "#ManagerAccount.v1_4_0.ManagerAccount",
+            "AccountTypes": [
+                "Redfish"
+            ],
+            "Description": "User Account",
+            "Id": username,
+            "Enabled": enabled,
+            "RoleId": role_id,
+            "Links": {
+                "Role": {
+                    "@odata.id": "/redfish/v1/AccountService/Roles/{0}".format(role_id)
+                }
+            },
+            "Locked": False,
+            "Locked@Redfish.AllowableValues": [
+                "false"
+            ],
+            "Name": "User Account",
+            "Password": None,
+            "PasswordChangeRequired": False,
+        })

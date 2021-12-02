@@ -25,6 +25,8 @@ class EthernetInterface(RedfishAPIObject):
     def select_version(cls, version):  # type: (str) -> Optional[ClassVar[EthernetInterface]]
         if version == "#EthernetInterface.v1_4_1.EthernetInterface":
             return EthernetInterface_v1_4_1
+        elif version == "#EthernetInterface.v1_4_1.EthernetInterface.Mockup":
+            return EthernetInterfaceMockup_v1_4_1
 
     def get_dhcpv4_enabled(self):  # type: () -> bool
         raise NotImplementedError("Method not implemented")
@@ -60,7 +62,11 @@ class EthernetInterface_v1_4_1(EthernetInterface):
         return self._get_field("StaticNameServers")
 
     def get_static_ipv4_addresses(self):  # type: () -> List[Dict]
-        return self._get_field("IPv4StaticAddresses")
+        addresses = self._get_field("IPv4StaticAddresses")
+        for a in addresses:
+            if "AddressOrigin" in a:
+                a.pop("AddressOrigin")
+        return addresses
 
     def set_dhcpv4_enabled(self, enabled):  # type: (bool) -> None
         if not isinstance(enabled, bool):
@@ -93,3 +99,17 @@ class EthernetInterface_v1_4_1(EthernetInterface):
 
         self._client.patch(self._path, body={"StaticNameServers": static_nameservers})
 
+
+class EthernetInterfaceMockup_v1_4_1(EthernetInterface_v1_4_1):
+
+    def __init__(self, *args, **kwargs):
+        super(EthernetInterfaceMockup_v1_4_1, self).__init__(*args, **kwargs)
+
+    def set_ipv4_addresses(self, addresses):  # type: (List[Dict]) -> None
+        super(EthernetInterfaceMockup_v1_4_1, self).set_ipv4_addresses(addresses)
+        super(EthernetInterfaceMockup_v1_4_1, self).set_dhcpv4_enabled(False)
+
+    def set_dhcpv4_enabled(self, enabled):  # type: (bool) -> None
+        super(EthernetInterfaceMockup_v1_4_1, self).set_dhcpv4_enabled(enabled)
+        if enabled:
+            super(EthernetInterfaceMockup_v1_4_1, self).set_ipv4_addresses([])

@@ -13,7 +13,7 @@ default:
 
 stages:
   - sanity
-  - units
+#  - units
   - integration
   - pages
 
@@ -32,15 +32,15 @@ sanity:
   script:
     - ./utils.sh sanity
 
-units:
-  stage: units
-  script:
-    - ./utils.sh units
-  coverage: '/^TOTAL.+?(\d+\%)$/'
-  artifacts:
-    reports:
-      junit: ./tests/output/junit/*.xml
-      cobertura: ./tests/output/reports/coverage.xml
+#units:
+#  stage: units
+#  script:
+#    - ./utils.sh units
+#  coverage: '/^TOTAL.+?(\d+\%)$/'
+#  artifacts:
+#    reports:
+#      junit: ./tests/output/junit/*.xml
+#      cobertura: ./tests/output/reports/coverage.xml
 
 integration:
   stage: integration
