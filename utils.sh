@@ -177,9 +177,7 @@ case $1 in
     exit 0
     ;;
   webdocs)
-    clean
     prepare
-    build
     webdocs
     exit 0
     ;;
