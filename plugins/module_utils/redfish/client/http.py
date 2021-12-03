@@ -48,9 +48,12 @@ class HTTPClient:
         self.validate_certs = validate_certs
         self.timeout = timeout
 
+    def get_base_url(self):
+        return self._base_url
+
     def make_request(self, path, method, query_params=None, body=None, headers=None):
         # type: (str, str, Dict, Dict, Dict) -> HTTPClientResponse
-        self._make_request(path, method, query_params, body, headers)
+        return self._make_request(path, method, query_params, body, headers)
 
     def _make_request(self, path, method, query_params, body, headers):
         # type: (str, str, Dict, Dict, Dict) -> HTTPClientResponse
@@ -93,3 +96,15 @@ class HTTPClient:
         url = build_url(self._base_url, path, query_params=query_params)
         response = open_url(url=url, data=request_body, **request_kwargs)
         return HTTPClientResponse(response)
+
+    def get(self, path, query_params=None, headers=None):  # type: (str, Dict, Dict) -> HTTPClientResponse
+        return self.make_request(path, method="GET", query_params=query_params, headers=headers)
+
+    def post(self, path, body=None, headers=None):  # type: (str, Dict, Dict) -> HTTPClientResponse
+        return self.make_request(path, method="POST", body=body, headers=headers)
+
+    def delete(self, path, headers=None):  # type: (str, Dict) -> HTTPClientResponse
+        return self.make_request(path, method="DELETE", headers=headers)
+
+    def patch(self, path, body=None, headers=None):  # type: (str, Dict, Dict) -> HTTPClientResponse
+        return self.make_request(path, method="PATCH", body=body, headers=headers)
