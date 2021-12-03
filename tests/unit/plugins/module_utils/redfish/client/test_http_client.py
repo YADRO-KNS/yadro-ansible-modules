@@ -97,7 +97,7 @@ class TestHttpClient:
         default_client_kwargs["auth"] = NoAuth()
         client = HTTPClient(**default_client_kwargs)
         mock = mocker.patch("{0}.open_url".format(client.__module__))
-        open_url_kwargs["force_basic_auth" ] = False
+        open_url_kwargs["force_basic_auth"] = False
         open_url_kwargs.pop("url_username")
         open_url_kwargs.pop("url_password")
         open_url_kwargs.update({
@@ -118,7 +118,7 @@ class TestHttpClient:
         client = HTTPClient(**default_client_kwargs)
         mock = mocker.patch("{0}.open_url".format(client.__module__))
 
-        open_url_kwargs["force_basic_auth" ] = False
+        open_url_kwargs["force_basic_auth"] = False
         open_url_kwargs.pop("url_username")
         open_url_kwargs.pop("url_password")
         open_url_kwargs.update({
@@ -143,7 +143,7 @@ class TestHttpClient:
         client = HTTPClient(**default_client_kwargs)
         mock = mocker.patch("{0}.open_url".format(client.__module__))
 
-        open_url_kwargs["force_basic_auth" ] = False
+        open_url_kwargs["force_basic_auth"] = False
         open_url_kwargs.pop("url_username")
         open_url_kwargs.pop("url_password")
         extra_headers = {"Extra": "Header"}
