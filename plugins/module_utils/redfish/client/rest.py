@@ -45,15 +45,3 @@ class RESTClient(HTTPClient):
             raise RESTClientConnectionError("Cannot connect to server: {0}".format(str(e)))
         else:
             return response
-
-    def get(self, path, query_params=None, headers=None):  # type: (str, Dict, Dict) -> HTTPClientResponse
-        return self.make_request(path, method="GET", query_params=query_params, headers=headers)
-
-    def post(self, path, body=None, headers=None):  # type: (str, Dict, Dict) -> HTTPClientResponse
-        return self.make_request(path, method="POST", body=body, headers=headers)
-
-    def delete(self, path, headers=None):  # type: (str, Dict) -> HTTPClientResponse
-        return self.make_request(path, method="DELETE", headers=headers)
-
-    def patch(self, path, body=None, headers=None):  # type: (str, Dict, Dict) -> HTTPClientResponse
-        return self.make_request(path, method="PATCH", body=body, headers=headers)
