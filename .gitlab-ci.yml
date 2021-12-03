@@ -15,6 +15,7 @@ stages:
   - sanity
 #  - units
   - integration
+  - galaxy
   - pages
 
 variables:
@@ -53,14 +54,23 @@ integration:
       junit: ./tests/output/junit/*.xml
       cobertura: ./tests/output/reports/coverage.xml
 
+galaxy:
+  stage: galaxy
+  script:
+    - ./utils.sh build
+  artifacts:
+    paths:
+      - ./build/yadro-obmc-*.tar.gz
+
 pages:
   stage: pages
+  dependencies:
+    - galaxy
   script:
     - ./utils.sh webdocs
     - mv ./build/html public
   artifacts:
     paths:
-      - ./build/yadro-obmc-*.tar.gz
       - ./public
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
