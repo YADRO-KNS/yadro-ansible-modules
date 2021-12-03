@@ -137,6 +137,7 @@ class System_v1_13_0(System):
                 raise ValueError("Unknown key: {0}".format(k))
 
         self._client.patch(self._path, body={"Boot": config})
+        self.reload()
 
     def get_power_state(self):  # type: () -> str
         return self._get_field("PowerState")

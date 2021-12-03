@@ -70,6 +70,7 @@ class AccountService_v1_5_0(AccountService):
             "RoleId": role_id,
             "Enabled": enabled
         })
+        self.reload()
 
     def get_account_collection(self):  # type: () -> List[Account]
         accounts = []
@@ -113,6 +114,7 @@ class AccountService_v1_5_0(AccountService):
         if not isinstance(account_id, str):
             raise TypeError("Account id must be string. Received: {0}".format(type(account_id)))
         self._client.delete("{0}/Accounts/{1}".format(self._path, account_id))
+        self.reload()
 
 
 class AccountServiceMockup_v1_5_0(AccountService_v1_5_0):
@@ -152,3 +154,4 @@ class AccountServiceMockup_v1_5_0(AccountService_v1_5_0):
             "Password": None,
             "PasswordChangeRequired": False,
         })
+        self.reload()

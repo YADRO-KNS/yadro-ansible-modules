@@ -72,6 +72,7 @@ class EthernetInterface_v1_4_1(EthernetInterface):
         if not isinstance(enabled, bool):
             raise TypeError("Enabled must be boolean. Received: {0}".format(type(enabled)))
         self._client.patch(self._path, body={"DHCPv4": {"DHCPEnabled": enabled}})
+        self.reload()
 
     def set_ipv4_addresses(self, addresses):  # type: (List[Dict]) -> None
         if not isinstance(addresses, list):
@@ -88,6 +89,7 @@ class EthernetInterface_v1_4_1(EthernetInterface):
                 raise ValueError("Address configuration has extra keys. Only {0} allowed and required".format(required_keys))
 
         self._client.patch(self._path, body={"IPv4StaticAddresses": addresses})
+        self.reload()
 
     def set_static_nameservers(self, static_nameservers):  # type: (List[str]) -> None
         if not isinstance(static_nameservers, list):
@@ -98,6 +100,7 @@ class EthernetInterface_v1_4_1(EthernetInterface):
                 raise TypeError("Nameserver must be string. Received: {0}".format(type(server)))
 
         self._client.patch(self._path, body={"StaticNameServers": static_nameservers})
+        self.reload()
 
 
 class EthernetInterfaceMockup_v1_4_1(EthernetInterface_v1_4_1):

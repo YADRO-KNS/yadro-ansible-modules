@@ -73,8 +73,10 @@ class Account_v1_4_0(Account):
         if not isinstance(role_id, str):
             raise TypeError("Role id must be string. Received: {0}".format(type(role_id)))
         self._client.patch(self._path, body={"RoleId": role_id})
+        self.reload()
 
     def set_enabled(self, enabled):  # type: (bool) -> None
         if not isinstance(enabled, bool):
             raise TypeError("Enabled must be boolean. Received: {0}".format(type(enabled)))
         self._client.patch(self._path, body={"Enabled": enabled})
+        self.reload()

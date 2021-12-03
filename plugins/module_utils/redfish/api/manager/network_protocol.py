@@ -69,11 +69,13 @@ class ManagerNetworkProtocol_v1_5_0(ManagerNetworkProtocol):
         if not isinstance(hostname, str):
             raise TypeError("HostName must be string. Received: {0}".format(type(hostname)))
         self._client.patch(self._path, body={"HostName": hostname})
+        self.reload()
 
     def set_ntp_enabled(self, enabled):  # type: (bool) -> None
         if not isinstance(enabled, bool):
             raise TypeError("Enabled must be boolean. Received: {0}".format(type(enabled)))
         self._client.patch(self._path, body={"NTP": {"ProtocolEnabled": enabled}})
+        self.reload()
 
     def set_ntp_servers(self, ntp_servers):  # type: (List[str]) -> None
         if not isinstance(ntp_servers, list):
@@ -82,3 +84,4 @@ class ManagerNetworkProtocol_v1_5_0(ManagerNetworkProtocol):
             if not isinstance(server, str):
                 raise TypeError("NTP server must be string. Received: {0}".format(type(server)))
         self._client.patch(self._path, body={"NTP": {"NTPServers": ntp_servers}})
+        self.reload()
