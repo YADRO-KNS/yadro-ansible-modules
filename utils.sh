@@ -18,7 +18,7 @@ print_usage() {
 	echo "    help                  display this help menu"
 	echo "    prepare               prepare environment"
 	echo "    sanity                execute collection sanity tests (docker required)"
-#	echo "    units                 execute collection unit tests (docker required)"
+	echo "    units                 execute collection unit tests (docker required)"
 	echo "    integration           execute collection integration tests (docker required, mockup server will be used)"
 	echo "    build                 pack collection to galaxy tarball"
 	echo "    report                disaply test report"
