@@ -168,5 +168,5 @@ class System_v1_13_0(System):
 
     def power_reset_force(self):  # type: () -> None
         self._client.post("{0}/Actions/ComputerSystem.Reset".format(self._path), body={
-            "ResetType": "ForceRestart",
+            "ResetType": "PowerCycle",
         })
