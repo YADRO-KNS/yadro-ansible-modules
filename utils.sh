@@ -67,14 +67,14 @@ sanity() {
   ansible-test sanity -v --docker ${SUBCOMMAND_ARGS}
 }
 
-#units() {
-#  echo "=> UNIT TESTS"
-#  # shellcheck disable=SC2086
-#  ansible-test units -v --docker --coverage ${SUBCOMMAND_ARGS}
-#  sed -i 's/file="/file="tests\/unit\/plugins\//g' "${TEST_DIR}"/output/junit/*
-#  ansible-test coverage xml
-#  ansible-test coverage report --omit="tests/unit/compat/*"
-#}
+units() {
+  echo "=> UNIT TESTS"
+  # shellcheck disable=SC2086
+  ansible-test units -v --docker --coverage ${SUBCOMMAND_ARGS}
+  sed -i 's/file="/file="tests\/unit\/plugins\//g' "${TEST_DIR}"/output/junit/*
+  ansible-test coverage xml
+  ansible-test coverage report --omit="tests/unit/compat/*"
+}
 
 integration() {
   echo "=> INTEGRATION TESTS"
@@ -158,12 +158,12 @@ case $1 in
     sanity
     exit 0
     ;;
-#  units)
-#    clean
-#    prepare
-#    units
-#    exit 0
-#    ;;
+  units)
+    clean
+    prepare
+    units
+    exit 0
+    ;;
   integration)
     clean
     prepare
