@@ -36,6 +36,9 @@ class RedfishAPIObject:
         except KeyError:
             raise RedfishFieldNotFoundError(name)
 
+    def reload(self):  # type: () -> None
+        self._data = self._client.get(self._path).json
+
     def get_id(self):  # type: () -> str
         return self._get_field("Id")
 

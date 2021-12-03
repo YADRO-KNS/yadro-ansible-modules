@@ -65,3 +65,4 @@ class SessionService_v1_0_2(SessionService):
         if not isinstance(session_id, str):
             raise TypeError("Session id must be string. Received: {0}".format(type(session_id)))
         self._client.delete("{0}/Sessions/{1}".format(self._path, session_id))
+        self.reload()
