@@ -22,15 +22,13 @@ from ansible.module_utils.six.moves.http_client import HTTPResponse
 class HTTPClientResponse:
 
     def __init__(self, response):  # type: (HTTPResponse) -> None
-        self.body = None
         self._response = response
-        if self._response:
-            self.body = self._response.read()
+        self._body = self._response.read()
 
     @property
     def json(self):  # type: () -> Dict
         try:
-            return json.loads(self.body)
+            return json.loads(self._body)
         except ValueError:
             raise ValueError("Unable to parse json")
 
