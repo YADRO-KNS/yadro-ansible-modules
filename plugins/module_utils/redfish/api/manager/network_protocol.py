@@ -29,19 +29,31 @@ class ManagerNetworkProtocol(RedfishAPIObject):
     def get_hostname(self):  # type: () -> str
         raise NotImplementedError("Method not implemented")
 
+    def get_ipmi_enabled(self):  # type: () -> bool
+        raise NotImplementedError("Method not implemented")
+
     def get_ntp_enabled(self):  # type: () -> bool
         raise NotImplementedError("Method not implemented")
 
     def get_ntp_servers(self):  # type: () -> List[str]
         raise NotImplementedError("Method not implemented")
 
+    def get_ssh_enabled(self):  # type: () -> bool
+        raise NotImplementedError("Method not implemented")
+
     def set_hostname(self, hostname):  # type: (str) -> None
+        raise NotImplementedError("Method not implemented")
+
+    def set_ipmi_enabled(self, enabled):  # type: (bool) -> None
         raise NotImplementedError("Method not implemented")
 
     def set_ntp_enabled(self, enabled):  # type: (bool) -> None
         raise NotImplementedError("Method not implemented")
 
     def set_ntp_servers(self, ntp_servers):  # type: (List[str]) -> None
+        raise NotImplementedError("Method not implemented")
+
+    def set_ssh_enabled(self, enabled):  # type: (bool) -> None
         raise NotImplementedError("Method not implemented")
 
 
@@ -52,6 +64,12 @@ class ManagerNetworkProtocol_v1_5_0(ManagerNetworkProtocol):
 
     def get_hostname(self):  # type: () -> str
         return self._get_field("HostName")
+
+    def get_ipmi_enabled(self):  # type: () -> bool
+        try:
+            return self._data["IPMI"]["ProtocolEnabled"]
+        except KeyError:
+            RedfishFieldNotFoundError("['IPMI']['ProtocolEnabled']")
 
     def get_ntp_enabled(self):  # type: () -> bool
         try:
@@ -65,10 +83,22 @@ class ManagerNetworkProtocol_v1_5_0(ManagerNetworkProtocol):
         except KeyError:
             raise RedfishFieldNotFoundError("['NTP']['NTPServers']")
 
+    def get_ssh_enabled(self):  # type: () -> bool
+        try:
+            return self._data["SSH"]["ProtocolEnabled"]
+        except KeyError:
+            raise RedfishFieldNotFoundError("['SSH']['ProtocolEnabled']]")
+
     def set_hostname(self, hostname):  # type: (str) -> None
         if not isinstance(hostname, str):
             raise TypeError("HostName must be string. Received: {0}".format(type(hostname)))
         self._client.patch(self._path, body={"HostName": hostname})
+        self.reload()
+
+    def set_ipmi_enabled(self, enabled):  # type: (bool) -> None
+        if not isinstance(enabled, bool):
+            raise TypeError("Enabled must be boolean. Received: {0}".format(type(enabled)))
+        self._client.patch(self._path, body={"IPMI": {"ProtocolEnabled": enabled}})
         self.reload()
 
     def set_ntp_enabled(self, enabled):  # type: (bool) -> None
@@ -84,4 +114,10 @@ class ManagerNetworkProtocol_v1_5_0(ManagerNetworkProtocol):
             if not isinstance(server, str):
                 raise TypeError("NTP server must be string. Received: {0}".format(type(server)))
         self._client.patch(self._path, body={"NTP": {"NTPServers": ntp_servers}})
+        self.reload()
+
+    def set_ssh_enabled(self, enabled):  # type: (bool) -> None
+        if not isinstance(enabled, bool):
+            raise TypeError("Enabled must be boolean. Received: {0}".format(type(enabled)))
+        self._client.patch(self._path, body={"SSH": {"ProtocolEnabled": enabled}})
         self.reload()
