@@ -64,6 +64,9 @@ class Manager(RedfishAPIObject):
     def reset_force(self):  # type: () -> None
         raise NotImplementedError("Method not implemented")
 
+    def reset_to_defaults(self, reset_type):  # type: (str) -> None
+        raise NotImplementedError("Method not implemented")
+
 
 class Manager_v1_9_0(Manager):
 
@@ -122,4 +125,12 @@ class Manager_v1_9_0(Manager):
     def reset_force(self):  # type: () -> None
         self._client.post("{0}/Actions/Manager.Reset".format(self._path), body={
             "ResetType": "ForceRestart",
+        })
+
+    def reset_to_defaults(self, reset_type):  # type: (str) -> None
+        types = {
+            "all": "ResetAll",
+        }
+        self._client.post("{0}/Actions/Manager.ResetToDefaults".format(self._path), body={
+            "ResetToDefaultsType": types[reset_type],
         })
