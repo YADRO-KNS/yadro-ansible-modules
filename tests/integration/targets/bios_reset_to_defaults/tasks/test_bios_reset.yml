@@ -1,0 +1,9 @@
+---
+- name: Test reset BIOS to defaults | Reset BIOS to defaults
+  yadro.obmc.bios_reset_to_defaults:
+    connection: "{{ connection }}"
+  register: result
+
+- name: Test reset BIOS to defaults | Check state
+  assert:
+    that: "result.changed == true"
