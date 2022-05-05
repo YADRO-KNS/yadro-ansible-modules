@@ -43,7 +43,6 @@ class RESTClient(HTTPClient):
             elif e.code == 401:
                 raise RESTClientUnauthorized('Unauthorized error')
             else:
-                # TODO: Why json.load() is used? It is intended for files reading
                 raise RESTClientRequestError("Request finished with error: {0}".format(json.load(e)))
         except (URLError, SSLValidationError, ConnectionError) as e:
             raise RESTClientConnectionError("Cannot connect to server: {0}".format(str(e)))
