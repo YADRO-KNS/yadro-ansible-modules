@@ -21,7 +21,7 @@ stages:
 variables:
   GIT_CLONE_PATH: "$CI_BUILDS_DIR/ansible_collections/yadro/obmc"
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  PYTHON_INTERPRETER: "/usr/local/bin/python3.8"
+  PYTHON_INTERPRETER: "/usr/bin/python3.6"
 
 cache:
   paths:
