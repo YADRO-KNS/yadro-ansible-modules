@@ -2,7 +2,7 @@
 - name: Test parameters | Create TestUser without required parameter
   yadro.obmc.bmc_account:
     connection: "{{ connection }}"
-    username: "TestUser"
+    username: "TestUserWoPass"
     state: "present"
   register: result
   ignore_errors: true
