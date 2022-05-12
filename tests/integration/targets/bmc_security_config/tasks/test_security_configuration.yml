@@ -1,0 +1,25 @@
+---
+- name: Test security configuration | Disable SSH support
+  yadro.obmc.bmc_security_config:
+    connection: "{{ connection }}"
+    ssh_enabled: false
+  register: result
+
+
+- name: Test security configuration | Check configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+
+
+- name: Test security configuration | Disable IPMI support
+  yadro.obmc.bmc_security_config:
+    connection: "{{ connection }}"
+    ipmi_enabled: false
+  register: result
+
+
+- name: Test security configuration | Check configuration updated
+  assert:
+    that:
+      - "result.changed == true"

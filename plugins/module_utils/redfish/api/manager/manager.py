@@ -103,7 +103,7 @@ class Manager_v1_9_0(Manager):
             interfaces.append(EthernetInterface.from_json(self._client, interface_data))
         return interfaces
 
-    def get_ethernet_interface(self, interface_id):  # type: () -> Optional[EthernetInterface]
+    def get_ethernet_interface(self, interface_id):  # type: (str) -> Optional[EthernetInterface]
         if not isinstance(interface_id, str):
             raise TypeError("Interface id must be string. Received: {0}".format(type(interface_id)))
 
