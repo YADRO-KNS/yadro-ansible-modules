@@ -10,10 +10,10 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 try:
-    from typing import Optional
+    from typing import Optional, List
 except ImportError:
     # Satisfy Python 2 which doesn't have typing.
-    Optional = None
+    Optional = List = None
 
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.auth import AuthMethod, NoAuth, BasicAuth, SessionAuth
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.client.rest import RESTClient
@@ -94,7 +94,7 @@ class RedfishAPI:
             managers.append(Manager.from_json(self._client, manager_data))
         return managers
 
-    def get_manager(self, manager_id):  # type: () -> Optional[Manager]
+    def get_manager(self, manager_id):  # type: (str) -> Optional[Manager]
         if not isinstance(manager_id, str):
             raise TypeError("Manager id must be string. Received: {0}".format(type(manager_id)))
 
@@ -113,7 +113,7 @@ class RedfishAPI:
             systems.append(System.from_json(self._client, system_data))
         return systems
 
-    def get_system(self, system_id):  # type: () -> Optional[System]
+    def get_system(self, system_id):  # type: (str) -> Optional[System]
         if not isinstance(system_id, str):
             raise TypeError("System id must be string. Received: {0}".format(type(system_id)))
 
@@ -132,7 +132,7 @@ class RedfishAPI:
             chassis.append(Chassis.from_json(self._client, chassis_data))
         return chassis
 
-    def get_chassis(self, chassis_id):  # type: () -> Optional[Chassis]
+    def get_chassis(self, chassis_id):  # type: (str) -> Optional[Chassis]
         if not isinstance(chassis_id, str):
             raise TypeError("Chassis id must be string. Received: {0}".format(type(chassis_id)))
 

@@ -24,6 +24,7 @@ from ansible_collections.yadro.obmc.plugins.module_utils.redfish.client.exceptio
     RESTClientRequestError,
     RESTClientNotFoundError,
     RESTClientConnectionError,
+    RESTClientUnauthorized,
 )
 
 
@@ -39,6 +40,8 @@ class RESTClient(HTTPClient):
         except HTTPError as e:
             if e.code == 404:
                 raise RESTClientNotFoundError("Not found: {0}".format(e.url))
+            elif e.code == 401:
+                raise RESTClientUnauthorized('Unauthorized error')
             else:
                 raise RESTClientRequestError("Request finished with error: {0}".format(json.load(e)))
         except (URLError, SSLValidationError, ConnectionError) as e:

@@ -16,6 +16,10 @@ class HTTPClientError(RedfishError):
     pass
 
 
+class RESTClientUnauthorized(RedfishError):
+    pass
+
+
 class RESTClientRequestError(RedfishError):
     pass
 

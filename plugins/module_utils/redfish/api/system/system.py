@@ -10,10 +10,10 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 try:
-    from typing import Optional, ClassVar, Dict
+    from typing import Optional, ClassVar, Dict, List
 except ImportError:
     # Satisfy Python 2 which doesn't have typing.
-    Optional = ClassVar = Dict = None
+    Optional = ClassVar = Dict = List = None
 
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.base import RedfishAPIObject
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.system.processor import Processor
