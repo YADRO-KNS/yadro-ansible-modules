@@ -19,6 +19,7 @@ from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.base import
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.system.processor import Processor
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.system.pcie_device import PCIeDevice
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.system.memory import Memory
+from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.system.bios import Bios
 
 
 class System(RedfishAPIObject):
@@ -27,6 +28,9 @@ class System(RedfishAPIObject):
     def select_version(cls, version):  # type: (str) -> Optional[ClassVar[System]]
         if version == "#ComputerSystem.v1_13_0.ComputerSystem":
             return System_v1_13_0
+
+    def get_bios(self):  # type: () -> Bios
+        raise NotImplementedError("Method not implemented")
 
     def get_model(self):  # type: () -> str
         raise NotImplementedError("Method not implemented")
@@ -84,6 +88,10 @@ class System_v1_13_0(System):
 
     def __init__(self, *args, **kwargs):
         super(System_v1_13_0, self).__init__(*args, **kwargs)
+
+    def get_bios(self):  # type: () -> Bios
+        bios_data = self._client.get("{0}/Bios".format(self._path)).json
+        return Bios.from_json(self._client, bios_data)
 
     def get_model(self):  # type: () -> str
         return self._get_field("Model")
