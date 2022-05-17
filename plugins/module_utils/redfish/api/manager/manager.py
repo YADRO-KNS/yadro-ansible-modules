@@ -19,6 +19,7 @@ from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.base import
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.client.exceptions import RESTClientNotFoundError
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.manager.network_protocol import ManagerNetworkProtocol
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.manager.ethernet_interface import EthernetInterface
+from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.manager.virtual_media import VirtualMedia
 
 
 class Manager(RedfishAPIObject):
@@ -56,6 +57,12 @@ class Manager(RedfishAPIObject):
         raise NotImplementedError("Method not implemented")
 
     def get_ethernet_interface(self, interface_id):  # type: () -> Optional[EthernetInterface]
+        raise NotImplementedError("Method not implemented")
+
+    def get_virtual_media_collection(self):  # type: () -> List[EthernetInterface]
+        raise NotImplementedError("Method not implemented")
+
+    def get_virtual_media(self, vm_id):    # type: (str) -> Optional[VirtualMedia]
         raise NotImplementedError("Method not implemented")
 
     def reset_graceful(self):  # type: () -> None
@@ -116,6 +123,24 @@ class Manager_v1_9_0(Manager):
         except RESTClientNotFoundError:
             return None
         return EthernetInterface.from_json(self._client, interface_data)
+
+    def get_virtual_media_collection(self):  # type: () -> List[EthernetInterface]
+        result = []
+        collection = self._client.get("{0}/VirtualMedia".format(self._path)).json
+        for member in collection['Members']:
+            media_data = self._client.get(member["@odata.id"]).json
+            result.append(VirtualMedia.from_json(self._client, media_data))
+        return result
+
+    def get_virtual_media(self, vm_id):  # type: (str) -> Optional[VirtualMedia]
+        if not isinstance(vm_id, str):
+            raise TypeError("Virtual media id must be string. Received: {0}".format(type(vm_id)))
+
+        virtual_media_data = self._client.get(
+            "{0}/VirtualMedia/{1}".format(self._path, vm_id),
+        ).json
+
+        return VirtualMedia.from_json(self._client, virtual_media_data)
 
     def reset_graceful(self):  # type: () -> None
         self._client.post("{0}/Actions/Manager.Reset".format(self._path), body={
