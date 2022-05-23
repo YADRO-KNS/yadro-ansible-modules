@@ -10,10 +10,10 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 try:
-    from typing import Dict
+    from typing import Dict, Union
 except ImportError:
     # Satisfy Python 2 which doesn't have typing.
-    Dict = None
+    Dict = Union = None
 
 import json
 from ansible.module_utils.urls import open_url
@@ -52,11 +52,11 @@ class HTTPClient:
         return self._base_url
 
     def make_request(self, path, method, query_params=None, body=None, headers=None):
-        # type: (str, str, Dict, Dict, Dict) -> HTTPClientResponse
+        # type: (str, str, Dict, Union[Dict, bytes], Dict) -> HTTPClientResponse
         return self._make_request(path, method, query_params, body, headers)
 
     def _make_request(self, path, method, query_params, body, headers):
-        # type: (str, str, Dict, Dict, Dict) -> HTTPClientResponse
+        # type: (str, str, Dict, Union[Dict, bytes], Dict) -> HTTPClientResponse
         request_kwargs = {
             "follow_redirects": "all",
             "force_basic_auth": False,
@@ -100,7 +100,7 @@ class HTTPClient:
     def get(self, path, query_params=None, headers=None):  # type: (str, Dict, Dict) -> HTTPClientResponse
         return self.make_request(path, method="GET", query_params=query_params, headers=headers)
 
-    def post(self, path, body=None, headers=None):  # type: (str, Dict, Dict) -> HTTPClientResponse
+    def post(self, path, body=None, headers=None):  # type: (str, Union[Dict, bytes], Dict) -> HTTPClientResponse
         return self.make_request(path, method="POST", body=body, headers=headers)
 
     def delete(self, path, headers=None):  # type: (str, Dict) -> HTTPClientResponse

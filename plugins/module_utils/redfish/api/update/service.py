@@ -34,6 +34,12 @@ class UpdateService(RedfishAPIObject):
     def get_firmware_inventory(self, inventory_id):  # type: (str) -> Optional[SoftwareInventory]
         raise NotImplementedError("Method not implemented")
 
+    def upload_image(self, image):  # type: (bytes) -> None
+        raise NotImplementedError("Method not implemented")
+
+    def simple_update(self, image_uri):  # type: (str) -> None
+        raise NotImplementedError("Method not implemented")
+
 
 class UpdateService_v1_4_0(UpdateService):
 
@@ -58,3 +64,12 @@ class UpdateService_v1_4_0(UpdateService):
         except RESTClientNotFoundError:
             return None
         return SoftwareInventory.from_json(self._client, inventory_data)
+
+    def simple_update(self, image_uri):  # type: (str) -> None
+        self._client.post(
+            self._path + '/Actions/UpdateService.SimpleUpdate',
+            body={'ImageURI': image_uri},
+        )
+
+    def upload_image(self, image):  # type: (bytes) -> None
+        self._client.post(self._path, body=image)
