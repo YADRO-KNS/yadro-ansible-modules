@@ -1,0 +1,42 @@
+---
+- name: Setup connection information
+  set_fact:
+    connection:
+      hostname:       "{{ connection_hostname }}"
+      port:           "{{ connection_port }}"
+      username:       "{{ connection_username }}"
+      password:       "{{ connection_password }}"
+      timeout:        "{{ connection_timeout }}"
+      validate_certs: "{{ connection_validate_certs }}"
+
+- name: Test firmware upload | Ensure system offline
+  yadro.obmc.system_power_state:
+    connection: "{{ connection }}"
+    state: Offline
+
+- name: Test firmware upload | Upload image from local machine
+  yadro.obmc.firmware_update:
+    connection: "{{ connection }}"
+    image_path: "{{ role_path }}/files/test_fake.iso"
+    upload_timeout: 10
+    activate_timeout: 5
+
+  register: result
+
+- name: Test firmware upload | Check result
+  assert:
+    that:
+      - "result.changed == True"
+
+- name: Test firmware upload tftp | Update firmware through tftp-server
+  yadro.obmc.firmware_update:
+    connection: "{{ connection }}"
+    image_path: "tftp://image-server/image.iso"
+    upload_timeout: 10
+    activate_timeout: 5
+  register: result
+
+- name: Test firmware upload tftp | Check result
+  assert:
+    that:
+      - "result.changed == True"

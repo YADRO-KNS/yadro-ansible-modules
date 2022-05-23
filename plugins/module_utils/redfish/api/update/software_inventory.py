@@ -25,6 +25,9 @@ class SoftwareInventory(RedfishAPIObject):
         if version == "#SoftwareInventory.v1_1_0.SoftwareInventory":
             return SoftwareInventory_v1_1_0
 
+    def get_description(self):  # type: () -> str
+        raise NotImplementedError("Method not implemented")
+
     def get_updateable(self):  # type: () -> bool
         raise NotImplementedError("Method not implemented")
 
@@ -39,6 +42,9 @@ class SoftwareInventory_v1_1_0(SoftwareInventory):
 
     def __init__(self, *args, **kwargs):
         super(SoftwareInventory_v1_1_0, self).__init__(*args, **kwargs)
+
+    def get_description(self):  # type: () -> str
+        return self._get_field("Description")
 
     def get_updateable(self):  # type: () -> bool
         return self._get_field("Updateable")
