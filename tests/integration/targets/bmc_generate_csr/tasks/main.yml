@@ -1,0 +1,53 @@
+---
+- name: Setup connection information
+  set_fact:
+    connection:
+      hostname:       "{{ connection_hostname }}"
+      port:           "{{ connection_port }}"
+      username:       "{{ connection_username }}"
+      password:       "{{ connection_password }}"
+      timeout:        "{{ connection_timeout }}"
+      validate_certs: "{{ connection_validate_certs }}"
+
+- name: Test generating CSR | Generate CSR at the BMC side
+  yadro.obmc.bmc_generate_csr:
+    connection: "{{ connection }}"
+    crt_type: https
+    country: RU
+    city: St. Petersburg
+    common_name: testhost.com
+    state: St. Petersburg
+    organization: Yadro
+    organizational_unit: Software Development
+  register: result
+
+- name: Test generating CSR | Check returned result
+  assert:
+    that:
+      - "result.changed == True"
+      - "result.csr_content != None"
+
+- name: Test generating CSR | Generate CSR with saving to file
+  yadro.obmc.bmc_generate_csr:
+    connection: "{{ connection }}"
+    path: "{{ role_path }}/test.csr"
+    crt_type: https
+    country: RU
+    city: St. Petersburg
+    common_name: testhost.com
+    state: St. Petersburg
+    organization: Yadro
+    organizational_unit: Software Development
+  register: result
+
+- name: Test generating CSR | Get file info
+  stat:
+    path: "{{ role_path }}/test.csr"
+  register: file
+
+- name: Test generating CSR | Check returned result
+  assert:
+    that:
+      - "result.changed == True"
+      - "result.csr_content != None"
+      - "file.stat.exists == True"

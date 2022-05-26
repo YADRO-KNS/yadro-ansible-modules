@@ -1,0 +1,73 @@
+---
+- name: Setup connection information
+  set_fact:
+    connection:
+      hostname:       "{{ connection_hostname }}"
+      port:           "{{ connection_port }}"
+      username:       "{{ connection_username }}"
+      password:       "{{ connection_password }}"
+      timeout:        "{{ connection_timeout }}"
+      validate_certs: "{{ connection_validate_certs }}"
+
+
+- name: Test certificate addition | Add certificate as CA to BMC by file
+  yadro.obmc.bmc_ssl_config:
+    connection: "{{ connection }}"
+    crt_type: ca
+    crt_path: "{{ role_path }}/files/CA.pem"
+  register: result
+
+
+- name: Test certificate addition | Check result
+  assert:
+    that:
+      - "result.changed == True"
+
+
+- name: Test certificate replacing | Replace CA certificate by content
+  yadro.obmc.bmc_ssl_config:
+    connection: "{{ connection }}"
+    crt_type: ca
+    crt_content: |
+      -----BEGIN CERTIFICATE-----
+      MIIDuzCCAqOgAwIBAgIUeE1dxQlDVpDG8XPhdnf5nU6fNPYwDQYJKoZIhvcNAQEL
+      BQAwbTELMAkGA1UEBhMCQVUxDTALBgNVBAgMBHRlc3QxDTALBgNVBAcMBHRlc3Qx
+      DTALBgNVBAoMBHRlc3QxDTALBgNVBAsMBHRlc3QxDTALBgNVBAMMBHRlc3QxEzAR
+      BgkqhkiG9w0BCQEWBHRlc3QwHhcNMjIwNTEyMTU1ODIyWhcNMjcxMjIwMTU1ODIy
+      WjBtMQswCQYDVQQGEwJBVTENMAsGA1UECAwEdGVzdDENMAsGA1UEBwwEdGVzdDEN
+      MAsGA1UECgwEdGVzdDENMAsGA1UECwwEdGVzdDENMAsGA1UEAwwEdGVzdDETMBEG
+      CSqGSIb3DQEJARYEdGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
+      ALypSG8b252Z1ks2XHpkZW0iSqi0suGoEJQ6XZqMQqBNxH1QCOLErk5kZoye5oA8
+      DUSpiujxyF+wSeJxxagbvDpNHkOMW85WSUdyVdlfMzM96uwAcJgNu6y+UK8TXUT9
+      1U7/JYwmDvzqRcrdJ53jJ9lojTIPeubW+LSQ3OnPVAxUOT1Qx49PaXKImG2NHnvi
+      FopcVW9buiZvq2O4+MN6MvDrepzaDA4wbY0tKqsoq+QlxEiO8xU3vGqudAeXwofi
+      E3XAqEhvLvO8y+bsbkcZOButbsuyI8UZWNu9eZG/jUDBTCQ0G4/oK9JTNfgDP/vb
+      4P74OGS9uqm/XFtvMG6yIasCAwEAAaNTMFEwHQYDVR0OBBYEFDrLp2+b9M/PkAHk
+      QxAiewUu8ZwmMB8GA1UdIwQYMBaAFDrLp2+b9M/PkAHkQxAiewUu8ZwmMA8GA1Ud
+      EwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggEBAG6Jl5ATC4Pz+NLfjmzq9Lxv
+      PtbH6tbqNC+WRVL/icfiaILjP8iboF2CO2ilxszfXq+4KTIt7NX3H1cLXlq4EYrV
+      rFTzjDTfFXci0whr8lE0NBDdzb7MBLCUCPB5D6F8bO9J9dxkL0KLx4siL4ND6a21
+      IJNnJWZ69N5avC9xlBZZotDh5t48Pvx3qCWlyHdrtA53Xu4CWEojdL6oSjLyr40K
+      T8ICRy5yUJ/d/vct0EpAa87m6LaBukNsQFEcs/Xrfa18H5RRQZnY3P7OSQCu7cCp
+      btAe1JUmxIy5s82gxZG5ID/iNH6wRzSgCKzkGrhq/oTjeQ3QYUfdj1VO6IVSF+w=
+      -----END CERTIFICATE-----
+
+  register: result
+
+- name: Test certificate replacing | Check result
+  assert:
+    that:
+      - "result.changed == True"
+
+
+- name: Test certificate deletion | Delete CA certificate
+  yadro.obmc.bmc_ssl_config:
+    connection: "{{ connection }}"
+    crt_type: ca
+    state: absent
+  register: result
+
+- name: Test certificate deletion | Check result
+  assert:
+    that:
+      - "result.changed == True"

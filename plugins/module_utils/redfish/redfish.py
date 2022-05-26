@@ -20,6 +20,7 @@ from ansible_collections.yadro.obmc.plugins.module_utils.redfish.client.rest imp
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.session.session import Session
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.session.service import SessionService
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.account.service import AccountService
+from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.certificate.service import CertificateService
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.update.service import UpdateService
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.manager.manager import Manager
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.system.system import System
@@ -80,6 +81,11 @@ class RedfishAPI:
         account_service_path = "{0}/AccountService".format(self._base_prefix)
         account_service_data = self._client.get(account_service_path).json
         return AccountService.from_json(self._client, account_service_data)
+
+    def get_certificate_service(self):  # type: () -> CertificateService
+        certificate_service_data = self._client.get(
+            "{0}/CertificateService".format(self._base_prefix)).json
+        return CertificateService.from_json(self._client, certificate_service_data)
 
     def get_update_service(self):  # type: () -> UpdateService
         update_service_path = "{0}/UpdateService".format(self._base_prefix)
