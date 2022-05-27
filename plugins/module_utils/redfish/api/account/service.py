@@ -10,15 +10,16 @@ from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
 try:
-    from typing import Optional, ClassVar, List
+    from typing import Optional, ClassVar, List, Dict, Any
 except ImportError:
     # Satisfy Python 2 which doesn't have typing.
-    Optional = ClassVar = List = None
+    Optional = ClassVar = List = Dict = Any = None
 
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.base import RedfishAPIObject
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.client.exceptions import RESTClientNotFoundError
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.account.account import Account
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.account.role import Role
+from ansible_collections.yadro.obmc.plugins.module_utils.redfish.enums import AccountProvider
 
 
 class AccountService(RedfishAPIObject):
@@ -31,6 +32,32 @@ class AccountService(RedfishAPIObject):
             return AccountServiceMockup_v1_5_0
 
     def create_account(self, username, password, role_id, enabled):  # type: (str, str, str, bool) -> None
+        raise NotImplementedError("Method not implemented")
+
+    def config_ldap(self, service_type, **kwargs):
+        # type: (AccountProvider, ...) -> Dict[str, Any]
+        """
+        Keyword Arguments:
+            uri (str): The address of the external LDAP service
+            enabled (bool): An indication of whether this service is enabled
+            bind_dn (str): DN of the user who will interact with
+                the LDAP service
+            password (str): Password of the user who will interact with the
+                LDAP service
+            base_dn (str): The base distinguished names to use to search
+                an external LDAP service
+            user_id_attribute (str): The attribute name that contains
+                the LDAP username entry
+            group_id_attribute (str): The attribute name that contains the
+                groups for a user on the LDAP user entry.
+            role_groups (list of dict): The mapping rules to convert
+                the external account providers account information to the
+                local role. The keys are 'name' and 'role'
+        """
+        raise NotImplementedError("Method not implemented")
+
+    def get_ldap_config(self, service_type):
+        # type: (AccountProvider) -> Dict[str, Any]
         raise NotImplementedError("Method not implemented")
 
     def get_account_collection(self):  # type: () -> List[Account]
@@ -71,6 +98,111 @@ class AccountService_v1_5_0(AccountService):
             "Enabled": enabled
         })
         self.reload()
+
+    def config_ldap(self, service_type, **kwargs):
+        # type: (AccountProvider, ...) -> Dict[str, Any]
+
+        data = {}
+
+        if 'uri' in kwargs:
+            data['ServiceAddresses'] = [kwargs['uri']]
+
+        if 'enabled' in kwargs:
+            data['ServiceEnabled'] = kwargs['enabled']
+
+        is_auth_update = 'bind_dn' in kwargs or 'password' in kwargs
+        if is_auth_update:
+            data['Authentication'] = {}
+
+        if 'bind_dn' in kwargs:
+            data['Authentication']['Username'] = kwargs['bind_dn']
+
+        if 'password' in kwargs:
+            data['Authentication']['Password'] = kwargs['password']
+
+        search_settings = {}
+        if 'base_dn' in kwargs:
+            search_settings['BaseDistinguishedNames'] = [kwargs['base_dn']]
+
+        if 'user_id_attribute' in kwargs:
+            search_settings['UsernameAttribute'] = kwargs['user_id_attribute']
+
+        if 'group_id_attribute' in kwargs:
+            search_settings['GroupsAttribute'] = kwargs['group_id_attribute']
+
+        if len(search_settings) > 0:
+            data['LDAPService'] = {'SearchSettings': search_settings}
+
+        if 'role_groups' in kwargs:
+            data['RemoteRoleMapping'] = []
+
+            role_groups = kwargs['role_groups']
+            if not isinstance(role_groups, list):
+                role_groups = [role_groups]
+
+            for group in role_groups:
+                group_data = None if group is None else {
+                    'RemoteGroup': group['name'],
+                    'LocalRole': group['role'],
+                }
+                data['RemoteRoleMapping'].append(group_data)
+
+        # We have to know actual state of other services
+        self.reload()
+
+        if service_type is AccountProvider.ACTIVE_DIRECTORY:
+            payload = {'ActiveDirectory': data}
+            if self._data['LDAP']['ServiceEnabled']:
+                self._client.patch(
+                    self._path,
+                    body={'LDAP': {'ServiceEnabled': False}},
+                )
+        elif service_type is AccountProvider.OPENLDAP:
+            payload = {'LDAP': data}
+            if self._data['ActiveDirectory']['ServiceEnabled']:
+                self._client.patch(
+                    self._path,
+                    body={'ActiveDirectory': {'ServiceEnabled': False}},
+                )
+        else:
+            raise ValueError('Unsupported service type')
+
+        self._client.patch(self._path, payload)
+        self.reload()
+        return self.get_ldap_config(service_type)
+
+    def get_ldap_config(self, service_type):
+        # type: (AccountProvider) -> Dict[str, Any]
+
+        if service_type is AccountProvider.OPENLDAP:
+            key = 'LDAP'
+        elif service_type is AccountProvider.ACTIVE_DIRECTORY:
+            key = 'ActiveDirectory'
+        else:
+            raise ValueError('Unsupported service type')
+
+        data = self._data[key]
+        search_settings = data['LDAPService']['SearchSettings']
+
+        role_groups = []
+        for role in data['RemoteRoleMapping']:
+            role_groups.append({
+                'name': role['RemoteGroup'],
+                'role': role['LocalRole'],
+            })
+
+        rv = {
+            'uri': data['ServiceAddresses'][0],
+            'enabled': data['ServiceEnabled'],
+            'bind_dn': data['Authentication']['Username'],
+            'password': data['Authentication']['Password'],
+            'base_dn': search_settings['BaseDistinguishedNames'][0],
+            'user_id_attribute': search_settings['UsernameAttribute'],
+            'group_id_attribute': search_settings['GroupsAttribute'],
+            'role_groups': role_groups,
+        }
+
+        return rv
 
     def get_account_collection(self):  # type: () -> List[Account]
         accounts = []

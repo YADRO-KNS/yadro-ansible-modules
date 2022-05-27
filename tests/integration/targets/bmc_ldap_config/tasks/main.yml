@@ -1,0 +1,81 @@
+---
+- name: Setup connection information
+  set_fact:
+    connection:
+      hostname:       "{{ connection_hostname }}"
+      port:           "{{ connection_port }}"
+      username:       "{{ connection_username }}"
+      password:       "{{ connection_password }}"
+      timeout:        "{{ connection_timeout }}"
+      validate_certs: "{{ connection_validate_certs }}"
+
+- name: Test ActiveDirectory configuration | Enable ActiveDirectory authentication
+  yadro.obmc.bmc_ldap_config:
+    connection: "{{ connection }}"
+    service_type: "ActiveDirectory"
+    uri: "ldap://192.168.100.101"
+    enabled: true
+    bind_dn: "cn=lookup,dc=example,dc=com"
+    password: "password"
+    base_dn: "dc=example,dc=com"
+    role_groups:
+      - name: test_group1
+        role: Administrator
+        state: present
+  register: result
+
+- name:  Test ActiveDirectory configuration | Check result
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.ldap_config.uri == 'ldap://192.168.100.101'"
+      - "result.ldap_config.enabled == true"
+      - "result.ldap_config.bind_dn == 'cn=lookup,dc=example,dc=com'"
+      - "result.ldap_config.base_dn == 'dc=example,dc=com'"
+      - "result.ldap_config.role_groups == [{'name': 'test_group1', 'role': 'Administrator'}]"
+
+- name: Test LDAP configuration | Enable LDAP authentication
+  yadro.obmc.bmc_ldap_config:
+    connection: "{{ connection }}"
+    service_type: "OpenLDAP"
+    uri: "ldap://192.168.100.102"
+    enabled: true
+    bind_dn: "cn=lookup,dc=example,dc=com"
+    password: "password"
+    base_dn: "dc=example,dc=com"
+    role_groups:
+      - name: test_group1
+        role: Administrator
+      - name: test_group2
+        role: ReadOnly
+  register: result
+
+- name:  Test LDAP configuration | Check result
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.ldap_config.uri == 'ldap://192.168.100.102'"
+      - "result.ldap_config.enabled == true"
+      - "result.ldap_config.bind_dn == 'cn=lookup,dc=example,dc=com'"
+      - "result.ldap_config.base_dn == 'dc=example,dc=com'"
+      - "result.ldap_config.role_groups == [{'name': 'test_group1', 'role': 'Administrator'},
+                                            {'name': 'test_group2', 'role': 'ReadOnly'}]"
+
+- name: Test LDAP configuration | Remove group
+  yadro.obmc.bmc_ldap_config:
+    connection: "{{ connection }}"
+    service_type: "OpenLDAP"
+    role_groups:
+      - name: test_group2
+        state: absent
+  register: result
+
+- name:  Test LDAP configuration | Check result
+  assert:
+    that:
+      - "result.changed == true"
+      - "result.ldap_config.uri == 'ldap://192.168.100.102'"
+      - "result.ldap_config.enabled == true"
+      - "result.ldap_config.bind_dn == 'cn=lookup,dc=example,dc=com'"
+      - "result.ldap_config.base_dn == 'dc=example,dc=com'"
+      - "result.ldap_config.role_groups == [{'name': 'test_group1', 'role': 'Administrator'}]"
