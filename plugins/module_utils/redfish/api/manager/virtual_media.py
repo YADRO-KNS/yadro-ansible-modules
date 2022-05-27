@@ -38,6 +38,9 @@ class VirtualMedia(RedfishAPIObject):
     ):  # type: (...) -> None
         raise NotImplementedError("Method not implemented")
 
+    def eject(self):  # type: () -> None
+        raise NotImplementedError("Method not implemented")
+
 
 class VirtualMedia_v1_3_0(VirtualMedia):
 
@@ -63,4 +66,9 @@ class VirtualMedia_v1_3_0(VirtualMedia):
                 'WriteProtected': write_protected,
                 'Inserted': inserted,
             }
+        )
+
+    def eject(self):  # type: () -> None
+        self._client.post(
+            self._path + '/Actions/VirtualMedia.EjectMedia',
         )

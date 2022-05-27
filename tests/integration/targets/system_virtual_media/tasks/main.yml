@@ -1,0 +1,35 @@
+---
+- name: Setup connection information
+  set_fact:
+    connection:
+      hostname:       "{{ connection_hostname }}"
+      port:           "{{ connection_port }}"
+      username:       "{{ connection_username }}"
+      password:       "{{ connection_password }}"
+      timeout:        "{{ connection_timeout }}"
+      validate_certs: "{{ connection_validate_certs }}"
+
+- name: Test inject virtual media | Inject vm
+  yadro.obmc.system_virtual_media:
+    connection: "{{ connection }}"
+    image_path: http://server-with-image/image.iso
+    reboot_host: True
+    media_type: HDD
+    username: user
+    password: pass
+    write_protected: False
+  register: result
+
+- name: Test inject virtual media | Check result
+  assert:
+    that: "result.changed == true"
+
+- name: Test eject virtual media | Eject vm
+  yadro.obmc.system_virtual_media:
+    connection: "{{ connection }}"
+    state: absent
+  register: result
+
+- name: Test eject virtual media | Check result
+  assert:
+    that: "result.changed == true"
