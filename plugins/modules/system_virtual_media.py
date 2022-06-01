@@ -114,7 +114,7 @@ EXAMPLES = r"""
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
-class OpenBmcTimeModule(OpenBmcModule):
+class OpenBmcVirtualMedia(OpenBmcModule):
 
     def __init__(self):
         argument_spec = {
@@ -155,7 +155,7 @@ class OpenBmcTimeModule(OpenBmcModule):
             },
         }
 
-        super(OpenBmcTimeModule, self).__init__(
+        super(OpenBmcVirtualMedia, self).__init__(
             argument_spec=argument_spec,
             supports_check_mode=False,
             required_if=[['state', 'present', ['image_path']]],
@@ -192,7 +192,7 @@ class OpenBmcTimeModule(OpenBmcModule):
 
 
 def main():
-    OpenBmcTimeModule().run()
+    OpenBmcVirtualMedia().run()
 
 
 if __name__ == "__main__":

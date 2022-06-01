@@ -59,7 +59,7 @@ class Manager(RedfishAPIObject):
     def get_ethernet_interface(self, interface_id):  # type: () -> Optional[EthernetInterface]
         raise NotImplementedError("Method not implemented")
 
-    def get_virtual_media_collection(self):  # type: () -> List[EthernetInterface]
+    def get_virtual_media_collection(self):  # type: () -> List[VirtualMedia]
         raise NotImplementedError("Method not implemented")
 
     def get_virtual_media(self, vm_id):    # type: (str) -> Optional[VirtualMedia]
@@ -124,7 +124,7 @@ class Manager_v1_9_0(Manager):
             return None
         return EthernetInterface.from_json(self._client, interface_data)
 
-    def get_virtual_media_collection(self):  # type: () -> List[EthernetInterface]
+    def get_virtual_media_collection(self):  # type: () -> List[VirtualMedia]
         result = []
         collection = self._client.get("{0}/VirtualMedia".format(self._path)).json
         for member in collection['Members']:
