@@ -37,7 +37,7 @@
 - name: Test LDAP configuration | Enable LDAP authentication
   yadro.obmc.bmc_ldap_config:
     connection: "{{ connection }}"
-    service_type: "OpenLDAP"
+    service_type: "LDAP"
     uri: "ldap://192.168.100.102"
     enabled: true
     bind_dn: "cn=lookup,dc=example,dc=com"
@@ -64,7 +64,7 @@
 - name: Test LDAP configuration | Remove group
   yadro.obmc.bmc_ldap_config:
     connection: "{{ connection }}"
-    service_type: "OpenLDAP"
+    service_type: "LDAP"
     role_groups:
       - name: test_group2
         state: absent
