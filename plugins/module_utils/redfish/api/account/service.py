@@ -19,7 +19,6 @@ from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.base import
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.client.exceptions import RESTClientNotFoundError
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.account.account import Account
 from ansible_collections.yadro.obmc.plugins.module_utils.redfish.api.account.role import Role
-from ansible_collections.yadro.obmc.plugins.module_utils.redfish.enums import AccountProvider
 
 
 class AccountService(RedfishAPIObject):
@@ -35,7 +34,7 @@ class AccountService(RedfishAPIObject):
         raise NotImplementedError("Method not implemented")
 
     def config_ldap(self, service_type, **kwargs):
-        # type: (AccountProvider, ...) -> Dict[str, Any]
+        # type: (str, ...) -> Dict[str, Any]
         """
         Keyword Arguments:
             uri (str): The address of the external LDAP service
@@ -57,7 +56,7 @@ class AccountService(RedfishAPIObject):
         raise NotImplementedError("Method not implemented")
 
     def get_ldap_config(self, service_type):
-        # type: (AccountProvider) -> Dict[str, Any]
+        # type: (str) -> Dict[str, Any]
         raise NotImplementedError("Method not implemented")
 
     def get_account_collection(self):  # type: () -> List[Account]
@@ -100,7 +99,7 @@ class AccountService_v1_5_0(AccountService):
         self.reload()
 
     def config_ldap(self, service_type, **kwargs):
-        # type: (AccountProvider, ...) -> Dict[str, Any]
+        # type: (str, ...) -> Dict[str, Any]
 
         data = {}
 
@@ -150,38 +149,33 @@ class AccountService_v1_5_0(AccountService):
         # We have to know actual state of other services
         self.reload()
 
-        if service_type is AccountProvider.ACTIVE_DIRECTORY:
-            payload = {'ActiveDirectory': data}
-            if self._data['LDAP']['ServiceEnabled']:
-                self._client.patch(
-                    self._path,
-                    body={'LDAP': {'ServiceEnabled': False}},
-                )
-        elif service_type is AccountProvider.OPENLDAP:
-            payload = {'LDAP': data}
-            if self._data['ActiveDirectory']['ServiceEnabled']:
-                self._client.patch(
-                    self._path,
-                    body={'ActiveDirectory': {'ServiceEnabled': False}},
-                )
-        else:
-            raise ValueError('Unsupported service type')
+        ad_enabled = 'ActiveDirectory' in self._data \
+                     and self._data['ActiveDirectory']['ServiceEnabled']
 
+        ldap_enabled = 'LDAP' in self._data \
+                       and self._data['LDAP']['ServiceEnabled']
+
+        if service_type == 'LDAP' and ad_enabled:
+            self._client.patch(
+                self._path,
+                body={'ActiveDirectory': {'ServiceEnabled': False}},
+            )
+        elif service_type == 'ActiveDirectory' and ldap_enabled:
+            self._client.patch(
+                self._path,
+                body={'LDAP': {'ServiceEnabled': False}},
+            )
+
+        payload = {service_type: data}
         self._client.patch(self._path, payload)
         self.reload()
+
         return self.get_ldap_config(service_type)
 
     def get_ldap_config(self, service_type):
-        # type: (AccountProvider) -> Dict[str, Any]
+        # type: (str) -> Dict[str, Any]
 
-        if service_type is AccountProvider.OPENLDAP:
-            key = 'LDAP'
-        elif service_type is AccountProvider.ACTIVE_DIRECTORY:
-            key = 'ActiveDirectory'
-        else:
-            raise ValueError('Unsupported service type')
-
-        data = self._data[key]
+        data = self._data[service_type]
         search_settings = data['LDAPService']['SearchSettings']
 
         role_groups = []

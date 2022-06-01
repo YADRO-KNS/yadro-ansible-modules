@@ -28,7 +28,7 @@ options:
   service_type:
     required: True
     type: str
-    choices: [OpenLDAP, ActiveDirectory]
+    choices: [LDAP, ActiveDirectory]
     description: Defines the LDAP service
   uri:
     required: False
@@ -113,7 +113,7 @@ ldap_config:
   returned: on success
   description: Actual ldap configuration
   sample: {
-    "service_type": "OpenLDAP",
+    "service_type": "LDAP",
     "uri": "ldap://192.168.100.101",
     "enabled": True,
     "bind_dn": "cn=admin,dc=example,dc=com",
@@ -136,7 +136,7 @@ EXAMPLES = r"""
       hostname: "localhost"
       username: "username"
       password: "password"
-    service_type: "OpenLDAP"
+    service_type: "LDAP"
     uri: "ldap://192.168.100.101"
     enabled: true
     bind_dn: "cn=lookup,dc=example,dc=com"
@@ -153,7 +153,7 @@ EXAMPLES = r"""
       hostname: "localhost"
       username: "username"
       password: "password"
-    service_type: "OpenLDAP"
+    service_type: "LDAP"
     enabled: false
 
 - name: Remove role group
@@ -162,7 +162,7 @@ EXAMPLES = r"""
       hostname: "localhost"
       username: "username"
       password: "password"
-    service_type: "OpenLDAP"
+    service_type: "LDAP"
     role_groups:
       - name: test_group
         state: absent
@@ -170,7 +170,6 @@ EXAMPLES = r"""
 
 
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
-from ansible_collections.yadro.obmc.plugins.module_utils.redfish.enums import AccountProvider
 
 
 class OpenBmcLdapConfigModule(OpenBmcModule):
@@ -180,7 +179,7 @@ class OpenBmcLdapConfigModule(OpenBmcModule):
             'service_type': {
                 'required': True,
                 'type': 'str',
-                'choices': ['OpenLDAP', 'ActiveDirectory'],
+                'choices': ['LDAP', 'ActiveDirectory'],
             },
             'uri': {'required': False, 'type': 'str'},
             'enabled': {'required': False, 'type': 'bool'},
@@ -218,9 +217,9 @@ class OpenBmcLdapConfigModule(OpenBmcModule):
         self._validate_role_groups()
 
     def _run(self):
-        service_type = self._define_service_type()
         account_service = self.redfish.get_account_service()
-        actual_config = account_service.get_ldap_config(service_type)
+        actual_config = account_service.get_ldap_config(
+            self.params['service_type'])
 
         # Send only defined parameters
         prepared_data = dict(
@@ -250,7 +249,7 @@ class OpenBmcLdapConfigModule(OpenBmcModule):
             result = dict(msg="Operation successful.", changed=True)
             if not self.check_mode:
                 actual_config = account_service.config_ldap(
-                    service_type=service_type,
+                    service_type=self.params['service_type'],
                     **prepared_data
                 )
                 result['ldap_config'] = actual_config
@@ -260,19 +259,6 @@ class OpenBmcLdapConfigModule(OpenBmcModule):
                 msg="No changes required.",
                 ldap_config=actual_config,
                 changed=False)
-
-    def _define_service_type(self):
-        if self.params['service_type'] == 'OpenLDAP':
-            return AccountProvider.OPENLDAP
-
-        if self.params['service_type'] == 'ActiveDirectory':
-            return AccountProvider.ACTIVE_DIRECTORY
-
-        self.fail_json(
-            msg='Unsupported service type',
-            error='service_type value error',
-            changed=False,
-        )
 
     def _get_groups_update(self, existing_groups):
         rv = existing_groups.copy()
