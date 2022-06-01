@@ -6,7 +6,7 @@ WORKDIR=$(pwd)
 BUILD_DIR=${WORKDIR}/build
 TEST_DIR=${WORKDIR}/tests
 
-DOCKER_MOCKUP_SERVER_IMAGE="hub.spb.yadro.com/docker/redfish-mockup-server:latest-x86_64"
+DOCKER_MOCKUP_SERVER_IMAGE="gitlab-hub.spb.yadro.com/docker/redfish-mockup-server:latest-x86_64"
 DOCKER_MOCKUP_SERVER_PORT=8000
 
 SUBCOMMAND_ARGS="${*:2}"
