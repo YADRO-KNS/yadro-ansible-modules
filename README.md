@@ -1,12 +1,19 @@
 # YADRO OpenBmc Ansible Collection
 
-[![pipeline status](https://gitlab.spb.yadro.com/galaxy/obmc/badges/master/pipeline.svg)](https://gitlab.spb.yadro.com/galaxy/obmc/-/commits/master)
-[![coverage report](https://gitlab.spb.yadro.com/galaxy/obmc/badges/master/coverage.svg)](https://gitlab.spb.yadro.com/galaxy/obmc/-/commits/master)
+YADRO OpenBmc Ansible Collection allows to interact with server's BMC. 
+This collection helps to automate configuration of the Vegman server.
+
+
+## Requirements
+
+- python >= 2.7 or >= 3.5
+- ansible version >= 2.9
+
+## Installation
+
+You can install this collection by executing the next command:
+
+```ansible-galaxy collection install git+https://github.com/YADRO-KNS/yadro-ansible-modules```
 
 ## Documentation
-
-### Requirements and terms of reference
-https://c.yadro.com/display/INFKB/OpenBmc+Ansible+Collection
-
-### Description of modules and parameters
 https://galaxy.pages.spb.yadro.com/obmc/

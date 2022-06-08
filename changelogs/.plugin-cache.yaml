@@ -1,0 +1,97 @@
+objects:
+  role: {}
+plugins:
+  become: {}
+  cache: {}
+  callback: {}
+  cliconf: {}
+  connection: {}
+  httpapi: {}
+  inventory: {}
+  lookup: {}
+  module:
+    bmc_account:
+      description: Manage BMC accounts.
+      name: bmc_account
+      namespace: ''
+      version_added: 1.0.0
+    bmc_generate_csr:
+      description: Generating Certificate Sign Request.
+      name: bmc_generate_csr
+      namespace: ''
+      version_added: 1.1.0
+    bmc_hostname:
+      description: Manage BMC hostname.
+      name: bmc_hostname
+      namespace: ''
+      version_added: 1.0.0
+    bmc_ldap_config:
+      description: Configures LDAP authentication
+      name: bmc_ldap_config
+      namespace: ''
+      version_added: 1.1.0
+    bmc_network_interface:
+      description: Manage BMC network interfaces.
+      name: bmc_network_interface
+      namespace: ''
+      version_added: 1.0.0
+    bmc_restart:
+      description: Restart BMC.
+      name: bmc_restart
+      namespace: ''
+      version_added: 1.0.0
+    bmc_security_config:
+      description: Manage BMC security protocols.
+      name: bmc_security_config
+      namespace: ''
+      version_added: 1.1.0
+    bmc_session:
+      description: Manage BMC sessions.
+      name: bmc_session
+      namespace: ''
+      version_added: 1.0.0
+    bmc_ssl_config:
+      description: Configuring BMC certificates
+      name: bmc_ssl_config
+      namespace: ''
+      version_added: 1.1.0
+    bmc_time:
+      description: Manage BMC time.
+      name: bmc_time
+      namespace: ''
+      version_added: 1.0.0
+    firmware_info:
+      description: Return BMC and BIOS firmware information.
+      name: firmware_info
+      namespace: ''
+      version_added: 1.0.0
+    firmware_update:
+      description: Updates bmc or host firmware.
+      name: firmware_update
+      namespace: ''
+      version_added: 1.1.0
+    system_boot_settings:
+      description: Setup Host OS boot settings.
+      name: system_boot_settings
+      namespace: ''
+      version_added: 1.0.0
+    system_info:
+      description: Return system information.
+      name: system_info
+      namespace: ''
+      version_added: 1.0.0
+    system_power_state:
+      description: System power operations.
+      name: system_power_state
+      namespace: ''
+      version_added: 1.0.0
+    system_virtual_media:
+      description: Connect or disconnect virtual media image to host.
+      name: system_virtual_media
+      namespace: ''
+      version_added: 1.1.0
+  netconf: {}
+  shell: {}
+  strategy: {}
+  vars: {}
+version: 1.1.0
