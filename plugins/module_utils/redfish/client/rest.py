@@ -43,7 +43,11 @@ class RESTClient(HTTPClient):
             elif e.code == 401:
                 raise RESTClientUnauthorized('Unauthorized error')
             else:
-                raise RESTClientRequestError("Request finished with error: {0}".format(json.load(e)))
+                try:
+                    msg = json.load(e)
+                except ValueError:
+                    msg = str(e)
+                raise RESTClientRequestError("Request finished with error: {0}".format(msg))
         except (URLError, SSLValidationError, ConnectionError) as e:
             raise RESTClientConnectionError("Cannot connect to server: {0}".format(str(e)))
         else:
