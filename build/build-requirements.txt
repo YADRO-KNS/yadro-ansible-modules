@@ -1,6 +1,0 @@
-ansible
-coverage==4.5.4
-antsibull
-junit_xml
-sphinx-notfound-page >= 0.6
-sphinx-ansible-theme >= 0.7.0

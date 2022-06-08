@@ -1,0 +1,23 @@
+ancestor: null
+releases:
+  1.1.0:
+    modules:
+    - description: Generating Certificate Sign Request.
+      name: bmc_generate_csr
+      namespace: ''
+    - description: Configures LDAP authentication
+      name: bmc_ldap_config
+      namespace: ''
+    - description: Manage BMC security protocols.
+      name: bmc_security_config
+      namespace: ''
+    - description: Configuring BMC certificates
+      name: bmc_ssl_config
+      namespace: ''
+    - description: Updates bmc or host firmware.
+      name: firmware_update
+      namespace: ''
+    - description: Connect or disconnect virtual media image to host.
+      name: system_virtual_media
+      namespace: ''
+    release_date: '2022-06-10'

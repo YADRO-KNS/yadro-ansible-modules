@@ -1,0 +1,32 @@
+---
+- hosts: bmc_vegman
+  connection: local
+  name: Add https certificate to BMC
+
+  tasks:
+    - name: Generate csr for https
+      yadro.obmc.bmc_generate_csr:
+        connection: "{{ connection }}"
+        crt_type: https
+        country: RU
+        city: St. Petersburg
+        common_name: "{{ connection.hostname }}"
+        state: St. Petersburg
+        organization: Yadro
+        organizational_unit: Software Development
+        register: csr
+
+    - community.crypto.x509_certificate:
+        path: /tmp/bmc_ldap.cert
+        csr_content: "{{ csr.csr_content }}"
+        provider: ownca
+        ownca_path: /usr/local/ssl/CA.crt
+        ownca_privatekey_path: /usr/local/ssl/CA.key
+        ownca_privatekey_passphrase: 1234
+        return_content: yes
+      register: cert
+
+    - yadro.obmc.bmc_ssl_config:
+        connection: "{{ connection }}"
+        crt_type: https
+        crt_content: "{{ cert.certificate }}"

@@ -1,20 +1,17 @@
 namespace: yadro
 name: obmc
-version: 1.0.0
+version: 1.1.0
 readme: README.md
 authors:
   - Radmir Safin <r.safin@yadro.com>
+  - Sergey Kovalev <s.kovalev@yadro.com>
 description: Yadro OpenBmc Ansible Collection
 license:
-  - GPL-2.0-or-later
-license_file: ''
+  - GPL-3.0-or-later
+license_file: COPYING
 tags: []
 dependencies: {}
-repository: http://example.com/repository
-documentation: http://docs.example.com
-homepage: http://example.com
-issues: http://example.com/issue/tracker
-build_ignore:
-  - '.*'
-  - build
-  - build-tool.sh
+repository: https://github.com/YADRO-KNS/yadro-ansible-modules
+documentation: ***REMOVED***
+homepage: https://github.com/YADRO-KNS/yadro-ansible-modules
+issues: https://github.com/YADRO-KNS/yadro-ansible-modules/issues

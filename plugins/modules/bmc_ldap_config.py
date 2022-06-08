@@ -261,7 +261,7 @@ class OpenBmcLdapConfigModule(OpenBmcModule):
                 changed=False)
 
     def _get_groups_update(self, existing_groups):
-        rv = existing_groups.copy()
+        rv = list(existing_groups)  # Python 2 doesn't support copy method
         desired_groups = self.params['role_groups']
 
         for desired in desired_groups:
