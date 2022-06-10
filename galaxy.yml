@@ -15,3 +15,7 @@ repository: https://github.com/YADRO-KNS/yadro-ansible-modules
 documentation: ***REMOVED***
 homepage: https://github.com/YADRO-KNS/yadro-ansible-modules
 issues: https://github.com/YADRO-KNS/yadro-ansible-modules/issues
+build_ignore:
+  - '.*'
+  - build
+  - build-tool.sh
