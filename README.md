@@ -1,12 +1,5 @@
-# YADRO OpenBmc Ansible Collection
+# This branch contains excluded modules bios_reset_to_defaults and bmc_reset_to_defaults
 
-[![pipeline status](https://gitlab.spb.yadro.com/galaxy/obmc/badges/master/pipeline.svg)](https://gitlab.spb.yadro.com/galaxy/obmc/-/commits/master)
-[![coverage report](https://gitlab.spb.yadro.com/galaxy/obmc/badges/master/coverage.svg)](https://gitlab.spb.yadro.com/galaxy/obmc/-/commits/master)
-
-## Documentation
-
-### Requirements and terms of reference
-https://c.yadro.com/display/INFKB/OpenBmc+Ansible+Collection
-
-### Description of modules and parameters
-https://galaxy.pages.spb.yadro.com/obmc/
+BMC currently does not support functionality for modules bios_reset_to_defaults 
+and bmc_reset_to_defaults, so this modules were excluded from the release 1.1.0.
+For saving the developed modules, this branch was created 
