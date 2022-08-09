@@ -12,7 +12,7 @@ license_file: COPYING
 tags: []
 dependencies: {}
 repository: https://github.com/YADRO-KNS/yadro-ansible-modules
-documentation: ***REMOVED***
+documentation: https://yadro-kns.github.io/yadro-ansible-modules/
 homepage: https://github.com/YADRO-KNS/yadro-ansible-modules
 issues: https://github.com/YADRO-KNS/yadro-ansible-modules/issues
 build_ignore:
