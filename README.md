@@ -6,8 +6,8 @@ This collection helps to automate configuration of the Vegman server.
 
 ## Requirements
 
-- python >= 2.7 or >= 3.5
-- ansible version >= 2.9
+- python >= 2.7 or >= 3.6
+- ansible version >= 2.10
 
 ## Installation
 
