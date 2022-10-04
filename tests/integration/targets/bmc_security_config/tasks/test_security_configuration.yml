@@ -23,3 +23,28 @@
   assert:
     that:
       - "result.changed == true"
+
+- name: Test security configuration | Enable SSH support
+  yadro.obmc.bmc_security_config:
+    connection: "{{ connection }}"
+    ssh_enabled: true
+  register: result
+
+
+- name: Test security configuration | Check configuration updated
+  assert:
+    that:
+      - "result.changed == true"
+
+
+- name: Test security configuration | Enable IPMI support
+  yadro.obmc.bmc_security_config:
+    connection: "{{ connection }}"
+    ipmi_enabled: true
+  register: result
+
+
+- name: Test security configuration | Check configuration updated
+  assert:
+    that:
+      - "result.changed == true"
