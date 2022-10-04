@@ -77,6 +77,7 @@ EXAMPLES = r"""
 import os
 import time
 import json
+from io import open
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 from ansible.module_utils.urls import open_url
 from ansible.module_utils.six.moves.urllib.error import URLError, HTTPError

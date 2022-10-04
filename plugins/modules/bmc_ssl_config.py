@@ -77,6 +77,7 @@ EXAMPLES = r"""
     crt_path: /tmp/https.crt
 """
 
+from io import open
 from functools import partial
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 

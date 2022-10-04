@@ -142,6 +142,7 @@ EXAMPLES = r"""
 
 
 import os
+from io import open
 from ansible_collections.yadro.obmc.plugins.module_utils.obmc_module import OpenBmcModule
 
 
