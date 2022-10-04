@@ -35,7 +35,7 @@ class Certificate_v1_0_0(Certificate):
     def __init__(self, client, path, data):
         super(Certificate_v1_0_0, self).__init__(client, path, data)
 
-        self.location, self.id = self._data['@odata.id'].rsplit('/', maxsplit=1)
+        self.location, self.id = self._data['@odata.id'].rsplit('/', 1)
         self.content = self._data['CertificateString']
         self.issuer = self._data['Issuer']
         self.key_usage = self._data['KeyUsage']
