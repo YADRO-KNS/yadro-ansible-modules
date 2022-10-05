@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yadro.Obmc &mdash; Ansible Documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/ansible.css" type="text/css" />
+      <link rel="stylesheet" href="_static/antsibull-minimal.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/rtd-ethical-ads.css" type="text/css" />
+    <link rel="shortcut icon" href="_static/images/Ansible-Mark-RGB_Black.svg"/>
+    <link rel="canonical" href="https://docs.ansible.com/ansible/latest/index.html"/>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="yadro.obmc.bmc_account module – Manage BMC accounts." href="bmc_account_module.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+<script src="https://www.redhat.com/dtm.js"></script>
+
+
+<!-- <meta class="swiftype" name="published_at" data-type="date" content="2017-12-13" /> -->
+<meta class="swiftype" name="version" data-type="string" content="devel">
+
+<!-- Google Tag Manager Data Layer -->
+<script>
+ dataLayer = [];
+</script>
+<!-- End Google Tag Manager Data Layer -->
+
+
+
+<script>
+  (function(w,d,t,u,n,s,e){w['SwiftypeObject']=n;w[n]=w[n]||function(){
+  (w[n].q=w[n].q||[]).push(arguments);};s=d.createElement(t);
+  e=d.getElementsByTagName(t)[0];s.async=1;s.src=u;e.parentNode.insertBefore(s,e);
+  })(window,document,'script','https://s.swiftypecdn.com/install/v2/st.js','_st');
+
+_st('install','yABGvz2N8PwcwBxyfzUc','2.0.0');
+</script>
+
+</head>
+
+<body class="wy-body-for-nav"><!-- extra body elements for Ansible beyond RTD Sphinx Theme -->
+<!-- Google Tag Manager -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PSB293" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-PSB293');</script>
+<!-- End Google Tag Manager -->
+
+<div class="DocSite-globalNav ansibleNav">
+  <ul>
+    <li><a href="https://www.ansible.com/ansiblefest" target="_blank">AnsibleFest</a></li>
+    <li><a href="https://www.ansible.com/tower" target="_blank">Products</a></li>
+    <li><a href="https://www.ansible.com/community" target="_blank">Community</a></li>
+    <li><a href="https://www.ansible.com/webinars-training" target="_blank">Webinars & Training</a></li>
+    <li><a href="https://www.ansible.com/blog" target="_blank">Blog</a></li>
+  </ul>
+</div>
+
+<a class="DocSite-nav" href="/" style="padding-bottom: 30px;">
+
+  <img class="DocSiteNav-logo"
+    src="_static/images/Ansible-Mark-RGB_White.svg"
+    alt="Ansible Logo">
+  <div class="DocSiteNav-title">Documentation</div>
+</a>
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> Ansible
+          </a>
+              <div class="version">
+                devel
+              </div><!--- Based on https://github.com/rtfd/sphinx_rtd_theme/pull/438/files -->
+
+<div class="version">
+  
+    <div class="version-dropdown">
+      <script>
+        function switchVersionTo(slug) {
+          var current_url_path = window.location.pathname;
+          var url_version = current_url_path.search("/devel/") > -1
+            ? "/devel/"
+            : "/latest/";
+          var new_version_url = current_url_path.replace(url_version, "/" + slug + "/");
+          window.location.replace(new_version_url);
+        }
+      </script>
+      <select
+          class="version-list"
+          id="version-list"
+          onchange="switchVersionTo(this.value);"
+      >
+        
+        <option
+            value="latest"
+            
+        >
+            latest
+        </option>
+        
+        <option
+            value="2.9"
+            
+        >
+            2.9
+        </option>
+        
+        <option
+            value="devel"
+            selected="selected"
+        >
+            devel
+        </option>
+        
+      </select>
+    </div>
+  
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" method="get">
+    <input type="text" class="st-default-search-input" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+  
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="bmc_account_module.html">yadro.obmc.bmc_account module – Manage BMC accounts.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmc_generate_csr_module.html">yadro.obmc.bmc_generate_csr module – Generating Certificate Sign Request.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmc_hostname_module.html">yadro.obmc.bmc_hostname module – Manage BMC hostname.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmc_ldap_config_module.html">yadro.obmc.bmc_ldap_config module – Configures LDAP authentication</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmc_network_interface_module.html">yadro.obmc.bmc_network_interface module – Manage BMC network interfaces.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmc_restart_module.html">yadro.obmc.bmc_restart module – Restart BMC.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmc_security_config_module.html">yadro.obmc.bmc_security_config module – Manage BMC security protocols.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmc_session_module.html">yadro.obmc.bmc_session module – Manage BMC sessions.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmc_ssl_config_module.html">yadro.obmc.bmc_ssl_config module – Configuring BMC certificates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bmc_time_module.html">yadro.obmc.bmc_time module – Manage BMC time.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firmware_info_module.html">yadro.obmc.firmware_info module – Return BMC and BIOS firmware information.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="firmware_update_module.html">yadro.obmc.firmware_update module – Updates bmc or host firmware.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system_boot_settings_module.html">yadro.obmc.system_boot_settings module – Setup Host OS boot settings.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system_info_module.html">yadro.obmc.system_info module – Return system information.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system_power_state_module.html">yadro.obmc.system_power_state module – System power operations.</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system_virtual_media_module.html">yadro.obmc.system_virtual_media module – Connect or disconnect virtual media image to host.</a></li>
+</ul>
+<!-- extra nav elements for Ansible beyond RTD Sphinx Theme -->
+<!-- changeable widget links to tower - do not change as image controlled by Ansible-->
+<div id="sideBanner">
+  <br/>
+  <a href="https://www.ansible.com/docs-left?utm_source=docs">
+    <img style="border-width:0px;" src="https://cdn2.hubspot.net/hubfs/330046/docs-graphics/ASB-docs-left-rail.png" />
+  </a>
+  <br/><br/><br/>
+</div>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Ansible</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>Yadro.Obmc</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/ansible/ansible/edit/devel/docs/docsite/rst/index.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+  
+           <div itemprop="articleBody">
+             
+  <section id="yadro-obmc">
+<span id="plugins-in-yadro-obmc"></span><h1>Yadro.Obmc<a class="headerlink" href="#yadro-obmc" title="Permalink to this heading"></a></h1>
+<p>Collection version 1.1.0</p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#description" id="id1">Description</a></p></li>
+<li><p><a class="reference internal" href="#plugin-index" id="id2">Plugin Index</a></p></li>
+</ul>
+</div>
+<section id="description">
+<h2><a class="toc-backref" href="#id1">Description</a><a class="headerlink" href="#description" title="Permalink to this heading"></a></h2>
+<p>Yadro OpenBmc Ansible Collection</p>
+<p><strong>Authors:</strong></p>
+<ul class="simple">
+<li><p>Radmir Safin &lt;<a class="reference external" href="mailto:r&#46;safin&#37;&#52;&#48;yadro&#46;com">r<span>&#46;</span>safin<span>&#64;</span>yadro<span>&#46;</span>com</a>&gt;</p></li>
+<li><p>Sergey Kovalev &lt;<a class="reference external" href="mailto:s&#46;kovalev&#37;&#52;&#48;yadro&#46;com">s<span>&#46;</span>kovalev<span>&#64;</span>yadro<span>&#46;</span>com</a>&gt;</p></li>
+</ul>
+<p class="ansible-links">
+  <a href="https://github.com/YADRO-KNS/yadro-ansible-modules/issues" aria-role="button" target="_blank" rel="noopener external">Issue Tracker</a>
+  <a href="https://github.com/YADRO-KNS/yadro-ansible-modules" aria-role="button" target="_blank" rel="noopener external">Repository (Sources)</a>
+</p><div class="toctree-wrapper compound">
+</div>
+</section>
+<section id="plugin-index">
+<h2><a class="toc-backref" href="#id2">Plugin Index</a><a class="headerlink" href="#plugin-index" title="Permalink to this heading"></a></h2>
+<p>These are the plugins in the yadro.obmc collection:</p>
+<section id="modules">
+<h3>Modules<a class="headerlink" href="#modules" title="Permalink to this heading"></a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="bmc_account_module.html#ansible-collections-yadro-obmc-bmc-account-module"><span class="std std-ref">bmc_account module</span></a> – Manage BMC accounts.</p></li>
+<li><p><a class="reference internal" href="bmc_generate_csr_module.html#ansible-collections-yadro-obmc-bmc-generate-csr-module"><span class="std std-ref">bmc_generate_csr module</span></a> – Generating Certificate Sign Request.</p></li>
+<li><p><a class="reference internal" href="bmc_hostname_module.html#ansible-collections-yadro-obmc-bmc-hostname-module"><span class="std std-ref">bmc_hostname module</span></a> – Manage BMC hostname.</p></li>
+<li><p><a class="reference internal" href="bmc_ldap_config_module.html#ansible-collections-yadro-obmc-bmc-ldap-config-module"><span class="std std-ref">bmc_ldap_config module</span></a> – Configures LDAP authentication</p></li>
+<li><p><a class="reference internal" href="bmc_network_interface_module.html#ansible-collections-yadro-obmc-bmc-network-interface-module"><span class="std std-ref">bmc_network_interface module</span></a> – Manage BMC network interfaces.</p></li>
+<li><p><a class="reference internal" href="bmc_restart_module.html#ansible-collections-yadro-obmc-bmc-restart-module"><span class="std std-ref">bmc_restart module</span></a> – Restart BMC.</p></li>
+<li><p><a class="reference internal" href="bmc_security_config_module.html#ansible-collections-yadro-obmc-bmc-security-config-module"><span class="std std-ref">bmc_security_config module</span></a> – Manage BMC security protocols.</p></li>
+<li><p><a class="reference internal" href="bmc_session_module.html#ansible-collections-yadro-obmc-bmc-session-module"><span class="std std-ref">bmc_session module</span></a> – Manage BMC sessions.</p></li>
+<li><p><a class="reference internal" href="bmc_ssl_config_module.html#ansible-collections-yadro-obmc-bmc-ssl-config-module"><span class="std std-ref">bmc_ssl_config module</span></a> – Configuring BMC certificates</p></li>
+<li><p><a class="reference internal" href="bmc_time_module.html#ansible-collections-yadro-obmc-bmc-time-module"><span class="std std-ref">bmc_time module</span></a> – Manage BMC time.</p></li>
+<li><p><a class="reference internal" href="firmware_info_module.html#ansible-collections-yadro-obmc-firmware-info-module"><span class="std std-ref">firmware_info module</span></a> – Return BMC and BIOS firmware information.</p></li>
+<li><p><a class="reference internal" href="firmware_update_module.html#ansible-collections-yadro-obmc-firmware-update-module"><span class="std std-ref">firmware_update module</span></a> – Updates bmc or host firmware.</p></li>
+<li><p><a class="reference internal" href="system_boot_settings_module.html#ansible-collections-yadro-obmc-system-boot-settings-module"><span class="std std-ref">system_boot_settings module</span></a> – Setup Host OS boot settings.</p></li>
+<li><p><a class="reference internal" href="system_info_module.html#ansible-collections-yadro-obmc-system-info-module"><span class="std std-ref">system_info module</span></a> – Return system information.</p></li>
+<li><p><a class="reference internal" href="system_power_state_module.html#ansible-collections-yadro-obmc-system-power-state-module"><span class="std std-ref">system_power_state module</span></a> – System power operations.</p></li>
+<li><p><a class="reference internal" href="system_virtual_media_module.html#ansible-collections-yadro-obmc-system-virtual-media-module"><span class="std std-ref">system_virtual_media module</span></a> – Connect or disconnect virtual media image to host.</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>List of <a class="reference external" href="https://docs.ansible.com/ansible/4/collections/index.html#list-of-collections" title="(in Ansible v4)"><span class="xref std std-ref">collections</span></a> with docs hosted here.</p>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          
+
+<footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bmc_account_module.html" class="btn btn-neutral float-right" title="yadro.obmc.bmc_account module – Manage BMC accounts." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ansible project contributors.
+      <span class="lastupdated">Last updated on Oct 05, 2022.
+      </span></p>
+  </div>
+
+  
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script><!-- extra footer elements for Ansible beyond RTD Sphinx Theme -->
+<!-- begin analytics -->
+<script>
+var _hsq = _hsq || [];
+_hsq.push(["setContentType", "standard-page"]);
+      (function(d,s,i,r) {
+      if (d.getElementById(i)){return;}
+      var n = d.createElement(s),e = document.getElementsByTagName(s)[0];
+      n.id=i;n.src = 'https://js.hs-analytics.net/analytics/'+(Math.ceil(new Date()/r)*r)+'/330046.js';
+      e.parentNode.insertBefore(n, e);
+      })(document, "script", "hs-analytics",300000);
+</script>
+<!-- end analytics -->
+<script>
+if (("undefined" !== typeof _satellite) && ("function" === typeof _satellite.pageBottom)) {
+  _satellite.pageBottom();
+}
+</script>
+
+</body>
+</html>
